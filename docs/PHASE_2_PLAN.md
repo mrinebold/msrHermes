@@ -19,7 +19,10 @@ Phase 2 is not approved for execution yet. This document records safe-check resu
 - No Google authentication was performed.
 - No models were pulled.
 - No Home Assistant install was performed.
-- No DevMonster connection was attempted.
+- DevMonster discovery was limited to Tailscale peer status and Tailscale ping.
+- No definitive `devmonster` peer was found.
+- `civic-main` at `100.92.126.17` is the only online Linux peer and responded to Tailscale ping; it is a candidate only, not confirmed DevMonster.
+- No Gemma endpoint call was attempted.
 
 ## Tailscale Install and Check-In Steps
 
@@ -50,16 +53,24 @@ Recommended default: keep SSH Remote Login disabled until Tailscale is installed
 
 ## DevMonster Connectivity Test Plan
 
-Requires approval before any connection attempt.
+Phase 2B status: discovery only completed. Requires approval before any Gemma endpoint call.
 
-1. Confirm DevMonster tailnet hostname or Tailscale IP.
+Discovery results:
+
+1. `devmonster` did not resolve over Tailscale DNS.
+2. `devmonster.taila2da57.ts.net` did not resolve over Tailscale DNS.
+3. `civic-main` responded to Tailscale ping at `100.92.126.17` in about `1ms`.
+4. `civic-main` is a possible DevMonster candidate because it is the only online Linux peer, but it is not confirmed.
+
+Next approved test sequence:
+
+1. Confirm the actual DevMonster node name and Tailscale IP.
 2. Confirm OpenAI-compatible base URL path, expected model ID, timeout, and auth requirement.
 3. Store `GEMMA_BASE_URL`, `GEMMA_API_KEY`, `GEMMA_MODEL`, and `GEMMA_TIMEOUT` in an approved untracked local env file.
-4. Test private DNS or Tailscale IP reachability without sending prompts.
-5. Test OpenAI-compatible metadata endpoint, such as `/v1/models`, if available.
-6. Run one minimal non-sensitive inference request only after approval.
-7. Benchmark latency, timeout behavior, and error handling.
-8. Keep all endpoints private and do not enable autonomous routing during validation.
+4. Test OpenAI-compatible metadata endpoint, such as `/v1/models`, only after approval.
+5. Run one minimal non-sensitive inference request only after approval.
+6. Benchmark latency, timeout behavior, and error handling.
+7. Keep all endpoints private and do not enable autonomous routing during validation.
 
 ## Ollama Local Health Check Plan
 
