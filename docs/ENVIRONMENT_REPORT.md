@@ -1,6 +1,6 @@
 # Environment Report
 
-Generated: 2026-05-27 12:15:24 CDT
+Generated: 2026-05-27 12:26:04 CDT
 
 Mode: read-only inspection. No installs, sudo, shell profile edits, deletions, or public service exposure.
 
@@ -15,13 +15,34 @@ Generated after approved Phase 1 foundation work on 2026-05-27.
 - Installed OrbStack via Homebrew cask.
 - Installed Ollama app via Homebrew cask.
 - Installed Google Cloud SDK via Homebrew cask.
-- Did not install Tailscale; it remains missing.
 - Did not enable SSH Remote Login; `com.openssh.sshd` reports `state = not running`.
 - Did not configure Google OAuth.
 - Did not pull models. DevMonster is the intended worker direction for the next planning pass.
 - Did not install Home Assistant.
 - Did not expose public ports.
 - Did not edit shell profiles. Google Cloud SDK reported optional PATH/completion profile instructions, but they were not applied.
+
+## Phase 2A Tailscale Summary
+
+Generated after approved Phase 2A Tailscale check-in work on 2026-05-27.
+
+- Tailscale was already installed as the Homebrew cask `tailscale-app`; no Tailscale install was required.
+- Opened the Tailscale app for user login/check-in.
+- Tailscale is running and checked into the `mrinebold.github` tailnet.
+- Hostname: `michaels-mac-mini`.
+- MagicDNS name: `michaels-mac-mini.taila2da57.ts.net`.
+- Tailscale IPv4: `100.80.79.75`.
+- Tailscale IPv6: `fd7a:115c:a1e0::d837:4f4b`.
+- MagicDNS is enabled tailnet-wide with suffix `taila2da57.ts.net`.
+- Exit node use is not configured: `ExitNodeID` and `ExitNodeIP` are empty.
+- This Mac is not advertising subnet routes or services: `AdvertiseRoutes` and `AdvertiseServices` are `null`.
+- Tailscale SSH is not enabled locally: `RunSSH` is `false`.
+- No SSH Remote Login change was made.
+- No DevMonster connection was attempted.
+- No Google authentication was performed.
+- No models were pulled.
+- No Home Assistant install was performed.
+- No autonomous services were started.
 
 ### macOS version
 
@@ -55,6 +76,7 @@ exit_status=0
 git version 2.50.1 (Apple Git-155)
 ## main
  M docs/ENVIRONMENT_REPORT.md
+ M scripts/check_environment.sh
 
 exit_status=0
 ```
@@ -78,7 +100,6 @@ exit_status=0
 ### Codex CLI status
 
 ```text
-WARNING: proceeding, even though we could not update PATH: Operation not permitted (os error 1)
 codex-cli 0.133.0
 
 exit_status=0
@@ -97,7 +118,75 @@ exit_status=0
 ### Tailscale status
 
 ```text
-Tailscale not found
+1.98.2
+  tailscale commit: aaf7caef13becf6989e9e81f66412f3edc564c38
+  long version: 1.98.2-taaf7caef1-gc4a37aed9
+  other commit: c4a37aed97b8b6dcc3fb32d87281c069fd2359d7
+  go version: go1.26.3 (tailscale/go e877d97384)
+
+Status:
+100.80.79.75   michaels-mac-mini    mrinebold@  macOS    -                           
+100.92.126.17  civic-main           mrinebold@  linux    -                           
+100.96.95.115  ipad-pro-12-9-gen-5  mrinebold@  iOS      offline, last seen 60d ago  
+100.92.128.26  iphone-15-pro-max    mrinebold@  iOS      -                           
+100.77.8.69    rinebolddomain       mrinebold@  windows  -                           
+
+IPs:
+100.80.79.75
+fd7a:115c:a1e0::d837:4f4b
+
+DNS:
+
+=== 'Use Tailscale DNS' status ===
+
+Tailscale DNS: enabled.
+
+Tailscale is configured to handle DNS queries on this device.
+Run 'tailscale set --accept-dns=false' to revert to your system default DNS resolver.
+
+=== MagicDNS configuration ===
+
+This is the DNS configuration provided by the coordination server to this device.
+
+MagicDNS: enabled tailnet-wide (suffix = taila2da57.ts.net)
+
+Other devices in your tailnet can reach this device at michaels-mac-mini.taila2da57.ts.net.
+
+Resolvers (in preference order):
+  (no resolvers configured, system default will be used: see 'System DNS configuration' below)
+
+Split DNS Routes:
+  - ts.net.                        -> 199.247.155.53
+  - ts.net.                        -> 2620:111:8007::53
+
+Search Domains:
+  - taila2da57.ts.net
+
+=== System DNS configuration ===
+
+This is the DNS configuration that Tailscale believes your operating system is using.
+Tailscale may use this configuration if 'Override Local DNS' is disabled in the admin console,
+or if no resolvers are provided by the coordination server.
+
+Nameservers:
+  - 192.168.68.1
+  - 8.8.8.8
+
+Search domains:
+  (no search domains found)
+
+[this is a preliminary version of this command; the output format may change in the future]
+
+Prefs:
+	"RouteAll": true,
+	"ExitNodeID": "",
+	"ExitNodeIP": "",
+	"ExitNodeAllowLANAccess": false,
+	"RunSSH": false,
+	"WantRunning": true,
+	"LoggedOut": false,
+	"AdvertiseRoutes": null,
+	"AdvertiseServices": null,
 
 exit_status=0
 ```
@@ -194,7 +283,7 @@ exit_status=0
 
 ```text
 Filesystem        Size    Used   Avail Capacity iused ifree %iused  Mounted on
-/dev/disk2s1s1   228Gi    12Gi    62Gi    16%    459k  648M    0%   /
+/dev/disk2s1s1   228Gi    12Gi    62Gi    16%    459k  646M    0%   /
 
 exit_status=0
 ```
@@ -202,28 +291,28 @@ exit_status=0
 ### memory
 
 ```text
-      Memory: 16 GB
+17179869184
 Mach Virtual Memory Statistics: (page size of 16384 bytes)
-Pages free:                                    84206.
-Pages active:                                 268777.
-Pages inactive:                               224798.
-Pages speculative:                             44271.
+Pages free:                                   129780.
+Pages active:                                 281638.
+Pages inactive:                               273368.
+Pages speculative:                              7622.
 Pages throttled:                                   0.
-Pages wired down:                             122251.
-Pages purgeable:                                2647.
-"Translation faults":                      146636112.
-Pages copy-on-write:                         9486040.
-Pages zero filled:                          63571968.
-Pages reactivated:                           4473066.
-Pages purged:                                 485266.
-File-backed pages:                            246618.
-Anonymous pages:                              291228.
-Pages stored in compressor:                   618368.
-Pages occupied by compressor:                 269541.
-Decompressions:                              2387499.
-Compressions:                                3536649.
-Pageins:                                     7005561.
-Pageouts:                                      63645.
+Pages wired down:                             136267.
+Pages purgeable:                               21173.
+"Translation faults":                      148621725.
+Pages copy-on-write:                         9619662.
+Pages zero filled:                          64923319.
+Pages reactivated:                           4493009.
+Pages purged:                                 491495.
+File-backed pages:                            218388.
+Anonymous pages:                              344240.
+Pages stored in compressor:                   451881.
+Pages occupied by compressor:                 184956.
+Decompressions:                              2469747.
+Compressions:                                3566239.
+Pageins:                                     7075335.
+Pageouts:                                      64195.
 Swapins:                                           0.
 Swapouts:                                          0.
 
@@ -235,7 +324,7 @@ exit_status=0
 ```text
 Warning: could not connect to a running Ollama instance
 Warning: client version is 0.24.0
-Error: Head "http://127.0.0.1:11434/": dial tcp 127.0.0.1:11434: connect: operation not permitted
+Error: timed out waiting for server to start
 
 exit_status=0
 ```
@@ -243,8 +332,6 @@ exit_status=0
 ### Google Cloud CLI status
 
 ```text
-WARNING: Could not setup log file in /Users/michaelrinebold/.config/gcloud/logs, (PermissionError: [Errno 1] Operation not permitted: '/Users/michaelrinebold/.config/gcloud/logs/2026.05.27/12.15.27.554237.log'.
-The configuration directory may not be writable. To learn more, see https://cloud.google.com/sdk/docs/configurations#creating_a_configuration
 Google Cloud SDK 570.0.0
 bq 2.1.32
 core 2026.05.22
@@ -259,7 +346,7 @@ exit_status=0
 ```text
 total 0
 drwxr-xr-x   3 michaelrinebold  staff    96 May 26 10:56 .
-drwxr-x---+ 52 michaelrinebold  staff  1664 May 27 12:13 ..
+drwxr-x---+ 53 michaelrinebold  staff  1696 May 27 12:26 ..
 drwxr-xr-x   9 michaelrinebold  staff   288 May 27 12:08 helio-command-center
 
 exit_status=0
