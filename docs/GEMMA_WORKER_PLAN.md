@@ -78,6 +78,7 @@ Approved non-invasive checks:
 - `HEAD /`
 - `GET /`
 - `GET /v1/models`
+- `GET /api/tags`
 
 Ports checked:
 
@@ -88,10 +89,12 @@ Ports checked:
 
 Results:
 
-- Port `11434`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
-- Port `8000`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
-- Port `8080`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
-- Port `3000`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
+- Preferred MagicDNS target `devmonster-4.taila2da57.ts.net` did not resolve for `/usr/bin/curl` during this retry.
+- Fallback target `100.93.120.124` was used for port checks.
+- Port `11434`: connection refused for `HEAD /`, `GET /`, `GET /v1/models`, and `GET /api/tags`.
+- Port `8000`: connection refused for `HEAD /`, `GET /`, `GET /v1/models`, and `GET /api/tags`.
+- Port `8080`: connection refused for `HEAD /`, `GET /`, `GET /v1/models`, and `GET /api/tags`.
+- Port `3000`: connection refused for `HEAD /`, `GET /`, `GET /v1/models`, and `GET /api/tags`.
 
 Current conclusion:
 
@@ -100,3 +103,10 @@ Current conclusion:
 - No server type or response headers could be identified because all approved ports refused connections.
 - DevMonster remains reachable over Tailscale ping, but the inference service port/path is not yet known.
 - No prompts, completions, authentication, port exposure, DevMonster modifications, installs, SSH enablement, or autonomous services were used during discovery.
+
+Recommended integration posture:
+
+- Do not set `GEMMA_BASE_URL` yet.
+- Confirm the intended DevMonster bind address, port, API compatibility mode, and auth policy on the DevMonster host.
+- Prefer an OpenAI-compatible endpoint if available; otherwise use Ollama-compatible routing only if `/api/tags` and related Ollama metadata endpoints respond over Tailscale.
+- Require a future metadata-only validation step before any prompt or completion request.
