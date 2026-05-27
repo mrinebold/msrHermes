@@ -1,0 +1,68 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.pnpm-store/
+.next/
+.nuxt/
+coverage/
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+!.env.sample
+config/*.env
+!config/example.env
+*.pem
+*.key
+*.p12
+*.p8
+secrets/
+
+# Local runtime data
+.cache/
+.tmp/
+tmp/
+data/local/
