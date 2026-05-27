@@ -62,3 +62,41 @@ Requires explicit approval before any endpoint call.
 4. Check only metadata first, such as `/v1/models`, if available.
 5. Run one minimal non-sensitive inference request only after separate approval.
 6. Benchmark latency and timeout behavior before any autonomous routing.
+
+## Phase 2C Endpoint Discovery
+
+Discovery date: 2026-05-27.
+
+Target:
+
+- Host: `devmonster-4`.
+- Tailscale IPv4: `100.93.120.124`.
+- MagicDNS: `devmonster-4.taila2da57.ts.net`.
+
+Approved non-invasive checks:
+
+- `HEAD /`
+- `GET /`
+- `GET /v1/models`
+
+Ports checked:
+
+- `11434`, common Ollama API port.
+- `8000`, common local model/API server port.
+- `8080`, common application/API server port.
+- `3000`, common development server port.
+
+Results:
+
+- Port `11434`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
+- Port `8000`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
+- Port `8080`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
+- Port `3000`: connection refused for `HEAD /`, `GET /`, and `GET /v1/models`.
+
+Current conclusion:
+
+- No Ollama-compatible endpoint was reachable on `11434`.
+- No OpenAI-compatible endpoint was reachable on `8000`, `8080`, or `3000`.
+- No server type or response headers could be identified because all approved ports refused connections.
+- DevMonster remains reachable over Tailscale ping, but the inference service port/path is not yet known.
+- No prompts, completions, authentication, port exposure, DevMonster modifications, installs, SSH enablement, or autonomous services were used during discovery.
