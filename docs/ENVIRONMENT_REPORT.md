@@ -29,14 +29,20 @@ Generated after approved Phase 2A Tailscale check-in work on 2026-05-27.
 - Tailscale was already installed as the Homebrew cask `tailscale-app`; no Tailscale install was required.
 - Opened the Tailscale app for user login/check-in.
 - Tailscale is running and checked into the `mrinebold.github` tailnet.
+- Tailscale version: `1.98.2`.
 - Hostname: `michaels-mac-mini`.
 - MagicDNS name: `michaels-mac-mini.taila2da57.ts.net`.
 - Tailscale IPv4: `100.80.79.75`.
 - Tailscale IPv6: `fd7a:115c:a1e0::d837:4f4b`.
 - MagicDNS is enabled tailnet-wide with suffix `taila2da57.ts.net`.
-- Exit node use is not configured: `ExitNodeID` and `ExitNodeIP` are empty.
-- This Mac is not advertising subnet routes or services: `AdvertiseRoutes` and `AdvertiseServices` are `null`.
+- This Mac does not appear to be advertising itself as an exit node: status reports `ExitNode` as `false` and `ExitNodeOption` as `false`.
+- This Mac is not using an exit node: `ExitNodeID` and `ExitNodeIP` are empty.
+- This Mac is not advertising subnet routes: `AdvertiseRoutes` is `null`.
+- This Mac is not advertising services: `AdvertiseServices` is `null`.
 - Tailscale SSH is not enabled locally: `RunSSH` is `false`.
+- Security concern: Tailscale DNS is enabled, so name resolution now includes tailnet DNS behavior.
+- Security concern: Tailscale file-sharing capability appears available in the tailnet capability map, but no file sharing state was changed during Phase 2A.
+- Unknown: public sharing controls and ACL posture were not audited from the Tailscale admin console.
 - No SSH Remote Login change was made.
 - No DevMonster connection was attempted.
 - No Google authentication was performed.

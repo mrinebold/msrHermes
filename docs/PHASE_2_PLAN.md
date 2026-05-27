@@ -9,7 +9,12 @@ Phase 2 is not approved for execution yet. This document records safe-check resu
 - Ollama CLI is installed: `0.24.0`.
 - Ollama does not currently report a running local instance.
 - Google Cloud SDK is installed: `570.0.0`.
-- No Tailscale install was performed.
+- Tailscale is installed and checked in as `michaels-mac-mini`.
+- Tailscale IPv4 is `100.80.79.75`.
+- MagicDNS appears enabled with name `michaels-mac-mini.taila2da57.ts.net`.
+- This machine does not appear to advertise itself as an exit node.
+- This machine is not advertising subnet routes.
+- This machine is not using an exit node.
 - No SSH Remote Login change was performed.
 - No Google authentication was performed.
 - No models were pulled.
@@ -18,14 +23,19 @@ Phase 2 is not approved for execution yet. This document records safe-check resu
 
 ## Tailscale Install and Check-In Steps
 
-Requires approval before execution.
+Phase 2A status: completed for install/check-in verification.
 
-1. Install Tailscale using an approved method, preferably Homebrew cask.
-2. Open or start Tailscale only as required by the installer.
-3. Authenticate the Mac mini to the tailnet.
-4. Record hostname, Tailscale IP, MagicDNS status, and tailnet account.
-5. Confirm subnet routing, exit node, and public sharing are disabled unless explicitly approved.
-6. Re-run environment checks and log the result.
+Completed:
+
+1. Confirmed Tailscale app is installed.
+2. Opened Tailscale for user check-in.
+3. Recorded hostname, Tailscale IP, MagicDNS status, and tailnet account.
+4. Confirmed no local Tailscale SSH, exit node use, advertised subnet routes, or advertised services were enabled.
+
+Still requires future approval:
+
+1. Admin-console review of ACLs, sharing controls, device expiry, and tailnet policy.
+2. Any change to Tailscale SSH, advertised routes, exit-node use, or device sharing.
 
 ## SSH Remote Login Options
 
