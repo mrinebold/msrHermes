@@ -1,8 +1,27 @@
 # Environment Report
 
-Generated: 2026-05-26 11:09:14 CDT
+Generated: 2026-05-27 12:15:24 CDT
 
 Mode: read-only inspection. No installs, sudo, shell profile edits, deletions, or public service exposure.
+
+## Phase 1 Summary
+
+Generated after approved Phase 1 foundation work on 2026-05-27.
+
+- Initialized this folder as a local Git repository.
+- Added remote `origin` as `https://github.com/mrinebold/HelioCommandCenter.git`.
+- Created initial commit `059a225` with message `Initial Helio Command Center scaffold`.
+- Added `.gitignore` for macOS, Python, Node, logs, secrets, and local env files.
+- Installed OrbStack via Homebrew cask.
+- Installed Ollama app via Homebrew cask.
+- Installed Google Cloud SDK via Homebrew cask.
+- Did not install Tailscale; it remains missing.
+- Did not enable SSH Remote Login; `com.openssh.sshd` reports `state = not running`.
+- Did not configure Google OAuth.
+- Did not pull models. DevMonster is the intended worker direction for the next planning pass.
+- Did not install Home Assistant.
+- Did not expose public ports.
+- Did not edit shell profiles. Google Cloud SDK reported optional PATH/completion profile instructions, but they were not applied.
 
 ### macOS version
 
@@ -34,7 +53,8 @@ exit_status=0
 
 ```text
 git version 2.50.1 (Apple Git-155)
-fatal: not a git repository (or any of the parent directories): .git
+## main
+ M docs/ENVIRONMENT_REPORT.md
 
 exit_status=0
 ```
@@ -68,7 +88,8 @@ exit_status=0
 
 ```text
 Docker CLI not found
-OrbStack CLI not found
+Version: 2.1.3 (2010300)
+Commit: 7a3258b7336a8a47b75771e87ef7b74ba4bba8eb (v2.1.3)
 
 exit_status=0
 ```
@@ -173,7 +194,7 @@ exit_status=0
 
 ```text
 Filesystem        Size    Used   Avail Capacity iused ifree %iused  Mounted on
-/dev/disk2s1s1   228Gi    12Gi    69Gi    15%    459k  727M    0%   /
+/dev/disk2s1s1   228Gi    12Gi    62Gi    16%    459k  648M    0%   /
 
 exit_status=0
 ```
@@ -183,26 +204,26 @@ exit_status=0
 ```text
       Memory: 16 GB
 Mach Virtual Memory Statistics: (page size of 16384 bytes)
-Pages free:                                     4264.
-Pages active:                                 362969.
-Pages inactive:                               359379.
-Pages speculative:                              3477.
+Pages free:                                    84206.
+Pages active:                                 268777.
+Pages inactive:                               224798.
+Pages speculative:                             44271.
 Pages throttled:                                   0.
-Pages wired down:                             123478.
-Pages purgeable:                               14226.
-"Translation faults":                       18519673.
-Pages copy-on-write:                          752378.
-Pages zero filled:                           8253654.
-Pages reactivated:                           1737513.
-Pages purged:                                 142231.
-File-backed pages:                            262958.
-Anonymous pages:                              462867.
-Pages stored in compressor:                   403679.
-Pages occupied by compressor:                 160282.
-Decompressions:                               925037.
-Compressions:                                1628073.
-Pageins:                                     1687853.
-Pageouts:                                      16872.
+Pages wired down:                             122251.
+Pages purgeable:                                2647.
+"Translation faults":                      146636112.
+Pages copy-on-write:                         9486040.
+Pages zero filled:                          63571968.
+Pages reactivated:                           4473066.
+Pages purged:                                 485266.
+File-backed pages:                            246618.
+Anonymous pages:                              291228.
+Pages stored in compressor:                   618368.
+Pages occupied by compressor:                 269541.
+Decompressions:                              2387499.
+Compressions:                                3536649.
+Pageins:                                     7005561.
+Pageouts:                                      63645.
 Swapins:                                           0.
 Swapouts:                                          0.
 
@@ -212,7 +233,9 @@ exit_status=0
 ### Ollama status
 
 ```text
-Ollama not found
+Warning: could not connect to a running Ollama instance
+Warning: client version is 0.24.0
+Error: Head "http://127.0.0.1:11434/": dial tcp 127.0.0.1:11434: connect: operation not permitted
 
 exit_status=0
 ```
@@ -220,7 +243,13 @@ exit_status=0
 ### Google Cloud CLI status
 
 ```text
-Google Cloud CLI not found
+WARNING: Could not setup log file in /Users/michaelrinebold/.config/gcloud/logs, (PermissionError: [Errno 1] Operation not permitted: '/Users/michaelrinebold/.config/gcloud/logs/2026.05.27/12.15.27.554237.log'.
+The configuration directory may not be writable. To learn more, see https://cloud.google.com/sdk/docs/configurations#creating_a_configuration
+Google Cloud SDK 570.0.0
+bq 2.1.32
+core 2026.05.22
+gcloud-crc32c 1.0.0
+gsutil 5.37
 
 exit_status=0
 ```
@@ -230,9 +259,8 @@ exit_status=0
 ```text
 total 0
 drwxr-xr-x   3 michaelrinebold  staff    96 May 26 10:56 .
-drwxr-x---+ 51 michaelrinebold  staff  1632 May 26 11:01 ..
-drwxr-xr-x   7 michaelrinebold  staff   224 May 26 11:08 helio-command-center
+drwxr-x---+ 52 michaelrinebold  staff  1664 May 27 12:13 ..
+drwxr-xr-x   9 michaelrinebold  staff   288 May 27 12:08 helio-command-center
 
 exit_status=0
 ```
-

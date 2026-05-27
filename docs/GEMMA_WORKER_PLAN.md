@@ -1,15 +1,15 @@
-# Gemma Worker Plan
+# Local Worker Plan
 
 ## Objective
 
-Run a local Gemma-backed worker for private local tasks using Ollama or another approved runtime.
+Run a local DevMonster-oriented worker for private local tasks. Ollama is installed as a local runtime foundation, but no models have been pulled.
 
 ## Phases
 
-1. Inspect existing Ollama installation and available models.
-2. Confirm hardware memory and disk capacity.
-3. Select Gemma model size based on available resources.
-4. Install or configure runtime only after approval.
+1. Confirm DevMonster runtime requirements.
+2. Inspect existing Ollama installation and available local runtimes.
+3. Confirm hardware memory and disk capacity.
+4. Select the worker backend and model/runtime package only after approval.
 5. Bind worker API to localhost.
 6. Add task queue integration and audit logging.
 
