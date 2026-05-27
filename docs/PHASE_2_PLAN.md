@@ -74,6 +74,39 @@ Next approved test sequence:
 5. Benchmark latency, timeout behavior, and error handling.
 6. Keep all endpoints private and do not enable autonomous routing during validation.
 
+## DevMonster Worker Activation Plan
+
+Phase 2D status: planning only. No DevMonster changes have been made.
+
+Activation options:
+
+1. Ollama on Tailscale only.
+2. LM Studio local server on Tailscale only.
+3. OpenAI-compatible proxy in front of Ollama.
+
+Recommended simplest path:
+
+- Use Ollama on Tailscale only if DevMonster already has Ollama and the Gemma4-compatible model available.
+- Bind only to DevMonster's Tailscale address, `100.93.120.124`, or keep Ollama on localhost behind a Tailscale-only reverse proxy.
+- Do not bind inference services publicly.
+- Add an API key before production use if the endpoint is OpenAI-compatible or otherwise reachable by multiple tailnet devices.
+
+Future validation from Helio, after separate approval:
+
+```sh
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/api/tags
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/v1/models
+```
+
+Security requirements:
+
+- Tailscale-only access.
+- No public binding.
+- Optional API key before production use.
+- No autonomous prompt routing until metadata checks and one manual non-sensitive inference test pass.
+- No prompts, completions, model pulls, SSH enablement, installs, or service starts without future approval.
+
 ## Ollama Local Health Check Plan
 
 No model pulls.

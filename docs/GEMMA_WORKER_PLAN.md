@@ -110,3 +110,99 @@ Recommended integration posture:
 - Confirm the intended DevMonster bind address, port, API compatibility mode, and auth policy on the DevMonster host.
 - Prefer an OpenAI-compatible endpoint if available; otherwise use Ollama-compatible routing only if `/api/tags` and related Ollama metadata endpoints respond over Tailscale.
 - Require a future metadata-only validation step before any prompt or completion request.
+
+## Phase 2D DevMonster Worker Activation Plan
+
+Planning date: 2026-05-27.
+
+This is a plan only. No changes have been made on DevMonster.
+
+### Option 1: Ollama on Tailscale Only
+
+Goal: expose Ollama's native API to Helio over the private Tailscale address only.
+
+DevMonster setup outline:
+
+1. Confirm Ollama is installed on DevMonster.
+2. Confirm the Gemma4-compatible model is already available or approve a future model pull separately.
+3. Configure Ollama to listen only on DevMonster's Tailscale address, `100.93.120.124`, or on localhost behind a Tailscale-only reverse proxy.
+4. Keep public interfaces closed; do not bind to `0.0.0.0` unless a local firewall restricts access to Tailscale.
+5. Validate from Helio using metadata-only checks before any prompt.
+
+Compatibility:
+
+- Ollama-compatible via `/api/tags` and related Ollama API routes.
+- OpenAI-compatible only if Ollama's OpenAI compatibility routes are enabled and verified.
+
+### Option 2: LM Studio Local Server on Tailscale Only
+
+Goal: expose LM Studio's local server on DevMonster over Tailscale.
+
+DevMonster setup outline:
+
+1. Confirm LM Studio is installed and the Gemma4-compatible model is loaded.
+2. Start LM Studio's local server.
+3. Bind the server to DevMonster's Tailscale address if supported; otherwise keep it on localhost and place a Tailscale-only reverse proxy in front.
+4. Confirm the server exposes OpenAI-compatible endpoints such as `/v1/models`.
+5. Keep public interfaces closed and require manual validation before Helio routing.
+
+Compatibility:
+
+- Usually OpenAI-compatible.
+- Operationally simple for manual desktop use, but less ideal for headless/autonomous service management.
+
+### Option 3: OpenAI-Compatible Proxy in Front of Ollama
+
+Goal: expose a stable OpenAI-compatible API to Helio while keeping Ollama private behind the proxy.
+
+DevMonster setup outline:
+
+1. Run Ollama bound to localhost on DevMonster.
+2. Run a lightweight OpenAI-compatible proxy bound only to `100.93.120.124`.
+3. Configure the proxy to route Gemma4 requests to Ollama.
+4. Add an API key at the proxy layer if needed.
+5. Validate `/v1/models` first, then a single manual non-sensitive inference request after separate approval.
+
+Compatibility:
+
+- OpenAI-compatible for Helio.
+- Better long-term abstraction if DevMonster may switch between Ollama, LM Studio, or another local runtime.
+- More moving parts than direct Ollama.
+
+### Recommendation
+
+Recommended simplest path: Option 1, Ollama on Tailscale only, if DevMonster already uses Ollama and the required model is available.
+
+Recommended Helio integration target after activation:
+
+- Prefer `http://100.93.120.124:11434` for Ollama-compatible metadata checks.
+- Prefer an OpenAI-compatible proxy only if Helio needs provider-neutral `/v1/models` and `/v1/chat/completions` behavior.
+- Do not set `GEMMA_BASE_URL` until metadata checks pass.
+
+### Future Helio Validation Commands
+
+Run only after DevMonster has been configured and approved for validation.
+
+```sh
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/api/tags
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:11434/v1/models
+```
+
+If an OpenAI-compatible proxy is selected:
+
+```sh
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:<approved-port>/
+/usr/bin/curl -sS -m 5 -i http://100.93.120.124:<approved-port>/v1/models
+```
+
+### Security Rules
+
+- Tailscale-only access.
+- No public binding.
+- No `0.0.0.0` listener unless firewall rules restrict access to Tailscale.
+- Optional API key recommended before production use, especially for OpenAI-compatible proxy mode.
+- No autonomous prompt routing until metadata checks and one manual non-sensitive inference test pass.
+- Log endpoint selection, model ID, timeout, and routing decisions.
+- Do not log secrets or prompt contents by default.
+- Keep shell execution, Home Assistant actions, external writes, and file deletion behind explicit policy gates.
