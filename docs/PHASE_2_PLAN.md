@@ -20,8 +20,10 @@ Phase 2 is not approved for execution yet. This document records safe-check resu
 - No models were pulled.
 - No Home Assistant install was performed.
 - DevMonster discovery was limited to Tailscale peer status and Tailscale ping.
-- No definitive `devmonster` peer was found.
-- `civic-main` at `100.92.126.17` is the only online Linux peer and responded to Tailscale ping; it is a candidate only, not confirmed DevMonster.
+- DevMonster was found as `devmonster-4`.
+- DevMonster Tailscale IPv4 is `100.93.120.124`.
+- DevMonster MagicDNS name is `devmonster-4.taila2da57.ts.net`.
+- DevMonster responded to Tailscale ping by hostname, FQDN, and IP in about `20-28ms`.
 - No Gemma endpoint call was attempted.
 
 ## Tailscale Install and Check-In Steps
@@ -57,20 +59,20 @@ Phase 2B status: discovery only completed. Requires approval before any Gemma en
 
 Discovery results:
 
-1. `devmonster` did not resolve over Tailscale DNS.
-2. `devmonster.taila2da57.ts.net` did not resolve over Tailscale DNS.
-3. `civic-main` responded to Tailscale ping at `100.92.126.17` in about `1ms`.
-4. `civic-main` is a possible DevMonster candidate because it is the only online Linux peer, but it is not confirmed.
+1. `devmonster-4` appears in Tailscale status.
+2. `devmonster-4.taila2da57.ts.net` is the MagicDNS name.
+3. `devmonster-4` has Tailscale IPv4 `100.93.120.124`.
+4. `devmonster-4` has Tailscale IPv6 `fd7a:115c:a1e0::5937:787c`.
+5. Tailscale ping succeeded by hostname, FQDN, and IP in about `20-28ms`.
 
 Next approved test sequence:
 
-1. Confirm the actual DevMonster node name and Tailscale IP.
-2. Confirm OpenAI-compatible base URL path, expected model ID, timeout, and auth requirement.
-3. Store `GEMMA_BASE_URL`, `GEMMA_API_KEY`, `GEMMA_MODEL`, and `GEMMA_TIMEOUT` in an approved untracked local env file.
-4. Test OpenAI-compatible metadata endpoint, such as `/v1/models`, only after approval.
-5. Run one minimal non-sensitive inference request only after approval.
-6. Benchmark latency, timeout behavior, and error handling.
-7. Keep all endpoints private and do not enable autonomous routing during validation.
+1. Confirm OpenAI-compatible base URL scheme, port, path, expected model ID, timeout, and auth requirement.
+2. Store `GEMMA_BASE_URL`, `GEMMA_API_KEY`, `GEMMA_MODEL`, and `GEMMA_TIMEOUT` in an approved untracked local env file.
+3. Test OpenAI-compatible metadata endpoint, such as `/v1/models`, only after approval.
+4. Run one minimal non-sensitive inference request only after approval.
+5. Benchmark latency, timeout behavior, and error handling.
+6. Keep all endpoints private and do not enable autonomous routing during validation.
 
 ## Ollama Local Health Check Plan
 
