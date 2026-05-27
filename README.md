@@ -75,3 +75,8 @@ Requires approval after Phase 2 review.
 - Add audit review UI or CLI.
 - Add health checks, backups, and recovery procedures.
 - Consider Tailscale-only remote access after local validation.
+
+## Future Tasks
+
+- Validate Gemma4 connectivity to the DevMonster OpenAI-compatible endpoint over Tailscale.
+- Benchmark DevMonster Gemma4 latency, throughput, timeout behavior, and failure modes before enabling autonomous routing.
