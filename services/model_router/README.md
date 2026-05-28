@@ -14,6 +14,13 @@ Prefer DevMonster Gemma4:26b for:
 - internal reasoning
 - low-risk agent reasoning
 
+Use the optional fast local model for:
+
+- classification
+- routing
+- short command interpretation
+- quick summaries
+
 DevMonster Gemma4:26b is not yet approved for:
 
 - autonomous execution decisions
@@ -48,6 +55,7 @@ Route decisions and generation responses record:
 
 - `DEVMONSTER_OLLAMA_URL`
 - `DEVMONSTER_DEFAULT_MODEL`
+- `FAST_LOCAL_MODEL`
 - `OPENAI_API_KEY`
 - `ANTHROPIC_API_KEY`
 
@@ -81,4 +89,4 @@ Results:
 
 No autonomous routing, cloud provider execution, Google integration, Home Assistant integration, SSH enablement, or sensitive prompt data was used during validation.
 
-Latency note: treat `gemma4:26b` as a deliberate reasoning worker, not a low-latency chat worker. A smaller model should be considered later for quick classification and command routing.
+Latency note: treat `gemma4:26b` as a deliberate reasoning worker, not a low-latency chat worker. `FAST_LOCAL_MODEL` is intended for future quick classification and command routing once installed and validated.

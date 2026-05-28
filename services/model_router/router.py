@@ -26,6 +26,7 @@ DEVMONSTER_TASKS = {
     "internal_reasoning",
     "low_risk_agent_reasoning",
 }
+FAST_LOCAL_TASKS = {"classify", "route", "quick_summary", "command_parse"}
 HUMAN_APPROVAL_TASKS = {
     "autonomous_execution_decisions",
     "sending_emails",
@@ -154,7 +155,7 @@ class ModelRouter:
     def route(self, task_type: str, model: str | None = None) -> RouteDecision:
         normalized = _normalize_task_type(task_type)
         provider = self._select_provider(normalized)
-        selected_model = model or self.config.devmonster_default_model
+        selected_model = model or self._default_model_for_task(normalized)
         approval_required = normalized in HUMAN_APPROVAL_TASKS or provider.name != self.devmonster.name
         decision = RouteDecision(
             task_type=normalized,
@@ -175,7 +176,14 @@ class ModelRouter:
         )
         return decision
 
+    def _default_model_for_task(self, task_type: str) -> str:
+        if task_type in FAST_LOCAL_TASKS and self.config.fast_local_model:
+            return self.config.fast_local_model
+        return self.config.devmonster_default_model
+
     def _select_provider(self, task_type: str) -> ModelProvider:
+        if task_type in FAST_LOCAL_TASKS:
+            return self.devmonster
         if task_type in DEVMONSTER_TASKS:
             return self.devmonster
         if task_type in HUMAN_APPROVAL_TASKS:

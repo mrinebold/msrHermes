@@ -27,6 +27,7 @@ class ModelRouterTest(unittest.TestCase):
         config = ModelRouterConfig(
             devmonster_ollama_url="http://100.93.120.124:11434",
             devmonster_default_model="gemma4:26b",
+            fast_local_model="gemma3:4b",
             openai_api_key="",
             anthropic_api_key="",
             timeout_seconds=1.0,
@@ -56,6 +57,7 @@ class ModelRouterTest(unittest.TestCase):
         config = ModelRouterConfig(
             devmonster_ollama_url="http://100.93.120.124:11434",
             devmonster_default_model="gemma4:26b",
+            fast_local_model="gemma3:4b",
             openai_api_key="",
             anthropic_api_key="",
             timeout_seconds=1.0,
@@ -73,6 +75,7 @@ class ModelRouterTest(unittest.TestCase):
         config = ModelRouterConfig(
             devmonster_ollama_url="http://100.93.120.124:11434",
             devmonster_default_model="gemma4:26b",
+            fast_local_model="gemma3:4b",
             openai_api_key="",
             anthropic_api_key="",
             timeout_seconds=1.0,
@@ -91,6 +94,42 @@ class ModelRouterTest(unittest.TestCase):
                 )
         finally:
             logging.disable(logging.NOTSET)
+
+    def test_fast_local_task_prefers_fast_model(self):
+        provider = FakeDevMonsterProvider()
+        config = ModelRouterConfig(
+            devmonster_ollama_url="http://100.93.120.124:11434",
+            devmonster_default_model="gemma4:26b",
+            fast_local_model="gemma3:4b",
+            openai_api_key="",
+            anthropic_api_key="",
+            timeout_seconds=1.0,
+        )
+        router = ModelRouter(config=config, devmonster_provider=provider)
+
+        decision = router.route("quick summary")
+
+        self.assertEqual(decision.provider, "devmonster_ollama")
+        self.assertEqual(decision.model, "gemma3:4b")
+        self.assertFalse(decision.human_approval_required)
+
+    def test_fast_local_task_falls_back_to_default_model_when_unconfigured(self):
+        provider = FakeDevMonsterProvider()
+        config = ModelRouterConfig(
+            devmonster_ollama_url="http://100.93.120.124:11434",
+            devmonster_default_model="gemma4:26b",
+            fast_local_model="",
+            openai_api_key="",
+            anthropic_api_key="",
+            timeout_seconds=1.0,
+        )
+        router = ModelRouter(config=config, devmonster_provider=provider)
+
+        decision = router.route("command_parse")
+
+        self.assertEqual(decision.provider, "devmonster_ollama")
+        self.assertEqual(decision.model, "gemma4:26b")
+        self.assertFalse(decision.human_approval_required)
 
 
 if __name__ == "__main__":
