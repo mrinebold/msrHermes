@@ -87,6 +87,13 @@ Phase 4B scaffold variables:
 
 The scaffold must fail closed when credential paths or scopes are missing. Even when local config paths exist, authentication remains disabled until a later approved phase.
 
+Planned local paths:
+
+- Client secret: `config/google/client_secret.json`.
+- Future token: `config/google/token.json`.
+
+Both files must remain ignored by Git. A redacted sample may be tracked as `config/google/client_secret.sample.json`.
+
 Future hardening:
 
 - Use revocable OAuth clients with narrow scopes.
@@ -135,6 +142,23 @@ Scope groups should map to permission tiers:
 - Read scopes for Phase 4C.
 - Draft or compose scopes for Phase 4D.
 - Write/modify scopes for Phase 4E after approval gates exist.
+
+Initial read-only scope categories:
+
+- Gmail metadata/read-only.
+- Calendar read-only.
+- Drive metadata/read-only.
+- Docs read-only.
+- Sheets read-only.
+- People/Contacts read-only.
+
+Excluded until later approval:
+
+- Send.
+- Modify.
+- Delete.
+- Share.
+- Draft/compose.
 
 ## Safety Defaults
 

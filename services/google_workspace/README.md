@@ -17,8 +17,17 @@ It does not:
 - `GOOGLE_OAUTH_SCOPES`
 - `GOOGLE_AUDIT_LOG`
 
+Planned local paths:
+
+- `GOOGLE_CLIENT_SECRET_FILE=config/google/client_secret.json`
+- `GOOGLE_TOKEN_FILE=config/google/token.json`
+
+See `docs/GOOGLE_OAUTH_SETUP_GUIDE.md` for human setup instructions.
+
 ## Current Behavior
 
 `GoogleWorkspaceAuth.check_ready()` fails closed when required local config is missing. Even when config paths and scopes are present, `authenticate()` remains disabled until a later approved phase.
 
 `write_audit_event()` writes JSON Lines audit entries with timestamp, action, permission tier, target service, status, and optional details.
+
+Real Google credential and token files must stay untracked. Use `config/google/client_secret.sample.json` only as a redacted shape reference.

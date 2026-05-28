@@ -55,6 +55,10 @@ logs/*
 !.env.sample
 config/*.env
 !config/example.env
+config/google/*.json
+config/google/*token*
+config/google/*secret*
+!config/google/*.sample.json
 *.pem
 *.key
 *.p12
