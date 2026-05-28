@@ -4,7 +4,7 @@
 
 Helio Command Center will integrate with Google Workspace only through explicit approval gates, narrow OAuth scopes, local audit logs, and staged capability rollout.
 
-Phase 4A is planning only. No Google authentication, OAuth credential creation, API calls, or package installation has been performed.
+Phase 4B has local scaffolding only. No Google authentication, OAuth credential creation, API calls, browser login, scope request, or package installation has been performed.
 
 ## Required Interfaces
 
@@ -78,6 +78,15 @@ Initial local storage approach:
 - Keep token files outside `docs/`, `logs/`, and tracked source directories.
 - Restrict file permissions for any local token cache.
 
+Phase 4B scaffold variables:
+
+- `GOOGLE_CLIENT_SECRET_FILE`
+- `GOOGLE_TOKEN_FILE`
+- `GOOGLE_OAUTH_SCOPES`
+- `GOOGLE_AUDIT_LOG`
+
+The scaffold must fail closed when credential paths or scopes are missing. Even when local config paths exist, authentication remains disabled until a later approved phase.
+
 Future hardening:
 
 - Use revocable OAuth clients with narrow scopes.
@@ -101,6 +110,14 @@ Every Google action must append an audit event with:
 - Dry-run/proposal/executed status.
 - Result status.
 - Error code/message if failed.
+
+Phase 4B audit helper records at minimum:
+
+- Timestamp.
+- Action.
+- Permission tier.
+- Target service.
+- Status.
 
 Sensitive handling:
 

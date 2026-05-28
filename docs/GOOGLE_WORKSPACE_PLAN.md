@@ -34,7 +34,7 @@ Status: current phase.
 
 ### Phase 4B: Local OAuth Scaffolding, No Auth
 
-Requires approval before execution.
+Status: scaffold created; authentication remains disabled.
 
 - Add local connector structure.
 - Add OAuth config placeholders.
@@ -43,6 +43,22 @@ Requires approval before execution.
 - Add scope manifests.
 - Do not run OAuth login.
 - Do not call Google APIs.
+
+Implemented scaffold:
+
+- `services/google_workspace/config.py`
+- `services/google_workspace/auth.py`
+- `services/google_workspace/audit.py`
+- `services/google_workspace/README.md`
+
+Current behavior:
+
+- Missing local OAuth config returns a clear fail-closed error.
+- `authenticate()` always returns disabled.
+- Audit helper writes JSON Lines events locally.
+- No browser is opened.
+- No scopes are requested.
+- No Google API is called.
 
 ### Phase 4C: Read-Only Gmail, Calendar, and Drive Validation
 
@@ -118,6 +134,13 @@ Exact scopes will be finalized during implementation, but the progression should
 - Prefer OS keychain storage or encrypted local storage before production use.
 - Restrict permissions on local token cache files.
 - Log token lifecycle events without logging token values.
+
+Phase 4B placeholders:
+
+- `GOOGLE_CLIENT_SECRET_FILE`
+- `GOOGLE_TOKEN_FILE`
+- `GOOGLE_OAUTH_SCOPES`
+- `GOOGLE_AUDIT_LOG`
 
 ## Audit Logging
 
