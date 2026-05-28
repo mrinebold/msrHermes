@@ -1,5 +1,5 @@
 """Local-first model routing for Helio Command Center."""
 
-from .router import ModelRouter, RouteRequest, RouteResponse
+from .router import ModelRouter, RouteDecision, RouteRequest, RouteResponse
 
-__all__ = ["ModelRouter", "RouteRequest", "RouteResponse"]
+__all__ = ["ModelRouter", "RouteDecision", "RouteRequest", "RouteResponse"]
