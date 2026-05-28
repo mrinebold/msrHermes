@@ -76,6 +76,25 @@ Recommended next step before integration:
 
 - Confirm on DevMonster which process should expose Gemma4, which bind address it uses, and which private Tailscale port/path should be used before Helio attempts metadata or inference requests.
 
+## Phase 3B Live Model Router Validation
+
+Generated after approved Phase 3B validation on 2026-05-27.
+
+- Router target: `http://100.93.120.124:11434`.
+- Default model: `gemma4:26b`.
+- Health check succeeded in `0.119s`.
+- Model listing succeeded in `0.109s`.
+- `gemma4:26b` was present in DevMonster's Ollama model list.
+- Safe prompt: `Reply with exactly: Router operational.`
+- Response: `Router operational.`
+- Generate elapsed time: `68.697s`.
+- Initial sandboxed attempt failed with local `Operation not permitted`; the approved rerun outside the sandbox succeeded over Tailscale.
+- No autonomous task execution was enabled.
+- No Google connection was made.
+- No Home Assistant install was performed.
+- No SSH change was made.
+- No cloud provider execution was added.
+
 ### macOS version
 
 ```text

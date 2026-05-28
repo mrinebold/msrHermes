@@ -36,3 +36,23 @@ Legacy planning variables such as `GEMMA_BASE_URL`, `GEMMA_MODEL`, and `GEMMA_TI
 - No Home Assistant integration.
 - No prompt routing to cloud providers.
 - DevMonster requests use explicit timeouts.
+
+## Phase 3B Live Validation
+
+Validation date: 2026-05-27.
+
+Environment:
+
+- `DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434`
+- `DEVMONSTER_DEFAULT_MODEL=gemma4:26b`
+
+Results:
+
+- Health check succeeded in `0.119s`.
+- Model listing succeeded in `0.109s`.
+- `gemma4:26b` was present in the model list.
+- Generate test prompt: `Reply with exactly: Router operational.`
+- Generate test response: `Router operational.`
+- Generate elapsed time: `68.697s`.
+
+No autonomous routing, cloud provider execution, Google integration, Home Assistant integration, SSH enablement, or sensitive prompt data was used during validation.

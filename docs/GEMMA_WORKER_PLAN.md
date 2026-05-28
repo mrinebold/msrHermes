@@ -206,3 +206,29 @@ If an OpenAI-compatible proxy is selected:
 - Log endpoint selection, model ID, timeout, and routing decisions.
 - Do not log secrets or prompt contents by default.
 - Keep shell execution, Home Assistant actions, external writes, and file deletion behind explicit policy gates.
+
+## Phase 3B Live Router Validation
+
+Validation date: 2026-05-27.
+
+Target:
+
+- Provider: `devmonster_ollama`.
+- URL: `http://100.93.120.124:11434`.
+- Model: `gemma4:26b`.
+
+Results:
+
+- Health check: passed in `0.119s`.
+- Model listing: passed in `0.109s`.
+- Available relevant models included `gemma4:26b`, `gemma4:latest`, and `michael-dev:latest`.
+- Safe generate prompt: `Reply with exactly: Router operational.`
+- Generate response: `Router operational.`
+- Generate elapsed time: `68.697s`.
+
+Conclusion:
+
+- The Helio model router can reach DevMonster over Tailscale.
+- DevMonster exposes an Ollama-compatible API at `http://100.93.120.124:11434`.
+- `gemma4:26b` is available and can complete the approved non-sensitive validation prompt.
+- Autonomous prompt routing remains disabled until a separate policy gate is approved.
