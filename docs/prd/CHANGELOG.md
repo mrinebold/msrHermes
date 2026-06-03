@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase 6E live read-only Agent Bus preflight planning.
+- Defined `SUPABASE_URL` plus `SUPABASE_ANON_KEY` as the minimum safe preflight credential set, with service-role access explicitly disallowed for Hermes.
+- Added exact read-only query shapes for `org_messaging_config`, `agent_messages` addressed to Hermes, and `bot_outbound_messages` audit inspection.
+- Documented expected RLS outcomes, fail-closed behavior, and rollback steps without connecting Supabase.
 - Completed Phase 6D read-only Hermes-Helio agent bus scaffold.
 - Added `services/agent_bus/` with fail-closed config, mock client, schemas, audit redaction, and permissions.
 - Added mocked unit tests for missing config, read-only reads, write denial, and outbound dry-run payloads.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6D read-only scaffold implemented with mocks only. No live Supabase, `ano-messaging`, network, polling, or write path is enabled.
+Phase 6E planning complete for a live Supabase read-only preflight. No live Supabase, `ano-messaging`, network, polling, or write path is enabled.
 
 This design uses [Agent Bus Contract](AGENT_BUS_CONTRACT.md) as the canonical message-bus contract and keeps Hermes behind Helio. It does not authorize direct Supabase access, direct agent dispatch, autonomous execution, or task execution.
 
@@ -32,7 +32,7 @@ The adapter is a local Hermes-side client for Helio, not an `ano-messaging` wrap
 
 ## Explicit Non-Scope
 
-- No Supabase connection.
+- No Supabase connection until a later approved validation run.
 - No service-role key handling.
 - No direct `agent_messages` writes.
 - No task dispatch or task status mutation.
@@ -232,6 +232,123 @@ Dry-run outbound payload shape:
 ```
 
 Use `chat_id_ref`, not a raw Telegram ID, in Hermes-facing drafts. Helio may resolve the reference if a later write is approved.
+
+## Phase 6E Live Read-Only Preflight Plan
+
+Phase 6E prepares, but does not run, the first live validation that Hermes can read Helio/ANO messaging metadata safely.
+
+### Minimum Safe Credential
+
+Use only:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `HELIO_AGENT_BUS_MODE=read_only`
+- `HELIO_DEFAULT_ORG`
+- `HELIO_DEFAULT_WORKSPACE`
+- `HELIO_AGENT_ID=hermes`
+
+Do not use or store `SUPABASE_SERVICE_ROLE_KEY` for Hermes preflight. If the anon key cannot read the required metadata because of RLS, the preflight fails closed and the next step is to add Helio-owned read-only endpoints, views, or RLS policies. Hermes must not escalate itself to a service role credential.
+
+The preferred path is anon-key access with RLS. The acceptable fallback is a Helio gateway that uses approved server-side credentials and returns only scoped read-only metadata to Hermes. Direct Hermes service-role access is not approved.
+
+### Read-Only Tables Or Views
+
+The preflight may query these objects in read-only mode only:
+
+| Object | Purpose | Required fields | RLS expectation |
+| --- | --- | --- | --- |
+| `org_messaging_config` or Helio read-only view | Resolve org messaging config and rosters. | `org_id`, `config_type`, `config_data`, `updated_at` | Package migrations allow service-role full access only. Anon access is expected to fail unless Helio adds a read-only policy or view. |
+| `agent_messages` | Read recent messages addressed to Hermes. | `id`, `from_agent`, `to_agent`, `message_type`, `payload`, `risk_level`, `status`, `priority`, `parent_message_id`, `result`, `error`, `created_at`, `claimed_at`, `completed_at`, `expires_at`, `org_id` | Package migrations allow authenticated read-only select. Anon behavior depends on whether the anon key maps to an authenticated role in the deployed Supabase project. |
+| `bot_outbound_messages` or Helio read-only view | Read recent outbound rows for audit visibility only. | `id`, `bot_name`, `chat_id`, `message_text`, `parse_mode`, `reply_to_message_id`, `status`, `error`, `requested_by`, `created_at`, `sent_at`, `org_id` | Package migrations allow service-role full access only. Anon access is expected to fail unless Helio adds a read-only policy or view. |
+
+If direct table access is not RLS-safe, define read-only views with scoped columns and no write privileges. Views must not expose raw secrets, unrestricted chat identifiers, or cross-org records.
+
+### Read-Only Queries To Validate
+
+All queries must include the configured org scope. Where workspace is not a canonical `ano-messaging` column, workspace remains a Helio-side scope check and must not be silently ignored by Hermes.
+
+List org configs:
+
+```text
+from org_messaging_config
+select org_id, config_type, config_data, updated_at
+where org_id = HELIO_DEFAULT_ORG
+order by config_type asc
+limit 25
+```
+
+Read recent messages addressed to Hermes:
+
+```text
+from agent_messages
+select id, from_agent, to_agent, message_type, payload, risk_level, status,
+       priority, parent_message_id, result, error, created_at, claimed_at,
+       completed_at, expires_at, org_id
+where org_id = HELIO_DEFAULT_ORG
+  and to_agent = HELIO_AGENT_ID
+order by created_at desc
+limit 25
+```
+
+Read recent outbound messages for audit only:
+
+```text
+from bot_outbound_messages
+select id, bot_name, chat_id, message_text, parse_mode, reply_to_message_id,
+       status, error, requested_by, created_at, sent_at, org_id
+where org_id = HELIO_DEFAULT_ORG
+order by created_at desc
+limit 25
+```
+
+Allowed preflight outcome:
+
+- Return row counts, latest timestamps, and status distributions.
+- Return redacted samples only when explicitly approved.
+- Never update status.
+- Never claim messages.
+- Never insert outbound messages.
+- Never acknowledge outbound messages.
+- Never run a poller.
+
+### Expected RLS Behavior
+
+Expected passing behavior:
+
+- The anon key can read only scoped data needed for the preflight.
+- Writes fail with permission errors.
+- Cross-org reads return zero rows or a permission error.
+- Direct mutation methods are unavailable from the scaffold.
+
+Expected acceptable failure behavior:
+
+- `org_messaging_config` read fails because no anon read policy exists.
+- `bot_outbound_messages` read fails because no anon read policy exists.
+- `agent_messages` read fails if the deployed Supabase role mapping does not allow anon/authenticated select.
+
+These failures are not reasons to use `SUPABASE_SERVICE_ROLE_KEY` in Hermes. They indicate that Helio needs a governed read-only gateway or scoped read-only database policy before live validation can proceed.
+
+### Failure And Rollback Behavior
+
+Preflight must fail closed when:
+
+- `SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing.
+- `HELIO_AGENT_BUS_MODE` is not `read_only`.
+- `HELIO_DEFAULT_ORG`, `HELIO_DEFAULT_WORKSPACE`, or `HELIO_AGENT_ID` is missing.
+- Any read returns records outside the configured org or agent scope.
+- Any write appears possible from the anon key.
+- RLS blocks required reads.
+- The returned schema does not match `docs/AGENT_BUS_CONTRACT.md`.
+
+Rollback is simple because Phase 6E does not write state:
+
+- Remove the temporary anon key from the local shell/session.
+- Restore `HELIO_AGENT_BUS_MODE=disabled` or unset it.
+- Delete any local redacted preflight report if one was generated in a later approved run.
+- Leave database rows untouched.
+
+No migration, package install, launch agent, background service, shell profile edit, or database cleanup is part of Phase 6E.
 
 ## Later Write Mode
 

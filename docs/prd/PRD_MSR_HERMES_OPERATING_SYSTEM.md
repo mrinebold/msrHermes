@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6D complete. Next recommended work: Phase 6E: review and approve a local Helio test gateway contract before any live integration.
+Phase 6E planning complete. Next recommended work: Phase 6F: approve and run a live read-only Supabase preflight with anon-key/RLS access only.
 
 ## Architecture Decision
 
@@ -19,6 +19,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
 | Phase 6D | Complete | Implemented the read-only `services/agent_bus` scaffold with mocked tests, no Supabase imports, no writes, and no polling worker. |
+| Phase 6E | Complete | Planned the live read-only Supabase preflight, preferring anon-key RLS and defining exact read queries without connecting Supabase. |
 
 ## Phase 6A Finding
 
@@ -41,11 +42,19 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 6E: review and approve a local Helio test gateway contract before any live integration.
+Phase 6F: approve and run a live read-only Supabase preflight with anon-key/RLS access only.
 
-Phase 6E may define local Helio gateway endpoints for read-only mocked integration. It must not connect Supabase, send messages, create polling workers, or enable writes.
+Phase 6F may validate whether Hermes can read scoped messaging metadata from the Helio/ANO Supabase bus. It must use `SUPABASE_URL` and `SUPABASE_ANON_KEY` only, must not use a service-role key, and must not send messages, create polling workers, or enable writes.
 
-Phase 6C reference:
+Phase 6F should read only:
+
+- `org_messaging_config` or a Helio-owned read-only view.
+- `agent_messages` addressed to `hermes`.
+- `bot_outbound_messages` or a Helio-owned read-only view for audit inspection only.
+
+If RLS blocks reads, Phase 6F must fail closed. The follow-up should be a Helio-owned read-only gateway, view, or scoped RLS policy, not direct Hermes service-role access.
+
+Phase 6E reference:
 
 - [Hermes Helio Adapter Design](../HERMES_HELIO_ADAPTER_DESIGN.md)
 
@@ -57,3 +66,4 @@ Phase 6C reference:
 - Do not store real secrets.
 - Do not send messages to agents.
 - Do not connect the scaffold to live services until a later approval is explicit.
+- Do not use `SUPABASE_SERVICE_ROLE_KEY` in the Hermes adapter.
