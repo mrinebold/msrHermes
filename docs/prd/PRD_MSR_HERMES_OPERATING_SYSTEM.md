@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6A complete. Next required work: Phase 6B: Canonical Agent Bus Contract.
+Phase 6B complete. Next recommended work: Phase 6C: Helio Agent Bus Gateway scaffold proposal and approval.
 
 ## Architecture Decision
 
@@ -16,6 +16,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 5B | Complete | Documented Hermes installation, security, configuration, and approval gates without installing Hermes. |
 | Phase 5C | Complete | Proposed exact install, config, and rollback commands only. Hermes was not installed. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
+| Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 
 ## Phase 6A Finding
 
@@ -26,11 +27,21 @@ The current Phase 6A references are:
 - [Supabase Agent Bus Source Map](../SUPABASE_AGENT_BUS_SOURCE_MAP.md)
 - [Hermes + Helio Agent Bus Plan](../HERMES_HELIO_AGENT_BUS_PLAN.md)
 
-## Next Required Work
+## Phase 6B Finding
 
-Phase 6B: Canonical Agent Bus Contract.
+`packages/ano-messaging` is the primary canonical source candidate for the portable Agent Bus message layer. It defines `agent_messages`, `bot_outbound_messages`, `org_messaging_config`, message service methods, outbound polling, directive scanning, and baseline computation.
 
-Phase 6B must elevate `packages/ano-messaging` as the primary canonical Agent Bus source candidate and produce `docs/AGENT_BUS_CONTRACT.md` before any `services/agent_bus/` scaffold is implemented.
+It does not define the full task bus. `agent_tasks`, task events, approvals, and immutable audit still need Helio-owned normalization before Hermes may dispatch agent work.
+
+Phase 6B reference:
+
+- [Canonical Agent Bus Contract](../AGENT_BUS_CONTRACT.md)
+
+## Next Recommended Work
+
+Phase 6C: Helio Agent Bus Gateway scaffold proposal and approval.
+
+Phase 6C should propose a `services/agent_bus/` scaffold that remains Helio-facing only, creates no Supabase client, sends no messages, and defaults to fail-closed behavior.
 
 ## Non-Goals
 
@@ -40,4 +51,3 @@ Phase 6B must elevate `packages/ano-messaging` as the primary canonical Agent Bu
 - Do not store real secrets.
 - Do not send messages to agents.
 - Do not scaffold `services/agent_bus/` until the contract is clear enough.
-
