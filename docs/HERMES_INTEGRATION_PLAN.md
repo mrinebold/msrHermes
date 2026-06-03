@@ -2,178 +2,208 @@
 
 Planning date: 2026-06-03.
 
-Phase 5A is planning only. Do not install Hermes in this phase.
+Phase 5A is planning only. Do not install Hermes, enable autonomous execution, connect Google Workspace, or install Home Assistant in this phase.
 
 ## Target Architecture
 
-Hermes should be the resident operator for the Mac mini. Helio should be the governed access plane that Hermes uses to reach external systems, model workers, and the 40-agent fleet.
+Hermes is the autonomous Mac mini operator. Helio is the controlled dispatch layer that gives Hermes governed access to the broader MSR/CivicGrantsAI agent team, model router, and external integrations.
 
 ```text
 User
   |
   v
 Hermes Agent
-  - local machine owner
-  - conversation surface
-  - memory and skills
-  - scheduler and local execution
+  - Mac mini workflow owner
+  - local project inspection
+  - approved local scripts
+  - daily coordination
+  - planning and drafting
   |
   v
 Helio Governance Gateway
   - policy checks
   - approval IDs
   - audit logging
-  - capability grants
-  - model routing policy
-  - task bus API
+  - model router access
+  - integration permissions
+  - 40-agent dispatch
+  - future Supabase task bus
   |
   +--> DevMonster Gemma4
   +--> Google Workspace
   +--> GitHub
-  +--> Home Assistant
+  +--> Home Assistant safety layer
   +--> Supabase task bus
-  +--> 40-agent fleet
+  +--> MSR/CivicGrantsAI agent team
 ```
 
 ## Design Principles
 
-- Hermes owns this Mac mini's day-to-day operation.
-- Helio owns governance for anything outside the local low-risk machine boundary.
-- Hermes may plan, draft, summarize, and propose freely.
-- Hermes must request Helio approval for writes, sends, service calls, code changes, physical-world actions, credential changes, package installs, and agent-fleet dispatch.
-- Helio records the durable audit trail even when Hermes performs the final action.
-- Direct Hermes credentials should be minimized; prefer Helio-issued scoped credentials or Helio MCP/API gateways.
-- No public service exposure. Prefer localhost first and Tailscale-only access after approval.
+- Hermes owns the Mac mini workflow.
+- Helio is not the top-level runtime.
+- Helio owns dispatch and governance outside the local low-risk boundary.
+- Hermes may inspect local project state, run approved scripts, manage local workflows, and coordinate daily work.
+- Hermes calls Helio when work should be assigned to one of the 40 agents.
+- Hermes uses the existing model router for local-first reasoning through DevMonster Gemma4.
+- Hermes uses Google Workspace tools only through the existing permission and audit framework.
+- Hermes uses Home Assistant only through a future safety-gated tool layer.
+- Human approval remains required for sensitive actions.
 
-## Proposed Components
+## Permission Boundaries
 
-### Hermes Local Operator
+| Area | Hermes direct | Helio mediated | Human approval |
+| --- | --- | --- | --- |
+| Local project inspection | Yes, in approved directories | Optional | No, unless secrets or private data are involved |
+| Approved scripts | Yes, for allowlisted scripts | Policy defines allowlist | Required to add new write-capable scripts |
+| Local workflow coordination | Yes | Optional | No for planning and status work |
+| Shell writes | No by default | Yes | Yes |
+| Package installation | No | Yes | Yes |
+| Public service exposure | No | Yes | Yes |
+| DevMonster Gemma4 | Through model router | Yes | Required for new autonomous categories |
+| Google Workspace | No direct access | Yes | Yes for auth and all writes |
+| GitHub reads | Limited after approval | Yes | Depends on token scope |
+| GitHub writes | No direct access | Yes | Yes |
+| Home Assistant | No direct access | Yes, future safety layer | Yes for token and service calls |
+| Supabase task bus | No raw DB writes | Yes | Yes for schema/credential changes |
+| 40-agent dispatch | No direct fanout | Yes | Required for high-risk or external-side-effect work |
 
-Responsibilities:
+## What Hermes May Do Directly
 
-- Provide the primary command surface.
-- Maintain local memory and skills.
-- Run approved local tasks.
-- Schedule reminders and recurring jobs.
-- Draft Google/GitHub/Home Assistant actions for approval.
-- Submit external or fleet tasks through Helio.
+Hermes may directly:
 
-Boundaries:
+- inspect approved local project directories
+- summarize local repo state
+- read local planning and architecture docs
+- run `scripts/check_environment.sh`
+- run future approved local workflow scripts
+- manage local daily work queues and planning notes
+- draft task requests for Helio
+- draft Google, GitHub, and Home Assistant proposals without executing them
+- call Helio's model router for approved local-first reasoning
 
-- No unrestricted shell autonomy.
-- No direct broad Home Assistant control.
-- No direct broad Google Workspace write access.
-- No direct all-agent fleet control.
-- No public listener unless separately approved.
+## What Hermes Must Route Through Helio
 
-### Helio Governance Gateway
+Hermes must route through Helio for:
 
-Responsibilities:
+- selecting and dispatching one of the 40 MSR/CivicGrantsAI agents
+- creating future Supabase task bus records
+- updating task leases or results
+- using DevMonster Gemma4 for governed model tasks
+- reading or writing Google Workspace after OAuth is enabled
+- mutating GitHub state
+- reading Home Assistant telemetry or calling services
+- accessing credentials or tokens
+- executing external API writes
+- changing runtime configuration
 
-- Enforce policy for external access.
-- Attach approval IDs to sensitive actions.
-- Write audit events.
-- Maintain integration-specific allowlists.
-- Broker credentials.
-- Translate Hermes requests into governed tool calls.
-- Expose the 40-agent fleet as governed capabilities.
+## What Requires Human Approval
 
-Initial interface options:
+Human approval is required for:
 
-- Local HTTP API on `127.0.0.1`.
-- Stdio MCP server exposed to Hermes.
-- Future HTTP MCP server over Tailscale for remote agents.
+- Hermes installation
+- autonomous execution enablement
+- adding new approved scripts
+- shell writes outside narrow approved scripts
+- package installs
+- `sudo`
+- shell profile changes
+- public network exposure
+- Google OAuth connection
+- Google sends, edits, shares, deletes, or calendar changes
+- GitHub pushes, PR creation, issue mutation, merge, or destructive operations
+- Home Assistant token creation or service calls
+- Supabase credentials or schema changes
+- assigning high-risk work to any agent
+- deleting files
+- enabling cloud model providers
 
-Recommended first interface: stdio MCP server or localhost HTTP API with an MCP adapter. This lets Hermes discover Helio capabilities while Helio controls the exposed tool list.
+## DevMonster Gemma4 Integration
 
-### Agent Fleet Gateway
+Hermes should use DevMonster Gemma4 through the existing Helio model router.
 
-Responsibilities:
+Current policy:
 
-- Maintain the 40-agent registry.
-- Describe each agent's capabilities, owner, risk tier, and current availability.
-- Accept tasks from Hermes only through Helio policy.
-- Assign task leases through the future Supabase task bus.
-- Return status, artifacts, and audit references.
+- DevMonster Gemma4 is the private deep reasoning worker.
+- Approved uses include private brainstorming, summarization, PRD drafting, internal planning, and low-risk agent reasoning.
+- Not approved uses include autonomous execution decisions, email sending, Google Workspace actions, Home Assistant control, and production code edits without review.
+- The model router should record task type, provider, model, timestamp, elapsed time, and approval requirement.
 
-Required concepts:
+Implementation direction:
 
-- `agent_id`
-- `capability`
-- `risk_tier`
-- `allowed_actions`
-- `approval_required`
-- `task_id`
-- `lease_owner`
-- `deadline`
-- `result_status`
-- `audit_event_id`
+- Hermes sends governed reasoning requests to Helio.
+- Helio routes to DevMonster Gemma4 when policy allows.
+- Helio fails closed for cloud-reserved work until cloud providers are approved.
+- A faster local model may later be installed for classification and command parsing.
 
-## Integration Phases
+## Future Google Workspace Integration
 
-### Phase 5A: Evaluation and Planning
+Hermes will use Google Workspace only through Helio's existing permission and audit framework.
 
-Status: current phase.
+Planned progression:
 
-- Research current Hermes requirements.
-- Document capability overlap and gaps.
-- Define machine-owner architecture.
-- Do not install Hermes.
-- Do not create Hermes config.
-- Do not authenticate providers.
-- Do not connect tools.
+1. Read-only Gmail, Calendar, Drive, Docs, Sheets, and Contacts/People validation.
+2. Draft-only Gmail, Calendar, Docs, Sheets, Drive, and contact proposals.
+3. Human-approved execution with approval IDs and audit events.
 
-### Phase 5B: Install Readiness Review
+Hermes may draft proposed Google actions in Phase 5 planning, but it may not authenticate, read, send, edit, share, or delete Google resources yet.
 
-Requires approval.
+## Future Home Assistant Integration
 
-- Choose install account and path.
-- Confirm `~/.hermes/` data location.
-- Confirm whether the global `hermes` command should be added to the shell path.
-- Decide whether Hermes may use DevMonster directly or only through Helio.
-- Decide first model provider and fallback model.
-- Decide which built-in Hermes tools are disabled by default.
-- Decide which Helio gateway interface to expose first.
-- Confirm backup plan for Hermes config, sessions, and memory.
+Hermes will use Home Assistant only through a future Helio safety-gated tool layer.
 
-No install should occur until this review is complete.
+Planned progression:
 
-### Phase 5C: Local Hermes Install, No External Authority
+1. Confirm Home Assistant URL and LAN or Tailscale-only access.
+2. Add read-only telemetry.
+3. Define safe entity/domain allowlists.
+4. Add proposal rendering for service calls.
+5. Require human approval for service calls.
+6. Audit every service call and automation trigger.
 
-Requires approval after Phase 5B.
+Locks, alarms, garage doors, HVAC, appliances, power controls, and security devices remain high risk.
 
-- Install Hermes per-user only.
-- Keep services local.
-- Configure a local model path suitable for low-risk chat and planning.
-- Disable or withhold credentials for Google Workspace, GitHub, Home Assistant, and agent fleet writes.
-- Verify Hermes starts and can perform local low-risk conversation.
-- Record install actions in Helio logs.
+## Installation Prerequisites
 
-Allowed:
+Current Hermes installation requirements from official Hermes documentation:
 
-- Local chat.
-- Local planning.
-- Low-risk file reads in approved directories.
+- Linux, macOS, WSL2, and Termux can use the official shell installer.
+- Native Windows can use the early-beta PowerShell installer.
+- Developer setup can clone the repository and run `setup-hermes.sh`, or install with Python 3.11 and `uv`.
+- The standard installer provisions `uv`, Python 3.11, Node.js 22, `ripgrep`, `ffmpeg`, Git where needed, a Hermes source checkout, a virtual environment, and a global `hermes` command.
+- Per-user layout uses `~/.hermes/hermes-agent/` for code, `~/.hermes/` for data and config, and `~/.local/bin/hermes` for the command symlink.
+- Hermes needs a model provider or custom endpoint before meaningful operation.
 
-Not allowed:
+References:
 
-- Google authentication.
-- Home Assistant token setup.
-- GitHub token setup.
-- Shell write automation.
-- Fleet dispatch.
+- https://hermes-agent.nousresearch.com/docs/getting-started/installation/
+- https://hermes-agent.nousresearch.com/docs/integrations/providers/
+- https://github.com/NousResearch/hermes-agent
 
-### Phase 5D: Helio Gateway Prototype
+## Phase 5B Install Proposal
 
-Requires approval.
+Phase 5B should approve installation readiness before any install command runs.
 
-- Create a minimal Helio MCP or localhost API gateway.
-- Expose read-only policy and status tools first.
-- Add a `request_approval` proposal path.
-- Add audit event writing.
-- Add dry-run integration calls.
+Proposed Phase 5B checklist:
 
-Candidate initial tools:
+1. Confirm per-user install path and user account.
+2. Confirm no root-mode or `sudo` install.
+3. Confirm whether the installer may modify shell startup files or create the `~/.local/bin/hermes` symlink.
+4. Confirm model setup path: Helio model router first, DevMonster custom endpoint only if constrained, cloud disabled.
+5. Define the initial disabled tool list.
+6. Keep Google Workspace credentials disabled.
+7. Keep Home Assistant token disabled.
+8. Keep GitHub write tokens disabled.
+9. Keep Supabase credentials disabled.
+10. Keep 40-agent dispatch disabled until the Helio gateway exists.
+11. Define Helio policy/audit tools Hermes can call after install.
+12. Define rollback steps for `~/.hermes/`, path changes, and any generated config.
+13. Run one safe local validation prompt after install.
+
+Phase 5B should still not enable autonomous execution.
+
+## Future Helio Gateway Tools
+
+Candidate tools for Hermes to call:
 
 - `helio_policy_check`
 - `helio_request_approval`
@@ -181,163 +211,24 @@ Candidate initial tools:
 - `helio_model_route`
 - `helio_agent_list`
 - `helio_task_draft`
+- `helio_task_submit`
+- `helio_google_propose`
+- `helio_github_propose`
+- `helio_homeassistant_propose`
 
-The first version should not execute external writes.
+The first implementation should expose read-only status and dry-run proposal tools before execution tools.
 
-### Phase 5E: Model Routing Integration
+## Stop Conditions
 
-Requires approval.
+Stop Phase 5A after documentation and commit.
 
-- Point Hermes governed model calls at Helio's model router.
-- Preserve private-first routing.
-- Use DevMonster Gemma4 for deliberate planning and long reasoning.
-- Add or validate a faster local model for command parsing and routing if needed.
-- Keep cloud providers fail-closed unless explicitly approved.
+Do not:
 
-Recommended routing:
-
-- Hermes local lightweight model: quick local conversation, classification, command parsing.
-- Helio model router: governed task reasoning and audit-worthy decisions.
-- DevMonster Gemma4: deeper private reasoning through Helio policy.
-- Cloud providers: reserved and disabled until explicitly approved.
-
-### Phase 5F: Google Workspace Through Helio
-
-Requires approval.
-
-- Start with read-only Google scopes.
-- Let Hermes draft actions, not execute them.
-- Route OAuth state, token storage, and audit logging through Helio's Google security model.
-- Add Gmail/Calendar/Drive/Docs/Sheets writes only after approval gates exist.
-
-Hermes may use its bundled Google Workspace skill as an execution backend only if Helio can constrain scopes, log actions, and require approval for writes.
-
-### Phase 5G: GitHub Through Helio
-
-Requires approval.
-
-- Expose GitHub read tools first.
-- Add branch/commit/PR draft workflows second.
-- Require explicit approval before pushes, PR creation, PR updates, issue mutations, merges, or CI-affecting actions.
-- Prefer a filtered GitHub MCP server or Helio GitHub gateway over broad token exposure.
-
-### Phase 5H: Home Assistant Through Helio
-
-Requires approval.
-
-- Start with read-only telemetry.
-- Build domain/entity allowlists before service calls.
-- Require approval for all physical-world actions.
-- Treat locks, alarms, garage doors, HVAC, appliances, power controls, and security devices as high risk.
-- Keep Home Assistant reachable only over LAN or Tailscale.
-
-Do not give Hermes a broad long-lived Home Assistant token until Helio can enforce allowlists and audit every service call.
-
-### Phase 5I: Supabase Task Bus and 40-Agent Fleet
-
-Requires approval.
-
-- Build the Supabase task bus as Helio infrastructure.
-- Represent the 40 agents as governed workers.
-- Let Hermes submit tasks into Helio with requested capabilities.
-- Let Helio choose agents, issue leases, and enforce policy.
-- Return agent results to Hermes with audit references.
-
-Minimum task bus fields:
-
-- `task_id`
-- `requested_by`
-- `requested_capability`
-- `risk_tier`
-- `approval_id`
-- `status`
-- `assigned_agent_id`
-- `lease_expires_at`
-- `input_ref`
-- `output_ref`
-- `audit_event_id`
-
-## Capability Exposure Plan
-
-| Capability | Hermes direct access | Helio-mediated access | Notes |
-| --- | --- | --- | --- |
-| Local low-risk chat | Yes | Optional | Hermes should feel resident and responsive. |
-| Local file reads | Limited | Yes | Scope to approved project roots. |
-| Local shell writes | No by default | Yes, with approval | Preserve current Helio operating rules. |
-| DevMonster Gemma4 | Limited | Preferred | Keep routing auditable. |
-| Google read | No until Phase 5F | Yes | Start read-only. |
-| Google write/send | No | Yes, with approval | Draft first, execute later. |
-| GitHub read | Limited | Yes | Prefer filtered MCP or gateway. |
-| GitHub write | No | Yes, with approval | Token scope must stay narrow. |
-| Home Assistant read | No until Phase 5H | Yes | Read-only telemetry first. |
-| Home Assistant action | No | Yes, with approval | Physical-world gate required. |
-| Supabase task bus | No raw DB writes | Yes | Helio owns queue semantics. |
-| 40-agent dispatch | No direct fanout | Yes | Helio owns registry and capability grants. |
-
-## Governance Rules Hermes Must Respect
-
-Hermes may not bypass Helio for:
-
-- External writes.
-- Sending email or messages as the user.
-- Calendar creation, update, or deletion.
-- Drive, Docs, or Sheets modification.
-- GitHub pushes, PRs, issue changes, merges, or destructive operations.
-- Home Assistant service calls.
-- Package installation.
-- Credential creation, rotation, or storage.
-- Public network exposure.
-- File deletion.
-- Agent fleet dispatch.
-- Supabase task bus writes.
-
-Each governed action should include:
-
-- proposed action
-- target system
-- risk tier
-- expected side effects
-- required credential or scope
-- human approval ID if required
-- audit event ID
-- result status
-
-## Open Questions
-
-- Which account should run Hermes on this Mac mini?
-- Should Hermes use DevMonster directly for local chat or only through Helio?
-- Which fast local model should handle quick command parsing?
-- Should Helio expose itself to Hermes as MCP, localhost HTTP, or both?
-- What are the names and capability tiers of the 40 agents?
-- Which agents are allowed to receive autonomous tasks?
-- Which Google account should be authorized first?
-- Which Home Assistant entities are safe for read-only telemetry?
-- Where should Hermes memory/session backups live?
-
-## Acceptance Criteria For Future Install Approval
-
-Before installing Hermes, the Phase 5B review should approve:
-
-- Install path and user account.
-- No-`sudo` per-user install unless explicitly changed.
-- Model provider plan.
-- Tool enablement plan.
-- Helio gateway interface.
-- Credential storage plan.
-- Audit event plan.
-- Rollback/removal plan.
-- Initial disabled tool list.
-- First safe validation prompt.
-
-## Recommendation
-
-Proceed toward Hermes as the machine owner, not merely as a subordinate tool.
-
-Keep Helio as the governance layer that gives Hermes safe access to the rest of the system:
-
-- Hermes owns the Mac mini.
-- Helio owns external authority.
-- The 40 agents live behind Helio's registry, policy, and future Supabase task bus.
-- High-risk integrations stay fail-closed until explicit approval gates are implemented.
-
-This preserves Hermes' strengths while keeping Helio's purpose sharp: governance, auditability, and safe delegation across a much larger agent network.
+- install Hermes
+- enable autonomous execution
+- connect Google Workspace
+- install or connect Home Assistant
+- create credentials
+- expose services publicly
+- dispatch work to the 40-agent team
+- modify runtime services
