@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6B complete. Next recommended work: Phase 6C: Helio Agent Bus Gateway scaffold proposal and approval.
+Phase 6C complete. Next recommended work: Phase 6D: approve and implement read-only Hermes-to-Helio adapter scaffold with mocked tests.
 
 ## Architecture Decision
 
@@ -17,6 +17,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 5C | Complete | Proposed exact install, config, and rollback commands only. Hermes was not installed. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
+| Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
 
 ## Phase 6A Finding
 
@@ -39,9 +40,13 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 6C: Helio Agent Bus Gateway scaffold proposal and approval.
+Phase 6D: approve and implement read-only Hermes-to-Helio adapter scaffold with mocked tests.
 
-Phase 6C should propose a `services/agent_bus/` scaffold that remains Helio-facing only, creates no Supabase client, sends no messages, and defaults to fail-closed behavior.
+Phase 6D may create `services/agent_bus/` only if explicitly approved. The scaffold must remain Helio-facing only, create no Supabase client, send no messages, and default to fail-closed behavior.
+
+Phase 6C reference:
+
+- [Hermes Helio Adapter Design](../HERMES_HELIO_ADAPTER_DESIGN.md)
 
 ## Non-Goals
 
@@ -50,4 +55,4 @@ Phase 6C should propose a `services/agent_bus/` scaffold that remains Helio-faci
 - Do not connect Supabase.
 - Do not store real secrets.
 - Do not send messages to agents.
-- Do not scaffold `services/agent_bus/` until the contract is clear enough.
+- Do not scaffold `services/agent_bus/` until Phase 6D approval is explicit.

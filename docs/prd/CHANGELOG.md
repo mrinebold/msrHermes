@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase 6C Helio-facing adapter scaffold proposal.
+- Added `docs/HERMES_HELIO_ADAPTER_DESIGN.md`.
+- Defined read-only-first behavior, later outbound-only write mode, exact fail-closed rules, and mocked test strategy.
+- Recorded that `services/agent_bus/` remains unimplemented pending Phase 6D approval.
 - Completed Phase 6B Agent Bus contract from `packages/ano-messaging`.
 - Added `docs/AGENT_BUS_CONTRACT.md`.
 - Updated the source map to elevate `packages/ano-messaging` as the primary portable message bus source candidate.
