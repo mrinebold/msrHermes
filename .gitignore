@@ -55,6 +55,7 @@ logs/*
 !.env.sample
 config/*.env
 !config/example.env
+!config/hermes.example.env
 config/google/*.json
 config/google/*token*
 config/google/*secret*

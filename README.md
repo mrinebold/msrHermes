@@ -2,7 +2,7 @@
 
 Helio Command Center is the controlled dispatch and governance layer for the broader MSR/CivicGrantsAI agent team.
 
-Current Phase 5A architecture decision: Hermes is the autonomous Mac mini operator. Helio is not the top-level runtime; Helio is the interface Hermes uses for governed access to DevMonster Gemma4, Google Workspace, GitHub, Home Assistant, the future Supabase task bus, and the 40-agent team.
+Current architecture decision: Hermes is the autonomous Mac mini operator. Helio is not the top-level runtime; Helio is the interface Hermes uses for governed access to DevMonster Gemma4, Google Workspace, GitHub, Home Assistant, the future Supabase task bus, and the 40-agent team.
 
 Current state: scaffold and planning only. Hermes has not been installed, autonomous execution has not been enabled, Google Workspace has not been connected, Home Assistant has not been installed or connected, and no services have been exposed.
 
@@ -28,6 +28,8 @@ Current state: scaffold and planning only. Hermes has not been installed, autono
 - `docs/ARCHITECTURE.md` - canonical Hermes-owned Mac mini and Helio-governed dispatch architecture.
 - `docs/HERMES_OWNERSHIP_MODEL.md` - chain of command, permission boundaries, and Phase 5B install proposal.
 - `docs/HERMES_INTEGRATION_PLAN.md` - phased Hermes integration roadmap.
+- `docs/HERMES_INSTALL_PLAN.md` - Phase 5B Hermes installation readiness plan.
+- `docs/HERMES_SECURITY_MODEL.md` - Hermes runtime, credential, command, file, and integration safety model.
 - `docs/HERMES_EVALUATION.md` - Phase 5A Hermes capability evaluation.
 - `docs/SECURITY_MODEL.md` - permission and access model.
 - `docs/ENVIRONMENT_REPORT.md` - machine inspection report.
@@ -39,6 +41,7 @@ Current state: scaffold and planning only. Hermes has not been installed, autono
 - `scripts/bootstrap_phase_1.sh` - placeholder for approved phase 1 install.
 - `scripts/bootstrap_phase_2.sh` - placeholder for approved phase 2 install.
 - `config/example.env` - example configuration values.
+- `config/hermes.example.env` - Hermes planning env sample with blank placeholders only.
 - `logs/bootstrap.log` - local action log, ignored by default if Git is later initialized.
 
 ## Hermes Direct Boundary
@@ -124,8 +127,13 @@ Status: current planning phase.
 
 ### Phase 5B: Hermes Install Readiness Review
 
-Requires approval before execution.
+Status: current planning phase.
 
+- Identify the official Hermes client, repository, package, and release target.
+- Document macOS Apple Silicon install options.
+- Document Python, Node, package manager, env, storage, and launch agent requirements.
+- Define how Hermes will connect to the local model router, DevMonster Gemma4, Helio dispatcher, Google Workspace, and Home Assistant.
+- Define approval gates for shell commands, file edits, Google, Helio dispatch, and Home Assistant.
 - Confirm per-user Hermes install path and account.
 - Confirm no root-mode or `sudo` install.
 - Confirm whether shell path changes are allowed.
@@ -133,6 +141,19 @@ Requires approval before execution.
 - Define the initial disabled tool list.
 - Keep Google Workspace, Home Assistant, GitHub writes, Supabase, and 40-agent dispatch disabled.
 - Define rollback steps.
+- Do not install Hermes.
+- Do not enable autonomous execution.
+- Do not connect Google Workspace.
+- Do not connect Home Assistant.
+
+### Phase 5C: Hermes Install
+
+Requires approval after Phase 5B review.
+
+- Run the approved install method.
+- Record exact Hermes release or commit.
+- Configure only the approved model provider path.
+- Keep background gateway service disabled unless separately approved.
 - Run one safe local validation prompt after install.
 
 ## Future Tasks
