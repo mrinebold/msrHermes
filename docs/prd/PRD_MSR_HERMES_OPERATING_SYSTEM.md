@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6C complete. Next recommended work: Phase 6D: approve and implement read-only Hermes-to-Helio adapter scaffold with mocked tests.
+Phase 6D complete. Next recommended work: Phase 6E: review and approve a local Helio test gateway contract before any live integration.
 
 ## Architecture Decision
 
@@ -18,6 +18,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
+| Phase 6D | Complete | Implemented the read-only `services/agent_bus` scaffold with mocked tests, no Supabase imports, no writes, and no polling worker. |
 
 ## Phase 6A Finding
 
@@ -40,9 +41,9 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 6D: approve and implement read-only Hermes-to-Helio adapter scaffold with mocked tests.
+Phase 6E: review and approve a local Helio test gateway contract before any live integration.
 
-Phase 6D may create `services/agent_bus/` only if explicitly approved. The scaffold must remain Helio-facing only, create no Supabase client, send no messages, and default to fail-closed behavior.
+Phase 6E may define local Helio gateway endpoints for read-only mocked integration. It must not connect Supabase, send messages, create polling workers, or enable writes.
 
 Phase 6C reference:
 
@@ -55,4 +56,4 @@ Phase 6C reference:
 - Do not connect Supabase.
 - Do not store real secrets.
 - Do not send messages to agents.
-- Do not scaffold `services/agent_bus/` until Phase 6D approval is explicit.
+- Do not connect the scaffold to live services until a later approval is explicit.

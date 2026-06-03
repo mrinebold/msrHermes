@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase 6D read-only Hermes-Helio agent bus scaffold.
+- Added `services/agent_bus/` with fail-closed config, mock client, schemas, audit redaction, and permissions.
+- Added mocked unit tests for missing config, read-only reads, write denial, and outbound dry-run payloads.
+- Updated env examples with `HELIO_AGENT_ID=hermes` and read-only scaffold placeholders.
 - Completed Phase 6C Helio-facing adapter scaffold proposal.
 - Added `docs/HERMES_HELIO_ADAPTER_DESIGN.md`.
 - Defined read-only-first behavior, later outbound-only write mode, exact fail-closed rules, and mocked test strategy.

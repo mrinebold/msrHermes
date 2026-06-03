@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6C scaffold proposal only. Do not implement `services/agent_bus/` yet.
+Phase 6D read-only scaffold implemented with mocks only. No live Supabase, `ano-messaging`, network, polling, or write path is enabled.
 
 This design uses [Agent Bus Contract](AGENT_BUS_CONTRACT.md) as the canonical message-bus contract and keeps Hermes behind Helio. It does not authorize direct Supabase access, direct agent dispatch, autonomous execution, or task execution.
 
@@ -41,9 +41,9 @@ The adapter is a local Hermes-side client for Helio, not an `ano-messaging` wrap
 - No autonomous polling loop.
 - No modification to `/Users/michaelrinebold/dev/msrresearch/msrresearch/packages/ano-messaging`.
 
-## Proposed Structure
+## Implemented Mock-Only Structure
 
-Proposed only; do not create these files in Phase 6C.
+Phase 6D created this structure:
 
 ```text
 services/agent_bus/
@@ -57,7 +57,7 @@ services/agent_bus/
 
 ### config.py
 
-Purpose: parse local adapter settings and fail closed before any Helio call.
+Purpose: parse local adapter settings and fail closed before any future Helio call.
 
 Responsibilities:
 
@@ -68,6 +68,7 @@ Responsibilities:
 - Validate allowed modes.
 - Refuse operation when mode is missing, unknown, or `disabled`.
 - Never read or expose `SUPABASE_SERVICE_ROLE_KEY`.
+- Treat `SUPABASE_URL` and `SUPABASE_ANON_KEY` as placeholders only; they are not used to create a client.
 
 Proposed modes:
 
@@ -80,11 +81,12 @@ Proposed modes:
 
 ### client.py
 
-Purpose: local Hermes-to-Helio API client.
+Purpose: local Hermes-to-Helio API client placeholder.
 
 Responsibilities:
 
-- Call Helio endpoints on localhost or another approved gateway URL.
+- Use mocked Supabase-shaped records in Phase 6D.
+- Avoid network calls until a future Helio gateway phase is approved.
 - Provide read-only calls for org config and inbound messages.
 - Provide dry-run outbound payload validation.
 - Provide a later approved outbound write call that targets `bot_outbound_messages` only.
@@ -327,7 +329,6 @@ Integration tests are not part of the first scaffold. Add them only after Helio 
 
 ## Implementation Recommendation
 
-Do not implement `services/agent_bus/` yet.
+Phase 6D implemented only the read-only mock scaffold.
 
-The safest next implementation phase is a read-only scaffold with mocked tests only, after explicit approval. That scaffold should include `config.py`, `client.py`, `schemas.py`, `audit.py`, `permissions.py`, and `README.md`, but it should still avoid Supabase imports and avoid direct `ano-messaging` service construction.
-
+The next implementation phase should remain conservative: wire this scaffold to a local Helio test gateway only after explicit approval. Keep Supabase imports, `ano-messaging` service construction, writes, and background polling disabled until a later approved phase.
