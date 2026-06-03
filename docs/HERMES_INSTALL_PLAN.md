@@ -399,9 +399,198 @@ If a future approved install must be removed:
 
 Do not perform rollback steps in Phase 5B because Hermes is not installed.
 
+## Phase 5C Install Command Proposal
+
+Status: proposal only. Do not run these commands without explicit approval.
+
+### Source Confirmation
+
+The intended Hermes source remains the official Nous Research Hermes Agent project:
+
+- Repository: `https://github.com/NousResearch/hermes-agent`
+- CLI/package identity: `hermes-agent`, exposing the `hermes` command
+- Official installer: `https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh`
+- First proposed release target: `v2026.5.29.2`
+
+The current installer supports `--skip-setup`, `--branch`, `--commit`, `--dir`, and `--hermes-home`. The proposed command uses `--skip-setup` so Phase 5C installs files only and does not run the interactive setup wizard.
+
+### Environment Inspection
+
+Read-only inspection on 2026-06-03 found:
+
+| Check | Result | Phase 5C meaning |
+| --- | --- | --- |
+| OS | macOS 26.5, arm64 | Apple Silicon supported by official macOS installer path |
+| Git | `/usr/bin/git`, version `2.50.1` | prerequisite present |
+| Homebrew | `/opt/homebrew/bin/brew`, version `5.1.14` | present, but not needed for the proposed install |
+| Generic Python | `/usr/bin/python3`, version `3.9.6` | below Hermes requirement |
+| Python 3.11 | `/opt/homebrew/bin/python3.11`, version `3.11.14` | suitable Python already present |
+| Generic Node | `/opt/homebrew/bin/node`, version `25.6.1` | newer generic Node present |
+| Node 22 | `/opt/homebrew/opt/node@22/bin/node`, version `22.21.1` | suitable Node 22 present |
+| npm/npx | `/opt/homebrew/bin/npm` and `/opt/homebrew/bin/npx`, version `11.9.0` | present |
+| ripgrep | `/opt/homebrew/bin/rg`, version `15.1.0` | present |
+| uv | not found in PATH or `~/.hermes/bin/uv` | installer should provision managed uv |
+| ffmpeg | not found in PATH | installer should provision if needed |
+| Hermes CLI | not found | Hermes is not currently installed |
+| Hermes home | no `~/.hermes` entry observed | no existing default Hermes home found |
+| Hermes symlink | no `~/.local/bin/hermes` entry observed | no existing CLI symlink found |
+| launchd plist | no `~/Library/LaunchAgents/ai.hermes.gateway.plist` entry observed | no Hermes gateway service found |
+| PATH | includes `~/.local/bin` | no shell profile change should be needed for the CLI symlink |
+
+### Recommended Install Method
+
+Recommended Phase 5C method: official per-user installer, pinned to the observed release tag, with setup and browser bootstrap skipped.
+
+Rationale:
+
+- Uses the official installer and official repo.
+- Avoids root-mode install.
+- Avoids `hermes setup`.
+- Avoids background service setup.
+- Avoids Google, Home Assistant, GitHub, Supabase, or agent-dispatch credentials.
+- Records the installed release/commit immediately after install.
+
+### Exact Install Commands
+
+Do not run until approved:
+
+```sh
+cd /Users/michaelrinebold/Documents/Helio/helio-command-center
+mkdir -p /private/tmp/hermes-install
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+  -o /private/tmp/hermes-install/install.sh
+bash /private/tmp/hermes-install/install.sh \
+  --skip-setup \
+  --skip-browser \
+  --branch v2026.5.29.2 \
+  --hermes-home "$HOME/.hermes" \
+  --dir "$HOME/.hermes/hermes-agent"
+"$HOME/.local/bin/hermes" --version
+git -C "$HOME/.hermes/hermes-agent" rev-parse --short HEAD
+```
+
+Notes:
+
+- `--skip-setup` prevents the interactive setup wizard from running.
+- `--skip-browser` avoids browser/Playwright bootstrap for the first install.
+- `--branch v2026.5.29.2` pins the checkout to the observed release tag.
+- `--hermes-home "$HOME/.hermes"` uses the official default data directory explicitly.
+- `--dir "$HOME/.hermes/hermes-agent"` uses the official default code directory explicitly.
+
+Alternative if release pinning fails because the installer expects a branch name:
+
+```sh
+cd /Users/michaelrinebold/Documents/Helio/helio-command-center
+mkdir -p /private/tmp/hermes-install
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh \
+  -o /private/tmp/hermes-install/install.sh
+bash /private/tmp/hermes-install/install.sh \
+  --skip-setup \
+  --skip-browser \
+  --branch main \
+  --hermes-home "$HOME/.hermes" \
+  --dir "$HOME/.hermes/hermes-agent"
+git -C "$HOME/.hermes/hermes-agent" checkout v2026.5.29.2
+"$HOME/.local/bin/hermes" --version
+git -C "$HOME/.hermes/hermes-agent" rev-parse --short HEAD
+```
+
+Do not run:
+
+```sh
+hermes setup
+hermes model
+hermes gateway install
+hermes gateway start
+```
+
+### Exact Config File Commands
+
+These commands are proposed for after the installer completes and before the first Hermes launch. Do not run until approved:
+
+```sh
+mkdir -p "$HOME/.hermes"
+install -m 600 /Users/michaelrinebold/Documents/Helio/helio-command-center/config/hermes.example.env \
+  "$HOME/.hermes/.env"
+cat > "$HOME/.hermes/config.yaml" <<'YAML'
+terminal:
+  backend: local
+  cwd: /Users/michaelrinebold/Documents/Helio/helio-command-center
+  timeout: 60
+
+mcp_servers: {}
+YAML
+chmod 600 "$HOME/.hermes/config.yaml"
+```
+
+This creates:
+
+- `~/.hermes/.env` from the committed blank sample
+- `~/.hermes/config.yaml` with no Google, Home Assistant, GitHub, Supabase, or Helio dispatcher credentials
+
+Model configuration should wait until one of these is approved:
+
+1. Helio exposes a localhost model-router adapter, preferred.
+2. Direct DevMonster custom provider is approved as a temporary low-risk fallback.
+
+Proposed future model-router config shape after the Helio adapter exists:
+
+```yaml
+model:
+  provider: custom
+  default: gemma4:26b
+  base_url: http://127.0.0.1:8787/v1
+```
+
+Proposed future DevMonster fallback config only if separately approved:
+
+```yaml
+model:
+  provider: custom
+  default: gemma4:26b
+  base_url: http://100.93.120.124:11434/v1
+```
+
+### Rollback Commands
+
+Do not run unless rollback is approved or explicitly requested:
+
+```sh
+"$HOME/.local/bin/hermes" gateway stop 2>/dev/null || true
+launchctl remove ai.hermes.gateway 2>/dev/null || true
+rm -f "$HOME/Library/LaunchAgents/ai.hermes.gateway.plist"
+rm -f "$HOME/.local/bin/hermes"
+rm -rf "$HOME/.hermes/hermes-agent"
+```
+
+Optional data archive before removing Hermes state:
+
+```sh
+tar -czf "$HOME/Desktop/hermes-home-backup-$(date +%Y%m%d-%H%M%S).tgz" \
+  -C "$HOME" .hermes
+```
+
+Optional full state removal after archive approval:
+
+```sh
+rm -rf "$HOME/.hermes"
+```
+
+### Sudo, launchd, background services, and shell profile changes
+
+Expected Phase 5C install characteristics:
+
+- `sudo`: not needed for the proposed per-user install.
+- launchd: not needed; do not run `hermes gateway install`.
+- background services: not enabled; do not run `hermes gateway start`.
+- shell profile changes: should not be needed because `~/.local/bin` is already on PATH.
+- persistent service file: no `~/Library/LaunchAgents/ai.hermes.gateway.plist` should be created.
+- setup wizard: skipped with `--skip-setup`.
+- browser bootstrap: skipped with `--skip-browser`.
+
 ## Stop Conditions
 
-Stop Phase 5B after documentation, tests, and commit.
+Stop Phase 5C command proposal after documenting exact commands and asking for approval.
 
 Do not:
 
