@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase 6G read-only Agent Bus preflight implementation.
+- Added `scripts/agent_bus_readonly_preflight.py` using Python stdlib only, process environment only, GET-only requests, and redacted output.
+- Added mocked tests for config failure, read-only mode enforcement, scoped query construction, GET-only enforcement, redaction, permission failure, and out-of-scope records.
+- Confirmed no Supabase connection, package install, secret storage, message send, or record write was performed.
 - Completed Phase 6E live read-only Agent Bus preflight planning.
 - Defined `SUPABASE_URL` plus `SUPABASE_ANON_KEY` as the minimum safe preflight credential set, with service-role access explicitly disallowed for Hermes.
 - Added exact read-only query shapes for `org_messaging_config`, `agent_messages` addressed to Hermes, and `bot_outbound_messages` audit inspection.

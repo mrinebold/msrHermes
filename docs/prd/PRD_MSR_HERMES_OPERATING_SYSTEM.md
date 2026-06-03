@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6E planning complete. Next recommended work: Phase 6F: approve and run a live read-only Supabase preflight with anon-key/RLS access only.
+Phase 6G complete. Next recommended work: Phase 6H: approve and run the live read-only Supabase preflight with anon-key/RLS access only.
 
 ## Architecture Decision
 
@@ -20,6 +20,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
 | Phase 6D | Complete | Implemented the read-only `services/agent_bus` scaffold with mocked tests, no Supabase imports, no writes, and no polling worker. |
 | Phase 6E | Complete | Planned the live read-only Supabase preflight, preferring anon-key RLS and defining exact read queries without connecting Supabase. |
+| Phase 6G | Complete | Implemented a stdlib-only read-only preflight script and mocked tests without connecting Supabase or installing packages. |
 
 ## Phase 6A Finding
 
@@ -42,17 +43,22 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 6F: approve and run a live read-only Supabase preflight with anon-key/RLS access only.
+Phase 6H: approve and run the live read-only Supabase preflight with anon-key/RLS access only.
 
-Phase 6F may validate whether Hermes can read scoped messaging metadata from the Helio/ANO Supabase bus. It must use `SUPABASE_URL` and `SUPABASE_ANON_KEY` only, must not use a service-role key, and must not send messages, create polling workers, or enable writes.
+Phase 6H may validate whether Hermes can read scoped messaging metadata from the Helio/ANO Supabase bus. It must use `SUPABASE_URL` and `SUPABASE_ANON_KEY` only, must not use a service-role key, and must not send messages, create polling workers, or enable writes.
 
-Phase 6F should read only:
+Phase 6H should read only:
 
 - `org_messaging_config` or a Helio-owned read-only view.
 - `agent_messages` addressed to `hermes`.
 - `bot_outbound_messages` or a Helio-owned read-only view for audit inspection only.
 
-If RLS blocks reads, Phase 6F must fail closed. The follow-up should be a Helio-owned read-only gateway, view, or scoped RLS policy, not direct Hermes service-role access.
+If RLS blocks reads, Phase 6H must fail closed. The follow-up should be a Helio-owned read-only gateway, view, or scoped RLS policy, not direct Hermes service-role access.
+
+Phase 6G reference:
+
+- [Read-only preflight script](../../scripts/agent_bus_readonly_preflight.py)
+- [Read-only preflight mocked tests](../../tests/agent_bus/test_readonly_preflight.py)
 
 Phase 6E reference:
 
