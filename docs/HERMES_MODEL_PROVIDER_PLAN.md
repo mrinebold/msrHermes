@@ -255,3 +255,39 @@ Validation results:
 No Hermes configuration, background service, external exposure, cloud provider, Google Workspace, Supabase, Home Assistant, or Helio connection was made.
 
 The next phase should validate Hermes against this localhost adapter using sandbox data only, without changing permanent Hermes configuration.
+
+## Phase 5I Hermes Sandbox Result
+
+Status: complete on 2026-06-04.
+
+Hermes was run with a temporary isolated `HERMES_HOME` configured to use only the localhost adapter:
+
+```yaml
+model:
+  provider: custom
+  default: gemma4:26b
+  base_url: http://127.0.0.1:8088/v1
+  api_key: dummy-local-adapter-key
+```
+
+The adapter was started manually in the foreground on `127.0.0.1:8088` and stopped immediately after inspection. No persistent Hermes config was changed.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Hermes startup | 0.394s, exit 0 |
+| `sample_note.md` chat attempt | exit 0 in 60.676s; no summary file created |
+| `sample_prd.md` chat attempt | exit 0 in 36.896s; no summary file created |
+| `sample_note.md` one-shot summary | exit 0 in 105.852s; `sample_note_summary.md` created |
+| `sample_prd.md` one-shot summary | exit 0 in 94.954s; `sample_prd_summary.md` created |
+| Output file sizes | 8 bytes each |
+| Output quality | Not usable; both output files contain only `(empty)` |
+| Stderr | empty for one-shot runs |
+| Adapter logs | no per-request lines emitted in the foreground stream |
+| Adapter bind | manually checked as `127.0.0.1:8088` only before shutdown |
+| Shutdown | adapter stopped; no listener remained on port `8088` |
+
+Hermes was configured only with the localhost adapter and a dummy local key. No real OpenAI, Anthropic, OpenRouter, Google, Supabase, Home Assistant, GitHub, or Helio credentials were provided.
+
+Phase 5I proves Hermes can be pointed at the local adapter in an isolated home, but it does not yet prove usable summarization through Hermes. The next investigation should determine why Hermes returns `(empty)` despite the adapter working for direct OpenAI-compatible chat-completion calls.

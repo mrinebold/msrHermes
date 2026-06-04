@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5H retry complete. The localhost Model Router adapter was manually validated end-to-end in the foreground on `127.0.0.1:8088`; health, model listing, chat completion through DevMonster Gemma, unknown-endpoint rejection, and localhost-only bind all passed.
+Phase 5I complete. Hermes was configured in an isolated sandbox home to use only the localhost Model Router adapter and dummy local key; both sandbox summary runs completed within timeout but produced unusable `(empty)` outputs.
 
-Local repository status: complete work through Phase 5G has been published. Phase 5H records live adapter validation results.
+Local repository status: complete work through Phase 5H retry has not yet been published. Phase 5I records isolated Hermes sandbox validation against the local adapter.
 
 ## Architecture Decision
 
@@ -30,6 +30,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5F | Complete | Planned Hermes local inference through a localhost OpenAI-compatible MSR Model Router adapter instead of direct DevMonster or cloud providers. |
 | Phase 5G | Complete | Added the localhost-only OpenAI-compatible Model Router adapter scaffold with mocked tests and no Hermes configuration. |
 | Phase 5H | Complete | Manually ran the adapter in the foreground on localhost and validated the end-to-end Model Router to DevMonster Gemma path after DevMonster repair. |
+| Phase 5I | Complete | Ran Hermes with an isolated sandbox home pointed at the localhost adapter; runs exited 0 but produced `(empty)` summary outputs. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -64,6 +65,7 @@ Completed and committed locally:
 - Phase 5F model-provider planning: Option C was selected as the target architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma / future approved providers. Initial implementation should route only to DevMonster through the local adapter while cloud providers remain disabled and fail-closed.
 - Phase 5G adapter scaffold: `services/model_router_adapter/` was added using Python stdlib HTTP serving, default host `127.0.0.1`, default port `8088`, allowed endpoints only, `services/model_router` delegation, and mocked unit tests.
 - Phase 5H live adapter retry: the adapter was started manually in the foreground, bound only to `127.0.0.1:8088`, and stopped after validation. `GET /health` returned 200 in 0.005s. `GET /v1/models` returned 200 in 0.095s and included `gemma4:26b`. `POST /v1/chat/completions` with the single approved prompt returned `Adapter operational.` in 15.179s using `gemma4:26b` through `devmonster_ollama`. `GET /v1/embeddings` returned 404 in 0.001s.
+- Phase 5I Hermes sandbox validation: Hermes startup in isolated `HERMES_HOME` took 0.394s. Initial chat runs exited 0 in 60.676s and 36.896s but did not create summary files. One-shot retries exited 0 in 105.852s and 94.954s and created `sample_note_summary.md` and `sample_prd_summary.md`, but each file was only 8 bytes and contained `(empty)`. Stderr files were empty. Adapter foreground logs emitted no per-request lines. The adapter was stopped and no listener remained on `8088`.
 
 Not completed or not approved:
 
@@ -74,7 +76,7 @@ Not completed or not approved:
 - Hermes did not produce local summaries in Phase 5E because no credential-free inference provider was configured.
 - Hermes is not configured to use the MSR Model Router adapter yet.
 - The Model Router adapter was not started as a background service.
-- No Hermes sandbox retry has been run against the adapter yet.
+- Hermes sandbox retry through the adapter did not produce usable summaries.
 - Hermes background gateway/launchd operation is not enabled.
 - Google Workspace is not connected.
 - Home Assistant is not installed or connected.
@@ -105,7 +107,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5I should run a controlled Hermes sandbox retry against the validated localhost adapter without changing permanent Hermes configuration. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5J should diagnose why Hermes returns `(empty)` when configured against the local adapter, without adding real cloud credentials or changing persistent Hermes config. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -122,6 +124,8 @@ Phase 5E showed that a credential-free Hermes client can start locally but canno
 Phase 5F determined that Hermes can treat the MSR Model Router as its sole inference provider if the router exposes a local OpenAI-compatible endpoint and Hermes is later configured with `model.provider=custom` and a loopback-only `model.base_url`. No Hermes config changes were made in Phase 5F. No live prompts, cloud provider config, external exposure, or background service setup was performed.
 
 Phase 5H retry confirmed the adapter can run manually on localhost, reject unknown endpoints, list DevMonster models, and complete the single approved non-sensitive prompt through `devmonster_ollama` and `gemma4:26b`. The adapter was stopped after validation and no listener remained on port `8088`.
+
+Phase 5I confirmed Hermes can be pointed at the local adapter in an isolated home using `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. Hermes used no real cloud credentials and no Google, Supabase, Home Assistant, GitHub, or Helio credentials. The outputs are not usable yet because Hermes wrote only `(empty)`.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

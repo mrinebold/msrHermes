@@ -2,6 +2,16 @@
 
 ## 2026-06-04
 
+- Completed Phase 5I Hermes sandbox validation using the local model adapter.
+- Configured only an isolated temporary `HERMES_HOME` with `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key.
+- Measured Hermes startup at 0.394s.
+- Initial Hermes chat runs exited 0 in 60.676s and 36.896s, but did not create the requested summary files.
+- One-shot Hermes summary runs exited 0 in 105.852s and 94.954s and created `sandbox/output/sample_note_summary.md` and `sandbox/output/sample_prd_summary.md`.
+- Recorded output file sizes as 8 bytes each; both contain only `(empty)`, so outputs are not usable.
+- Confirmed associated one-shot stderr files were empty.
+- Adapter foreground logs emitted no per-request lines during inspection; model-call receipt was not directly observable from adapter logs.
+- Stopped the adapter immediately after inspection and confirmed no listener remained on port `8088`.
+- Confirmed no persistent Hermes config, real OpenAI/Anthropic credentials, cloud provider, background service, Google, Supabase, Home Assistant, Helio, or autonomous execution was used.
 - Completed Phase 5H retry live localhost Model Router adapter validation after DevMonster repair.
 - Started the adapter manually in the foreground only with `MODEL_ROUTER_ADAPTER_HOST=127.0.0.1`, `MODEL_ROUTER_ADAPTER_PORT=8088`, `DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434`, and `DEVMONSTER_DEFAULT_MODEL=gemma4:26b`.
 - Confirmed `GET /health` returned 200 in 0.005s.
