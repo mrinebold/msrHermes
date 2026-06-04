@@ -2,6 +2,18 @@
 
 ## 2026-06-04
 
+- Completed Phase 5Q bounded Hermes file-summary metadata diagnostic.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, and message-structure logging enabled.
+- Ran exactly one bounded `hermes -z` diagnostic against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
+- Captured stdout to `sandbox/output/sample_note_phase5q_summary.md` and stderr to `sandbox/output/sample_note_phase5q_stderr.txt`.
+- Recorded exit code 0, elapsed time 33.501s, stdout 8 bytes, stderr 0 bytes, and no timeout under the 240s cap.
+- Confirmed the output is not usable as a five-bullet summary.
+- Confirmed adapter request metadata showed four successful `POST /v1/chat/completions` calls, all status 200 with selected model `gemma4:26b`; chat elapsed times were 17.514s, 2.509s, 6.755s, and 2.888s.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0` for all four chat-completion calls.
+- Confirmed message-structure metadata showed two messages with roles `system` and `user`, character counts `[5630, 71]`, non-empty final user message, file-like content present by length/shape, `tools` present, `tool_choice` absent, `stream` present, and no `max_tokens` or `temperature`.
+- Stopped the adapter immediately after inspection and confirmed no `8088` listener remained.
+- Recommended Phase 5R as prompt-shape isolation at the adapter/router boundary before another Hermes file-summary run.
+- Confirmed no `sample_prd.md` run, prompt/file content logging, model output logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5P Hermes file-summary prompt behavior diagnosis without running live prompts.
 - Inspected the adapter/router path and confirmed the adapter converts all OpenAI-style messages in order into a single router prompt; it does not read only the first message, last message, or user messages only.
 - Confirmed `services/model_router` receives that plain prompt string and the DevMonster provider sends it to Ollama `/api/generate`, then maps the returned `response` field into chat-completion content.

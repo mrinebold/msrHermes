@@ -80,3 +80,62 @@ The next diagnostic should answer:
 - Did content lengths differ between the direct prompt call and later file-summary calls?
 
 If no message contains file content, prefer an explicit content-injection summary pattern for sandbox validation or an approved Hermes toolset invocation that is proven to read only sandbox paths. If file content is present but model output remains zero length, focus next on prompt shape and DevMonster Gemma behavior with multi-message or tool-scaffolded prompts.
+
+## Phase 5Q Metadata Diagnostic
+
+Validation date: 2026-06-04.
+
+One bounded Hermes file-summary diagnostic was run against `sandbox/input/sample_note.md` only. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, and message-structure logging enabled, then stopped immediately after inspection. Hermes used a temporary isolated `HERMES_HOME` with only the localhost adapter, `gemma4:26b`, and a dummy local API key.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Exit code | 0 |
+| Elapsed time | 33.501s |
+| Stdout file | `sandbox/output/sample_note_phase5q_summary.md` |
+| Stdout byte count | 8 |
+| Stderr file | `sandbox/output/sample_note_phase5q_stderr.txt` |
+| Stderr byte count | 0 |
+| Output usable | No; it contains only the empty-response sentinel |
+| Adapter shutdown | Stopped immediately; no listener remained on `8088` |
+
+Adapter request metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 4 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 16 | 404 |
+
+Chat-completion elapsed times were 17.514s, 2.509s, 6.755s, and 2.888s.
+
+Response-shape metadata:
+
+| Chat call count | Streaming requested | Choices | Finish reason | Content length |
+| ---: | --- | ---: | --- | ---: |
+| 4 | true | 1 each | `stop` | 0 each |
+
+Message-structure metadata was identical for all four chat-completion calls:
+
+| Field | Value |
+| --- | --- |
+| Message count | 2 |
+| Roles | `system`, `user` |
+| Character counts | `[5630, 71]` |
+| Final user message empty | false |
+| File content appears present by length/shape | true |
+| `tools` present | true |
+| `tool_choice` present | false |
+| `stream` present | true |
+| `max_tokens` present | false |
+| `temperature` present | false |
+
+Conclusion:
+
+Phase 5Q rules out the simplest missing-file-content theory. Hermes appears to send substantial file-like content to the adapter, and the final user message is not empty. The zero-content result is more likely caused by the prompt/tool scaffold sent by Hermes, the adapter passing tool-oriented instructions as plain prompt text without tool execution, or DevMonster Gemma returning an empty response for this specific multi-message/tool-present shape.
+
+Recommendation:
+
+Phase 5R should avoid another full Hermes file-summary rerun at first. Instead, use mocked or direct adapter-level diagnostics to compare three prompt shapes without logging content: plain user-only summary with injected sandbox text, the same two-message shape without `tools`, and the same two-message shape with `tools` present but no executable tool loop. If a live model check is approved later, run one minimal non-Hermes adapter call using synthetic sandbox text to isolate DevMonster prompt-shape behavior from Hermes agent/tool orchestration.

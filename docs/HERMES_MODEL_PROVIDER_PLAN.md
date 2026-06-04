@@ -510,3 +510,39 @@ The log records only metadata: message count, roles present, character counts pe
 Recommendation:
 
 Phase 5Q should run a single bounded file-summary diagnostic with request, response-shape, and message-structure logging enabled. If no message contains file content, use explicit sandbox file content injection or an approved local-only Hermes file-read invocation pattern before attempting summaries again. If messages do contain file content and output remains zero length, focus on prompt simplification and DevMonster Gemma response behavior rather than adapter transport.
+
+## Phase 5Q File Summary Metadata Diagnostic
+
+Status: complete on 2026-06-04.
+
+Hermes was run exactly once against `sandbox/input/sample_note.md` using an isolated temporary `HERMES_HOME`, localhost adapter configuration, `gemma4:26b`, and a dummy local API key. The adapter ran manually in the foreground on `127.0.0.1:8088` with request, response-shape, and message-structure logging enabled.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Exit code | 0 |
+| Elapsed time | 33.501s |
+| Timeout | 240s cap; no timeout |
+| Stdout bytes | 8 |
+| Stderr bytes | 0 |
+| Output usable | No |
+
+Adapter evidence:
+
+- Hermes made four `POST /v1/chat/completions` calls.
+- All four calls returned 200 with selected model `gemma4:26b`.
+- All four response-shape records had `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`.
+- All four message-structure records had two messages with roles `system` and `user`.
+- Character counts were `[5630, 71]` for each call.
+- The final user message was not empty.
+- File-like content appeared present by length/shape.
+- `tools` were present, `tool_choice` was absent, `stream` was present, and `max_tokens`/`temperature` were absent.
+
+Conclusion:
+
+The adapter is receiving non-empty, file-like context from Hermes. The failure is no longer likely to be missing file access alone. The likely issue is how Hermes' tool-present multi-message prompt shape interacts with the constrained adapter, which forwards text to the model router but does not execute Hermes tools or continue a model/tool loop. DevMonster Gemma is returning empty text for this shape.
+
+Recommendation:
+
+Phase 5R should isolate prompt-shape behavior before another Hermes file-summary run. Preferred next checks are adapter-level and metadata-only: compare a plain user-only injected-content summary, the same content without `tools`, and the Hermes-like tool-present shape. Keep cloud providers fail-closed and avoid persistent Hermes configuration.

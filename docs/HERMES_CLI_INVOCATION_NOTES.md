@@ -373,3 +373,32 @@ This optional diagnostic records message count, roles present, character counts,
 Recommended next phase:
 
 Phase 5Q should run one bounded file-summary diagnostic with request logging, response-shape logging, and message-structure logging enabled. If the logs show no file content in messages, switch to explicit sandbox file content injection or an approved local-only Hermes toolset pattern. If file content is present but output remains empty, diagnose prompt shape and DevMonster Gemma behavior next.
+
+## Phase 5Q File Summary Metadata Diagnostic
+
+Status: complete on 2026-06-04.
+
+One bounded `hermes -z` file-summary diagnostic was run against `sandbox/input/sample_note.md` only with an isolated temporary `HERMES_HOME`, the localhost adapter, `gemma4:26b`, and a dummy local API key. The adapter was stopped immediately after inspection.
+
+Result:
+
+| Check | Result |
+| --- | --- |
+| Exit code | 0 |
+| Elapsed time | 33.501s |
+| Timeout | 240s cap; no timeout |
+| Stdout | 8 bytes; empty-response sentinel only |
+| Stderr | 0 bytes |
+| Usable summary | No |
+
+Adapter metadata showed four successful `POST /v1/chat/completions` calls, all with `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`.
+
+Message-structure metadata was stable across all four calls: two messages, roles `system` and `user`, character counts `[5630, 71]`, final user message not empty, file-like content present by length/shape, `tools` present, `tool_choice` absent, `stream` present, and no `max_tokens` or `temperature`.
+
+Assessment:
+
+The file-summary failure is not caused by Hermes sending an empty prompt or omitting file-like content entirely. The stronger candidate is the Hermes agent/tool prompt shape: the adapter forwards message text to the model router, but it does not execute Hermes tools or complete a tool loop. DevMonster Gemma returns zero visible content for this tool-present multi-message shape.
+
+Recommended next phase:
+
+Phase 5R should compare prompt shapes at the adapter/router boundary before another Hermes file-summary run. Start with mocked or direct adapter-level diagnostics that avoid logging content and isolate whether `tools` presence or the large system-message/file-content shape causes DevMonster to return empty text.
