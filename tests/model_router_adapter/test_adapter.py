@@ -42,9 +42,15 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertEqual(config.port, 8088)
 
     def test_request_logging_flag_from_env(self):
-        config = AdapterConfig.from_env({"MODEL_ROUTER_ADAPTER_LOG_REQUESTS": "true"})
+        config = AdapterConfig.from_env(
+            {
+                "MODEL_ROUTER_ADAPTER_LOG_REQUESTS": "true",
+                "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES": "true",
+            }
+        )
 
         self.assertTrue(config.log_requests)
+        self.assertTrue(config.log_response_shapes)
 
     def test_health(self):
         status, payload = self._get("/health")
@@ -125,6 +131,38 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("prompt", joined.lower())
         self.assertNotIn("secret", joined.lower())
 
+    def test_chat_completion_response_shape_log_redacts_content(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_response_shapes=True,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _ = self._post(
+                "/v1/chat/completions",
+                {
+                    "model": "gemma4:26b",
+                    "stream": True,
+                    "messages": [{"role": "user", "content": "Sensitive sandbox prompt text."}],
+                },
+            )
+
+        self.assertEqual(status, 200)
+        record = self._response_shape_log_record(logs.records)
+        self.assertEqual(record.path, "/v1/chat/completions")
+        self.assertEqual(record.top_level_keys, ["choices", "created", "id", "model", "msr_route", "object", "usage"])
+        self.assertEqual(record.choices_count, 1)
+        self.assertEqual(record.content_length, len("Sandbox summary."))
+        self.assertEqual(record.finish_reason, "stop")
+        self.assertTrue(record.streaming_requested)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertIn("model_router_adapter.response_shape", joined)
+        self.assertNotIn("Sensitive sandbox prompt text", joined)
+        self.assertNotIn("Sandbox summary.", joined)
+
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
 
@@ -168,6 +206,12 @@ class ModelRouterAdapterTest(unittest.TestCase):
             if getattr(record, "event", "") == "model_router_adapter.request":
                 return record
         self.fail("request log record was not emitted")
+
+    def _response_shape_log_record(self, records):
+        for record in records:
+            if getattr(record, "event", "") == "model_router_adapter.response_shape":
+                return record
+        self.fail("response shape log record was not emitted")
 
 
 if __name__ == "__main__":

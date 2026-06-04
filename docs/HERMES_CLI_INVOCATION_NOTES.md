@@ -168,3 +168,58 @@ Assessment:
 Updated recommendation:
 
 Phase 5L should inspect Hermes custom-provider response parsing and model capability discovery behavior locally before another live prompt. Focus areas: why Hermes probes unsupported Ollama-style and model-detail endpoints, whether it requires streaming/SSE responses, whether it ignores non-streaming `choices[].message.content` for `-z`, and whether extra model metadata is needed for `gemma4:26b`.
+
+## Phase 5L Response Contract Diagnosis
+
+Diagnosis date: 2026-06-04.
+
+Hermes source was inspected locally under `~/.hermes/hermes-agent`. No Hermes source was modified, no live prompt was sent, no persistent Hermes config was changed, and no cloud credentials or external integrations were used.
+
+Findings:
+
+- `hermes -z` calls `AIAgent.chat()` and returns `result["final_response"]`.
+- The one-shot path redirects ordinary stdout/stderr during execution and prints only the returned final response.
+- Hermes' chat-completions transport normalizes non-streaming responses from `response.choices[0].message.content`.
+- Hermes also reads `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, optional reasoning fields, and optional `usage`.
+- Hermes does not use `output_text` on the chat-completions path; that is relevant to Responses-style APIs, not this adapter.
+- Hermes' conversation loop prefers streaming for chat completions by default, even without display/TTS consumers.
+- The streaming helper sends `stream=True` and `stream_options={"include_usage": True}` to OpenAI-compatible endpoints.
+- The streaming helper expects OpenAI-compatible stream chunks with `choices[0].delta.content`, optional `choices[0].delta.tool_calls`, and a terminal `finish_reason`.
+- If no visible content is accumulated after retries, Hermes eventually returns the user-facing sentinel `(empty)`.
+
+Adapter comparison:
+
+| Field or behavior | Hermes expectation | Current adapter |
+| --- | --- | --- |
+| Non-streaming content | `choices[0].message.content` | Present |
+| Non-streaming finish reason | `choices[0].finish_reason` | Present: `stop` |
+| Usage | optional `usage` object | Present with zero counts |
+| Tool calls | optional `choices[0].message.tool_calls` | Absent unless future router response supports tools |
+| Responses `output_text` | Not used for chat completions | Absent |
+| Streaming content | SSE chunks with `choices[0].delta.content` | Not implemented |
+| Streaming finish | terminal SSE chunk with `finish_reason` | Not implemented |
+| Streaming usage | optional final usage chunk | Not implemented |
+
+Conclusion:
+
+The adapter response shape is compatible with Hermes' non-streaming chat-completions parser. The likely mismatch is that Hermes first asks for streaming by sending `stream=True`, while the adapter returns ordinary non-streaming JSON. Hermes then accumulates no streamed `delta.content` and can fall into its `(empty)` recovery path.
+
+Phase 5L added metadata-only response-shape logging:
+
+```text
+MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true
+```
+
+This logs only top-level response keys, choices count, assistant content length, finish reason, and whether the request asked for streaming. It never logs prompt text, message content, model output, or secrets.
+
+Recommended adapter fix:
+
+Implement OpenAI-compatible SSE handling for `POST /v1/chat/completions` when the request has `stream=true`. The first safe implementation can still wait for `services/model_router` to return a full response, then emit a small valid SSE stream:
+
+1. role chunk with `delta.role="assistant"`
+2. content chunk with `delta.content` containing the completed model text
+3. finish chunk with `finish_reason="stop"`
+4. optional usage chunk with empty `choices`
+5. `[DONE]`
+
+Keep the endpoint surface unchanged. Do not add new endpoints unless a later phase explicitly approves Hermes model-discovery compatibility work.

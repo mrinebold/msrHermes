@@ -18,10 +18,21 @@ Environment overrides:
 - `MODEL_ROUTER_ADAPTER_PORT`
 - `MODEL_ROUTER_ADAPTER_TASK_TYPE`
 - `MODEL_ROUTER_ADAPTER_LOG_REQUESTS`
+- `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES`
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
 
 Set `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true` only for bounded diagnostics. Request logs are emitted as JSON lines with timestamp, method, path, response status, selected model when available, and elapsed time. Prompt text, message content, API keys, OAuth tokens, Supabase keys, and other secrets are not logged by default.
+
+Set `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true` only for bounded diagnostics. Response-shape logs are emitted as JSON lines with top-level response keys, choices count, assistant content length, finish reason, and whether the request asked for streaming. They do not include prompt text, message content, model output, API keys, OAuth tokens, Supabase keys, or other secrets.
+
+## Hermes Contract Notes
+
+Hermes' non-streaming OpenAI-compatible parser expects `choices[0].message.content`, `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, and optional `usage`.
+
+Hermes' default chat-completions path prefers streaming, including in quiet one-shot mode. For `stream=true`, Hermes expects OpenAI-compatible SSE chat-completion chunks using `choices[0].delta.content`, followed by a terminal chunk with `finish_reason`.
+
+The current adapter returns non-streaming JSON from `POST /v1/chat/completions`. That shape is correct for non-streaming requests but is not sufficient for Hermes' default streaming path.
 
 ## Endpoints
 

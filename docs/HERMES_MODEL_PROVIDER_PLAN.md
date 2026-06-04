@@ -354,3 +354,38 @@ Hermes `-z` does call the localhost Model Router adapter, and the adapter succes
 Next recommended phase:
 
 Phase 5L should inspect Hermes custom-provider response parsing and model capability discovery locally before another live prompt. Do not broaden the adapter surface, add streaming support, or rerun live prompts until the expected Hermes wire contract is understood.
+
+## Phase 5L Response Contract Diagnosis
+
+Status: complete on 2026-06-04.
+
+Hermes source was inspected locally under `~/.hermes/hermes-agent` without modifying Hermes and without sending live prompts.
+
+Contract findings:
+
+- Hermes non-streaming chat completions parse `response.choices[0].message.content`.
+- Hermes also reads `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, optional reasoning fields, and optional `usage`.
+- Hermes does not use `output_text` for the chat-completions transport.
+- Hermes' default chat-completions path prefers streaming, including quiet one-shot mode.
+- Hermes sends `stream=True` plus `stream_options={"include_usage": True}` for OpenAI-compatible streaming.
+- Hermes streaming aggregation expects SSE chunks with `choices[0].delta.content` and a terminal `finish_reason`.
+
+Adapter comparison:
+
+- The adapter's non-streaming JSON includes `choices[0].message.content`, `finish_reason`, and `usage`, so the non-streaming shape is compatible.
+- The adapter does not yet implement SSE streaming for `stream=true`.
+- Returning ordinary non-streaming JSON to a streaming request is the likely cause of Hermes receiving 200 responses but eventually returning `(empty)`.
+
+Phase 5L also added metadata-only response-shape logging behind:
+
+```text
+MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true
+```
+
+The log records top-level keys, choices count, assistant content length, finish reason, and whether streaming was requested. It does not log prompt text, model output, or secrets.
+
+Recommended adapter fix:
+
+Implement OpenAI-compatible SSE responses inside the existing `POST /v1/chat/completions` endpoint when `stream=true`. The initial implementation may stream the completed router response as one content chunk after model generation completes. Keep the current non-streaming JSON path for requests without `stream=true`.
+
+Do not add new Hermes discovery endpoints in the same fix. The unsupported discovery probes from Phase 5K should remain a separate compatibility decision because Phase 5G intentionally limited the adapter surface.

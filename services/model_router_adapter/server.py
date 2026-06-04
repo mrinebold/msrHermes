@@ -80,6 +80,7 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
 
             try:
                 payload = self._read_json()
+                streaming_requested = bool(payload.get("stream"))
                 messages = payload.get("messages")
                 if not isinstance(messages, list):
                     status = 400
@@ -94,7 +95,9 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 route_response = router.generate(RouteRequest(task_type=task_type, prompt=prompt, model=model or None))
                 selected_model = str(getattr(route_response, "model", model) or model)
                 status = 200
-                self._write_json(status, chat_completion_response(route_response, model))
+                response_payload = chat_completion_response(route_response, model)
+                self._log_response_shape(response_payload, streaming_requested)
+                self._write_json(status, response_payload)
             except ValueError as exc:
                 status = 400
                 self._write_json(status, error_response(str(exc), "bad_request"))
@@ -147,12 +150,31 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 extra=metadata,
             )
 
+        def _log_response_shape(self, payload: dict[str, Any], streaming_requested: bool) -> None:
+            if not config.log_response_shapes:
+                return
+            choices = payload.get("choices")
+            first_choice = choices[0] if isinstance(choices, list) and choices else {}
+            message = first_choice.get("message") if isinstance(first_choice, dict) else {}
+            content = message.get("content") if isinstance(message, dict) else None
+            metadata = {
+                "event": "model_router_adapter.response_shape",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "path": self.path,
+                "top_level_keys": sorted(str(key) for key in payload.keys()),
+                "choices_count": len(choices) if isinstance(choices, list) else 0,
+                "content_length": len(content) if isinstance(content, str) else 0,
+                "finish_reason": first_choice.get("finish_reason") if isinstance(first_choice, dict) else None,
+                "streaming_requested": streaming_requested,
+            }
+            LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
+
     return ModelRouterAdapterHandler
 
 
 def main() -> None:
     config = AdapterConfig.from_env()
-    if config.log_requests:
+    if config.log_requests or config.log_response_shapes:
         logging.basicConfig(level=logging.INFO, format="%(message)s")
     if config.host != "127.0.0.1":
         raise SystemExit("MODEL_ROUTER_ADAPTER_HOST must be 127.0.0.1 for Phase 5G")

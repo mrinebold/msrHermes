@@ -2,6 +2,17 @@
 
 ## 2026-06-04
 
+- Completed Phase 5L Hermes response contract diagnosis.
+- Inspected Hermes provider/client code locally under `~/.hermes/hermes-agent` without modifying Hermes source.
+- Confirmed Hermes non-streaming chat-completions parsing expects `choices[0].message.content`, `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, optional reasoning fields, and optional `usage`.
+- Confirmed Hermes does not use `output_text` on the chat-completions transport.
+- Confirmed Hermes' default chat-completions path prefers streaming and sends `stream=True` plus `stream_options={"include_usage": True}` even in quiet one-shot mode.
+- Confirmed Hermes streaming aggregation expects OpenAI-compatible SSE chunks with `choices[0].delta.content` and terminal `finish_reason`.
+- Determined the adapter's non-streaming JSON shape is compatible, but its lack of SSE handling for `stream=true` is the likely cause of 200 responses ending in Hermes stdout `(empty)`.
+- Added metadata-only response-shape logging via `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true`.
+- Added tests proving response-shape logs include structural metadata only and redact prompt text plus model output text.
+- Recommended Phase 5M as adding SSE streaming support inside the existing `POST /v1/chat/completions` endpoint, without broadening the approved endpoint surface.
+- Confirmed no live prompts, Hermes source modification, cloud providers, real API keys, persistent Hermes config, Google, Supabase, Home Assistant, Helio, or Agent Bus access were used.
 - Completed Phase 5K bounded Hermes one-shot adapter diagnostic.
 - Started the localhost adapter manually in the foreground on `127.0.0.1:8088` with `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`, DevMonster Ollama URL `http://100.93.120.124:11434`, and default model `gemma4:26b`.
 - Ran exactly one approved command from an isolated temporary `HERMES_HOME`: `hermes -z "Reply with exactly: Hermes adapter diagnostic."`.
