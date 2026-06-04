@@ -4,6 +4,8 @@
 
 Phase ANO-GOV-1 complete. Next recommended work: rotate exposed credentials before any additional live Agent Bus reads.
 
+Local repository status: complete work through Phase ANO-GOV-1 is committed locally. The branch is ahead of `origin/main`; publishing is pending until DNS/network access to GitHub is available in the local Codex session.
+
 ## Architecture Decision
 
 Hermes is the resident Mac mini operator. Helio/ANO is the governed coordination layer for the broader MSR/CivicGrantsAI agent society. Hermes must not bypass Helio/ANO to request specialist work, connect Google Workspace, control Home Assistant, or write to the Supabase agent bus.
@@ -32,6 +34,34 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 6H | Complete | Ran live read-only anon-key validation for org `msr`, workspace `default`, and agent `hermes`; all approved reads returned safely with zero scoped rows. |
 | Phase SECURITY-1 | Complete | Documented credential exposure and created a rotation checklist without rotating credentials or calling external APIs. |
 | Phase ANO-GOV-1 | Complete | Clarified that Hermes is gated at the machine boundary while ANO agents are governed by Helio/ANO and are not subordinate to Hermes. |
+
+## Completed Work Snapshot
+
+Completed and committed locally:
+
+- Hermes ownership architecture: Hermes is the resident Mac mini operator, while Helio/ANO is the governed coordination layer for the broader agent society.
+- Hermes install planning: install options, security model, prerequisites, config layout, rollback planning, and install-command proposal were documented without installing Hermes.
+- Model routing and DevMonster planning: Hermes remains local-first through the existing Helio model router and DevMonster Gemma4 path.
+- Google Workspace and Home Assistant planning: both remain future gated integrations; neither is connected or enabled.
+- Supabase Agent Bus discovery: `packages/ano-messaging` was elevated as the primary canonical message-bus source candidate.
+- Agent Bus contract: canonical tables, fields, statuses, permissions/RLS expectations, payload shapes, services, and polling behavior were documented.
+- Hermes-to-Helio bus planning: Hermes may observe and request through Helio/ANO, but must not directly dispatch agents or write to the bus.
+- Read-only adapter scaffold: `services/agent_bus/` was added with fail-closed mock behavior and unit tests only.
+- Live read-only preflight script: `scripts/agent_bus_readonly_preflight.py` was added using Python stdlib only, process environment only, GET-only requests, and redacted output.
+- Live read-only validation: anon-key validation ran for org `msr`, workspace `default`, agent `hermes`; all approved reads returned 0 scoped rows.
+- Credential rotation tracking: exposed credential types were documented in the rotation checklist; no rotation was performed automatically.
+- ANO governance clarification: Hermes gating is machine-boundary protection, not governance over the ANO agent society.
+
+Not completed or not approved:
+
+- Hermes is not installed.
+- Autonomous execution is not enabled.
+- Google Workspace is not connected.
+- Home Assistant is not installed or connected.
+- Supabase writes are not enabled.
+- Agent dispatch is not enabled.
+- Service-role access is not approved for Hermes.
+- Further live Agent Bus reads are blocked until high-risk exposed credentials are rotated and a new phase is approved.
 
 ## Phase 6A Finding
 

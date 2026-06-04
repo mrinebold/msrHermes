@@ -1,5 +1,11 @@
 # PRD Changelog
 
+## 2026-06-04
+
+- Updated the master PRD with a completed-work snapshot through Phase ANO-GOV-1.
+- Recorded that local work is committed and publishing is pending until DNS/network access to GitHub is available in the Codex session.
+- Reaffirmed that Hermes remains uninstalled, autonomous execution remains disabled, and further live Agent Bus reads remain blocked until high-risk exposed credentials are rotated.
+
 ## 2026-06-03
 
 - Completed Phase ANO-GOV-1 Hermes gating versus ANO governance clarification.
