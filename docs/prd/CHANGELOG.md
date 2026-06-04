@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase 6H live read-only Agent Bus validation.
+- Validated `verify-config` for org `msr`, workspace `default`, and agent `hermes` with anon-key read-only mode.
+- Read `org_messaging_config`, `agent_messages` addressed to Hermes, and `bot_outbound_messages` audit metadata using GET-only preflight commands; each returned 0 scoped rows.
+- Confirmed no service-role access, message send, record write, row modification, conversation creation, task creation, or message acknowledgement was performed.
 - Completed Phase 6G read-only Agent Bus preflight implementation.
 - Added `scripts/agent_bus_readonly_preflight.py` using Python stdlib only, process environment only, GET-only requests, and redacted output.
 - Added mocked tests for config failure, read-only mode enforcement, scoped query construction, GET-only enforcement, redaction, permission failure, and out-of-scope records.
