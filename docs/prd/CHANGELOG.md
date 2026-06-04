@@ -2,6 +2,17 @@
 
 ## 2026-06-04
 
+- Completed Phase 5K bounded Hermes one-shot adapter diagnostic.
+- Started the localhost adapter manually in the foreground on `127.0.0.1:8088` with `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`, DevMonster Ollama URL `http://100.93.120.124:11434`, and default model `gemma4:26b`.
+- Ran exactly one approved command from an isolated temporary `HERMES_HOME`: `hermes -z "Reply with exactly: Hermes adapter diagnostic."`.
+- Recorded Hermes exit code 0, elapsed time 45.539s, stdout 8 bytes, stderr 0 bytes, and stdout text `(empty)`.
+- Confirmed adapter request metadata logging worked and proved Hermes called the adapter.
+- Observed two successful `GET /v1/models` calls and four successful `POST /v1/chat/completions` calls.
+- Confirmed all chat-completion calls returned status 200 with selected model `gemma4:26b`; adapter chat elapsed times were 28.035s, 2.366s, 3.607s, and 7.895s.
+- Observed unsupported Hermes discovery probes to `/api/v1/models`, `/api/tags`, `/v1/props`, `/props`, `/version`, `/api/show`, and `/v1/models/gemma4:26b`; the constrained adapter returned 404 for those endpoints.
+- Stopped the adapter immediately after validation and confirmed no `8088` listener remained.
+- Concluded that adapter reachability is proven, but Hermes stdout remains unusable, so the next investigation is Hermes custom-provider response parsing/model discovery behavior.
+- Confirmed no file summaries, persistent Hermes config, real API keys, cloud providers, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5J Hermes adapter observability and CLI contract diagnosis.
 - Added optional localhost adapter request logging through `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`.
 - Logged only request metadata by default: timestamp, method, path, response status, selected model, and elapsed time.

@@ -317,3 +317,40 @@ Phase 5J did not run Hermes against a live prompt, did not change persistent Her
 Next recommended phase:
 
 Phase 5K should run exactly one bounded `hermes -z` sandbox diagnostic with the adapter started manually on `127.0.0.1:8088` and request logging enabled, then inspect only stdout, stderr, output file size, and adapter request metadata.
+
+## Phase 5K Oneshot Adapter Diagnostic
+
+Status: complete on 2026-06-04.
+
+Hermes was run exactly once with:
+
+```text
+hermes -z "Reply with exactly: Hermes adapter diagnostic."
+```
+
+The run used a temporary isolated `HERMES_HOME` with only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging enabled and stopped immediately after the run.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 180s cap; no timeout |
+| Hermes exit code | 0 |
+| Hermes elapsed time | 45.539s |
+| Stdout | 8 bytes: `(empty)` |
+| Stderr | 0 bytes |
+| Adapter request logging | confirmed |
+| Adapter chat calls | 4 `POST /v1/chat/completions` requests |
+| Chat status/model | all 200 with selected model `gemma4:26b` |
+| Adapter chat elapsed times | 28.035s, 2.366s, 3.607s, 7.895s |
+| Adapter shutdown | stopped after diagnostic; no `8088` listener remained |
+
+Hermes also issued discovery probes that the approved adapter surface does not implement: `/api/v1/models`, `/api/tags`, `/v1/props`, `/props`, `/version`, `/api/show`, and `/v1/models/gemma4:26b`. These returned 404 as expected for the current constrained adapter.
+
+Conclusion:
+
+Hermes `-z` does call the localhost Model Router adapter, and the adapter successfully routes chat-completion calls to DevMonster Gemma through `services/model_router`. However, Hermes still prints `(empty)` to stdout, so the remaining issue is a Hermes/custom-provider response-contract or output-handling mismatch rather than adapter reachability.
+
+Next recommended phase:
+
+Phase 5L should inspect Hermes custom-provider response parsing and model capability discovery locally before another live prompt. Do not broaden the adapter surface, add streaming support, or rerun live prompts until the expected Hermes wire contract is understood.

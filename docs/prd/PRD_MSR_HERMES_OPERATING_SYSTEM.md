@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5J complete. The localhost Model Router adapter now has optional redacted request metadata logging, and local Hermes CLI help/docs were inspected to identify the correct one-shot invocation contract.
+Phase 5K complete. A bounded Hermes one-shot diagnostic proved `hermes -z` calls the localhost Model Router adapter, but Hermes still returned unusable stdout containing only `(empty)`.
 
-Local repository status: complete work through Phase 5H retry has been published. Phase 5I and Phase 5J are local until the next approved push.
+Local repository status: complete work through Phase 5H retry has been published. Phase 5I through Phase 5K are local until the next approved push.
 
 ## Architecture Decision
 
@@ -32,6 +32,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5H | Complete | Manually ran the adapter in the foreground on localhost and validated the end-to-end Model Router to DevMonster Gemma path after DevMonster repair. |
 | Phase 5I | Complete | Ran Hermes with an isolated sandbox home pointed at the localhost adapter; runs exited 0 but produced `(empty)` summary outputs. |
 | Phase 5J | Complete | Added adapter request logging and documented Hermes CLI one-shot invocation behavior without sending live prompts. |
+| Phase 5K | Complete | Ran one bounded `hermes -z` diagnostic; Hermes called the adapter, including chat completions, but stdout remained `(empty)`. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -69,6 +70,7 @@ Completed and committed locally:
 - Phase 5I Hermes sandbox validation: Hermes startup in isolated `HERMES_HOME` took 0.394s. Initial chat runs exited 0 in 60.676s and 36.896s but did not create summary files. One-shot retries exited 0 in 105.852s and 94.954s and created `sample_note_summary.md` and `sample_prd_summary.md`, but each file was only 8 bytes and contained `(empty)`. Stderr files were empty. Adapter foreground logs emitted no per-request lines. The adapter was stopped and no listener remained on `8088`.
 - Phase 5J adapter observability: `services/model_router_adapter` gained optional request metadata logging behind `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`, with timestamp, method, path, response status, selected model, and elapsed time while redacting prompt/message content and secrets by default.
 - Phase 5J Hermes CLI diagnosis: local help/docs confirm top-level `hermes -z` / `--oneshot` is the intended stdout-only scriptable prompt path; `hermes chat -q` is non-interactive chat but can include session behavior; this installed Hermes version has no `hermes run` command; local OpenAI-compatible endpoints should use `model.provider=custom` and `model.base_url=http://127.0.0.1:8088/v1`.
+- Phase 5K one-shot diagnostic: one bounded `hermes -z "Reply with exactly: Hermes adapter diagnostic."` run completed in 45.539s with exit code 0, stdout 8 bytes containing `(empty)`, and stderr 0 bytes. Adapter request metadata confirmed Hermes called `GET /v1/models` twice and `POST /v1/chat/completions` four times; all chat calls returned 200 with selected model `gemma4:26b`. Hermes also probed unsupported discovery endpoints that returned 404. The adapter was stopped immediately after validation and no `8088` listener remained.
 
 Not completed or not approved:
 
@@ -110,7 +112,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5K should run one bounded Hermes one-shot diagnostic through the local adapter with `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`, without adding real cloud credentials or changing persistent Hermes config. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5L should inspect Hermes custom-provider response parsing and model capability discovery locally before another live prompt. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -131,6 +133,8 @@ Phase 5H retry confirmed the adapter can run manually on localhost, reject unkno
 Phase 5I confirmed Hermes can be pointed at the local adapter in an isolated home using `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. Hermes used no real cloud credentials and no Google, Supabase, Home Assistant, GitHub, or Helio credentials. The outputs are not usable yet because Hermes wrote only `(empty)`.
 
 Phase 5J confirmed the next diagnostic should use top-level `hermes -z` / `--oneshot` for stdout capture, because it is documented as the scriptable one-shot path. Adapter request logging should be enabled for that diagnostic so the team can confirm whether Hermes calls `/v1/chat/completions`, which model is selected, and what status the adapter returns without logging prompt text.
+
+Phase 5K proved `hermes -z` reaches the localhost adapter and receives 200 responses from `/v1/chat/completions`, but it still prints `(empty)`. The remaining investigation should focus on Hermes' custom-provider wire contract, streaming expectations, response parsing, and model capability discovery probes before expanding the adapter or rerunning prompts.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

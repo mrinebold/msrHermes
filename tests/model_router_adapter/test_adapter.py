@@ -165,7 +165,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
 
     def _request_log_record(self, records):
         for record in records:
-            if record.getMessage() == "model_router_adapter.request":
+            if getattr(record, "event", "") == "model_router_adapter.request":
                 return record
         self.fail("request log record was not emitted")
 

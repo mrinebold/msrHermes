@@ -21,7 +21,7 @@ Environment overrides:
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
 
-Set `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true` only for bounded diagnostics. Request logs include timestamp, method, path, response status, selected model when available, and elapsed time. Prompt text, message content, API keys, OAuth tokens, Supabase keys, and other secrets are not logged by default.
+Set `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true` only for bounded diagnostics. Request logs are emitted as JSON lines with timestamp, method, path, response status, selected model when available, and elapsed time. Prompt text, message content, API keys, OAuth tokens, Supabase keys, and other secrets are not logged by default.
 
 ## Endpoints
 

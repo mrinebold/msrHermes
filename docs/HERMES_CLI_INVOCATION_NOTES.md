@@ -111,3 +111,60 @@ Use top-level `hermes -z` for the next bounded one-shot sandbox diagnostic, not 
 Recommended next phase:
 
 Phase 5K: run one bounded Hermes one-shot diagnostic through the local adapter with request logging enabled, then inspect only stdout, stderr, output file size, and adapter request metadata. Do not rerun without approval.
+
+## Phase 5K Result
+
+Diagnosis date: 2026-06-04.
+
+One bounded command was run from a temporary working directory with an isolated `HERMES_HOME`:
+
+```text
+hermes -z "Reply with exactly: Hermes adapter diagnostic."
+```
+
+Temporary Hermes config used only:
+
+```yaml
+model:
+  default: gemma4:26b
+  provider: custom
+  base_url: http://127.0.0.1:8088/v1
+  api_key: dummy-local-adapter-key
+```
+
+Result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 180s cap; command completed before timeout |
+| Exit code | 0 |
+| Elapsed time | 45.539s |
+| Stdout byte count | 8 bytes |
+| Stderr byte count | 0 bytes |
+| Stdout text | `(empty)` |
+| Adapter shutdown | stopped immediately after diagnostic; no `8088` listener remained |
+
+Adapter request metadata proved Hermes called the localhost adapter:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /health` | 1 | 200 |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 4 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 17 | 404 |
+
+Observed unsupported discovery probes included `/api/v1/models`, `/api/tags`, `/v1/props`, `/props`, `/version`, `/api/show`, and `/v1/models/gemma4:26b`. The adapter rejected these because its approved surface is limited to `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
+
+The four chat-completion calls returned status 200 with selected model `gemma4:26b`; adapter elapsed times were 28.035s, 2.366s, 3.607s, and 7.895s.
+
+Assessment:
+
+- `hermes -z` does call the localhost Model Router adapter.
+- The adapter reaches DevMonster Gemma through `services/model_router`.
+- Hermes still returns unusable stdout: `(empty)`.
+- The remaining issue is not adapter reachability; it is likely a Hermes/custom-provider response-contract or output-handling mismatch.
+- No file summaries were run, no persistent Hermes config was changed, no real API keys were used, no background service was started, and no Google, Supabase, Home Assistant, Helio, or Agent Bus access was used.
+
+Updated recommendation:
+
+Phase 5L should inspect Hermes custom-provider response parsing and model capability discovery behavior locally before another live prompt. Focus areas: why Hermes probes unsupported Ollama-style and model-detail endpoints, whether it requires streaming/SSE responses, whether it ignores non-streaming `choices[].message.content` for `-z`, and whether extra model metadata is needed for `gemma4:26b`.

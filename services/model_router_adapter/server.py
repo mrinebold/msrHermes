@@ -133,16 +133,18 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
         def _log_request(self, started: float, status: int, selected_model: str) -> None:
             if not config.log_requests:
                 return
+            metadata = {
+                "event": "model_router_adapter.request",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "method": self.command,
+                "path": self.path,
+                "status": status,
+                "selected_model": selected_model,
+                "elapsed_seconds": round(time.perf_counter() - started, 3),
+            }
             LOGGER.info(
-                "model_router_adapter.request",
-                extra={
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "method": self.command,
-                    "path": self.path,
-                    "status": status,
-                    "selected_model": selected_model,
-                    "elapsed_seconds": round(time.perf_counter() - started, 3),
-                },
+                json.dumps(metadata, sort_keys=True),
+                extra=metadata,
             )
 
     return ModelRouterAdapterHandler
@@ -150,6 +152,8 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
 
 def main() -> None:
     config = AdapterConfig.from_env()
+    if config.log_requests:
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
     if config.host != "127.0.0.1":
         raise SystemExit("MODEL_ROUTER_ADAPTER_HOST must be 127.0.0.1 for Phase 5G")
     server = create_server(config=config)
