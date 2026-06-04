@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5N complete. A bounded `hermes -z` diagnostic now returns usable stdout through the SSE-enabled localhost Model Router adapter.
+Phase 5O complete. Hermes ran bounded sandbox summary attempts through the SSE-enabled localhost adapter, but both outputs remained `(empty)` and are not usable.
 
-Local repository status: complete work through Phase 5H retry has been published. Phase 5I through Phase 5N are local until the next approved push.
+Local repository status: complete work through Phase 5N has been published. Phase 5O is local until the next approved push.
 
 ## Architecture Decision
 
@@ -36,6 +36,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5L | Complete | Diagnosed Hermes' chat-completions response contract and added metadata-only adapter response-shape logging. |
 | Phase 5M | Complete | Added OpenAI-compatible SSE support for `stream=true` chat-completions requests with mocked tests only. |
 | Phase 5N | Complete | Ran one bounded `hermes -z` diagnostic after the SSE fix; Hermes returned usable stdout. |
+| Phase 5O | Complete | Ran two bounded sandbox file-summary attempts after the SSE fix; both exited 0 but returned `(empty)`. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -77,6 +78,7 @@ Completed and committed locally:
 - Phase 5L response-contract diagnosis: local Hermes source inspection showed non-streaming parsing expects `choices[0].message.content`, `finish_reason`, optional tool calls, reasoning fields, and usage, which the adapter already provides. Hermes' default chat-completions path sends `stream=true` and expects SSE chunks with `choices[0].delta.content`; the adapter does not yet implement streaming. Added `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true` for metadata-only response-shape diagnostics.
 - Phase 5M streaming adapter support: `POST /v1/chat/completions` now returns OpenAI-compatible `text/event-stream` when `stream=true`, emitting one content delta chunk, one finish chunk, and `data: [DONE]` after the router completes. Requests with `stream=false` or no stream field keep the existing non-streaming JSON behavior. No live Hermes prompt was run in Phase 5M.
 - Phase 5N one-shot diagnostic after SSE fix: one bounded `hermes -z "Reply with exactly: Hermes adapter diagnostic."` run completed in 18.712s with exit code 0, stdout 27 bytes containing `Hermes adapter diagnostic.`, and stderr 0 bytes. Adapter metadata confirmed one `POST /v1/chat/completions` request returned 200 with selected model `gemma4:26b`; response-shape metadata showed `streaming_requested=true`, one choice, content length 26, and finish reason `stop`. The adapter was stopped immediately and no `8088` listener remained.
+- Phase 5O sandbox summaries after SSE fix: `sample_note.md` exited 0 in 36.241s with stdout 8 bytes `(empty)` and stderr 0 bytes; `sample_prd.md` exited 0 in 17.647s with stdout 8 bytes `(empty)` and stderr 0 bytes. Adapter metadata showed 8 successful chat-completion calls with selected model `gemma4:26b`, but all response-shape records had `content_length=0`. The output files are not usable summaries.
 
 Not completed or not approved:
 
@@ -118,7 +120,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5O should run bounded sandbox file-summary validation through the SSE-enabled adapter using synthetic sandbox inputs only. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5P should diagnose why Hermes file-summary prompts produce zero-content model responses while the simple one-shot diagnostic works. Start with local inspection of Hermes one-shot toolsets, local file read tool availability, and prompt structure before another live summary attempt. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -147,6 +149,8 @@ Phase 5L determined the adapter's non-streaming response shape matches Hermes' n
 Phase 5M implemented that SSE fix in the adapter using mocked tests only. The endpoint surface remains limited to `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
 
 Phase 5N confirmed the SSE fix works for the bounded one-shot path: Hermes now returns usable stdout through the localhost adapter. Unsupported Hermes discovery probes still return 404 and should remain separate from the sandbox file-summary validation decision.
+
+Phase 5O showed sandbox file-summary attempts still fail to produce visible content even though the adapter SSE path is used successfully. This points to Hermes one-shot file-summary workflow behavior or model/tool prompting rather than adapter transport.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

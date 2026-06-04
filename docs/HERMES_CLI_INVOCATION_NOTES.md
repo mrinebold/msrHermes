@@ -308,3 +308,41 @@ Assessment:
 Recommended next phase:
 
 Phase 5O should perform a bounded sandbox file-summary validation through the SSE-enabled adapter, still using an isolated `HERMES_HOME`, synthetic sandbox inputs only, and no persistent Hermes configuration.
+
+## Phase 5O Sandbox Summaries After SSE Fix
+
+Validation date: 2026-06-04.
+
+Two bounded one-shot summary commands were run against synthetic sandbox files using an isolated `HERMES_HOME` and the SSE-enabled localhost adapter. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled, then stopped immediately after both runs.
+
+Outputs were captured to:
+
+- `sandbox/output/sample_note_summary.md`
+- `sandbox/output/sample_prd_summary.md`
+
+Results:
+
+| File | Exit code | Elapsed | Stdout bytes | Stderr bytes | Output | Usable |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| `sample_note.md` | 0 | 36.241s | 8 | 0 | `(empty)` | No |
+| `sample_prd.md` | 0 | 17.647s | 8 | 0 | `(empty)` | No |
+
+Adapter metadata:
+
+- Total request metadata lines: 47.
+- Total response-shape metadata lines: 8.
+- Chat-completion calls: 8 total, all `POST /v1/chat/completions`, status 200, selected model `gemma4:26b`.
+- Response-shape metadata for all chat-completion calls showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`.
+- Unsupported Hermes discovery probes still returned 404 and did not crash the runs.
+
+Assessment:
+
+- Hermes did use the localhost adapter and the SSE path.
+- The adapter returned successful chat-completion responses, but every response had zero visible content.
+- The sandbox file-summary outputs are not usable yet.
+- This is no longer the Phase 5K streaming-wire failure; the next issue is prompt/tool/file-access behavior or router/model behavior for Hermes' file-summary workflow.
+- No cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
+
+Recommended next phase:
+
+Phase 5P should diagnose why Hermes file-summary prompts produce zero-content model responses while the simple one-shot diagnostic returns usable stdout. Do this without live file-summary reruns at first: inspect Hermes tool availability in isolated one-shot mode, whether local file tools are enabled for `-z`, whether the prompts triggered tool calls, and whether `--toolsets` or prompt structure must be adjusted for local file reads.

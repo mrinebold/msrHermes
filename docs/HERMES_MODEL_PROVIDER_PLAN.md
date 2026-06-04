@@ -455,3 +455,31 @@ Hermes still issues unsupported discovery probes such as `/api/v1/models`, `/api
 Next recommended phase:
 
 Phase 5O should validate sandbox file summaries through the SSE-enabled adapter using synthetic sandbox inputs only. Keep the adapter manual/foreground, keep `HERMES_HOME` isolated, and do not configure Hermes persistently.
+
+## Phase 5O Sandbox Summaries After SSE Fix
+
+Status: complete on 2026-06-04.
+
+Hermes ran two bounded one-shot summary commands using a temporary isolated `HERMES_HOME`, dummy local API key, and the SSE-enabled adapter on `127.0.0.1:8088`. The adapter was stopped immediately after both runs.
+
+Validation results:
+
+| File | Exit code | Elapsed | Stdout | Stderr | Output quality |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `sandbox/input/sample_note.md` | 0 | 36.241s | 8 bytes: `(empty)` | 0 bytes | Not usable |
+| `sandbox/input/sample_prd.md` | 0 | 17.647s | 8 bytes: `(empty)` | 0 bytes | Not usable |
+
+Adapter evidence:
+
+- 8 total `POST /v1/chat/completions` calls returned status 200 with selected model `gemma4:26b`.
+- 8 response-shape records showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`.
+- The SSE path was used, but the router/model returned no visible content for these file-summary runs.
+- Unsupported Hermes discovery probes remained 404 and did not block execution.
+
+Conclusion:
+
+The Phase 5M SSE fix remains valid because Phase 5N proved simple one-shot stdout works. Phase 5O shows the next blocker is specific to Hermes' file-summary workflow: either local file access/tool invocation in isolated `-z` mode, prompt structure, or model/router behavior for these more complex prompts. The outputs should not be treated as usable summaries.
+
+Next recommended phase:
+
+Phase 5P should diagnose local file-summary behavior before another live summary attempt. Inspect Hermes one-shot toolset configuration, local file read tool availability, and whether the file-summary prompt needs explicit content injection or approved `--toolsets` selection.

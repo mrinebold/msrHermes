@@ -2,6 +2,16 @@
 
 ## 2026-06-04
 
+- Completed Phase 5O Hermes sandbox summaries after the SSE adapter fix.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled.
+- Ran two bounded one-shot summary attempts from an isolated temporary `HERMES_HOME` against synthetic sandbox inputs only.
+- Captured `sample_note.md` stdout to `sandbox/output/sample_note_summary.md`; exit code 0, elapsed time 36.241s, stdout 8 bytes, stderr 0 bytes, output `(empty)`.
+- Captured `sample_prd.md` stdout to `sandbox/output/sample_prd_summary.md`; exit code 0, elapsed time 17.647s, stdout 8 bytes, stderr 0 bytes, output `(empty)`.
+- Confirmed both output files are not usable summaries.
+- Confirmed adapter metadata showed 8 successful `POST /v1/chat/completions` calls, all status 200 with selected model `gemma4:26b`.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0` for all 8 chat-completion calls.
+- Stopped the adapter immediately after validation and confirmed no `8088` listener remained.
+- Confirmed no cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5N Hermes one-shot diagnostic after the SSE adapter fix.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled.
 - Ran exactly one approved command from an isolated temporary `HERMES_HOME`: `hermes -z "Reply with exactly: Hermes adapter diagnostic."`.
