@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase SECURITY-1 credential rotation tracking.
+- Added `docs/security/CREDENTIAL_ROTATION_CHECKLIST.md` for Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review.
+- Marked further live Agent Bus reads as blocked until high-risk exposed credentials are rotated and a later phase is approved.
+- Confirmed no credential rotation, secret storage, Supabase connection, external API call, or package install was performed.
 - Completed Phase 6H live read-only Agent Bus validation.
 - Validated `verify-config` for org `msr`, workspace `default`, and agent `hermes` with anon-key read-only mode.
 - Read `org_messaging_config`, `agent_messages` addressed to Hermes, and `bot_outbound_messages` audit metadata using GET-only preflight commands; each returned 0 scoped rows.

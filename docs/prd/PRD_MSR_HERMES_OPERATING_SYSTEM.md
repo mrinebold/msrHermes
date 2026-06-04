@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 6H complete. Next recommended work: Phase 6I: investigate empty Agent Bus metadata results and decide whether Helio should expose a scoped read-only gateway or seed `msr` messaging config.
+Phase SECURITY-1 complete. Next recommended work: rotate exposed credentials before any additional live Agent Bus reads.
 
 ## Architecture Decision
 
@@ -22,6 +22,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 6E | Complete | Planned the live read-only Supabase preflight, preferring anon-key RLS and defining exact read queries without connecting Supabase. |
 | Phase 6G | Complete | Implemented a stdlib-only read-only preflight script and mocked tests without connecting Supabase or installing packages. |
 | Phase 6H | Complete | Ran live read-only anon-key validation for org `msr`, workspace `default`, and agent `hermes`; all approved reads returned safely with zero scoped rows. |
+| Phase SECURITY-1 | Complete | Documented credential exposure and created a rotation checklist without rotating credentials or calling external APIs. |
 
 ## Phase 6A Finding
 
@@ -44,7 +45,15 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 6I: investigate empty Agent Bus metadata results and decide whether Helio should expose a scoped read-only gateway or seed `msr` messaging config.
+Rotate exposed credentials before any additional live Agent Bus reads.
+
+Security reference:
+
+- [Credential Rotation Checklist](../security/CREDENTIAL_ROTATION_CHECKLIST.md)
+
+After rotation, run local tests and `verify-config` only. Do not run `list-org-configs`, `read-hermes-messages`, or `read-outbound-audit` again until the exposed high-risk credentials are revoked or rotated and a new phase is explicitly approved.
+
+Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 
 Phase 6H validated the approved read-only path using `SUPABASE_URL` and `SUPABASE_ANON_KEY` only. The service-role key was not used. No messages were sent, no polling workers were created, and no writes were enabled.
 
@@ -83,3 +92,4 @@ Phase 6E reference:
 - Do not send messages to agents.
 - Do not connect the scaffold to live services until a later approval is explicit.
 - Do not use `SUPABASE_SERVICE_ROLE_KEY` in the Hermes adapter.
+- Do not run further live reads until exposed high-risk credentials are rotated.
