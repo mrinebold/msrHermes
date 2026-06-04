@@ -223,3 +223,35 @@ Phase 5G: Build localhost OpenAI-compatible Model Router adapter.
 8. Do not run live prompts.
 9. Do not configure cloud providers.
 10. After tests pass, request a separate validation phase to run Hermes against the adapter using sandbox files.
+
+## Phase 5H Retry Result
+
+Status: complete on 2026-06-04 after DevMonster repair.
+
+The adapter was started manually in the foreground with:
+
+```sh
+MODEL_ROUTER_ADAPTER_HOST=127.0.0.1
+MODEL_ROUTER_ADAPTER_PORT=8088
+DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434
+DEVMONSTER_DEFAULT_MODEL=gemma4:26b
+```
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| `GET /health` | 200 in 0.005s |
+| `GET /v1/models` | 200 in 0.095s; included `gemma4:26b` |
+| `POST /v1/chat/completions` | 200 in 15.179s |
+| Response text | `Adapter operational.` |
+| Selected model | `gemma4:26b` |
+| Selected provider | `devmonster_ollama` |
+| Route task type | `summary` |
+| Unknown endpoint | `GET /v1/embeddings` returned 404 in 0.001s |
+| Bind exposure | `127.0.0.1:8088` only |
+| Shutdown | Adapter stopped after validation; no listener remained on port `8088` |
+
+No Hermes configuration, background service, external exposure, cloud provider, Google Workspace, Supabase, Home Assistant, or Helio connection was made.
+
+The next phase should validate Hermes against this localhost adapter using sandbox data only, without changing permanent Hermes configuration.

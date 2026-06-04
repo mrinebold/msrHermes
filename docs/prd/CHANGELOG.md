@@ -2,13 +2,14 @@
 
 ## 2026-06-04
 
-- Completed Phase 5H live localhost Model Router adapter validation.
+- Completed Phase 5H retry live localhost Model Router adapter validation after DevMonster repair.
 - Started the adapter manually in the foreground only with `MODEL_ROUTER_ADAPTER_HOST=127.0.0.1`, `MODEL_ROUTER_ADAPTER_PORT=8088`, `DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434`, and `DEVMONSTER_DEFAULT_MODEL=gemma4:26b`.
 - Confirmed `GET /health` returned 200 in 0.005s.
 - Confirmed the adapter listened only on `127.0.0.1:8088`; no external bind was observed.
 - Confirmed unknown endpoint rejection: `GET /v1/embeddings` returned 404 in 0.001s.
-- `GET /v1/models` failed closed with 502 in 0.490s because DevMonster refused `http://100.93.120.124:11434/v1/models`.
-- `POST /v1/chat/completions` using the single approved prompt failed closed with 502 in 0.007s because DevMonster refused `http://100.93.120.124:11434/api/generate`.
+- Confirmed `GET /v1/models` returned 200 in 0.095s and included `gemma4:26b`.
+- Confirmed `POST /v1/chat/completions` returned 200 in 15.179s using `gemma4:26b` through `devmonster_ollama`.
+- Confirmed the single approved prompt returned exactly `Adapter operational.`.
 - Stopped the foreground adapter after validation and confirmed no listener remained on port `8088`.
 - Confirmed no Hermes configuration, background service, external exposure, cloud provider connection, Google, Supabase, Home Assistant, or Helio connection was made.
 - Completed Phase 5G localhost OpenAI-compatible Model Router adapter scaffold.
