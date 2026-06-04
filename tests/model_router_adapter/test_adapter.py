@@ -41,6 +41,11 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertEqual(config.host, "127.0.0.1")
         self.assertEqual(config.port, 8088)
 
+    def test_request_logging_flag_from_env(self):
+        config = AdapterConfig.from_env({"MODEL_ROUTER_ADAPTER_LOG_REQUESTS": "true"})
+
+        self.assertTrue(config.log_requests)
+
     def test_health(self):
         status, payload = self._get("/health")
 
@@ -76,6 +81,49 @@ class ModelRouterAdapterTest(unittest.TestCase):
 
         self.assertEqual(status, 404)
         self.assertEqual(payload["error"]["type"], "not_found")
+
+    def test_chat_completion_request_log_redacts_prompt_content(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", log_requests=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _ = self._post(
+                "/v1/chat/completions",
+                {
+                    "model": "gemma4:26b",
+                    "messages": [{"role": "user", "content": "Sensitive sandbox prompt text."}],
+                },
+            )
+
+        self.assertEqual(status, 200)
+        record = self._request_log_record(logs.records)
+        self.assertEqual(record.method, "POST")
+        self.assertEqual(record.path, "/v1/chat/completions")
+        self.assertEqual(record.status, 200)
+        self.assertEqual(record.selected_model, "gemma4:26b")
+        self.assertGreaterEqual(record.elapsed_seconds, 0)
+        self.assertTrue(record.timestamp)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertIn("model_router_adapter.request", joined)
+        self.assertNotIn("Sensitive sandbox prompt text", joined)
+        self.assertNotIn("messages", joined)
+
+    def test_unknown_endpoint_logs_status_only(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", log_requests=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _ = self._get("/v1/embeddings")
+
+        self.assertEqual(status, 404)
+        record = self._request_log_record(logs.records)
+        self.assertEqual(record.method, "GET")
+        self.assertEqual(record.path, "/v1/embeddings")
+        self.assertEqual(record.status, 404)
+        self.assertEqual(record.selected_model, "")
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("prompt", joined.lower())
+        self.assertNotIn("secret", joined.lower())
 
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
@@ -114,6 +162,12 @@ class ModelRouterAdapterTest(unittest.TestCase):
         status_line = header_block.splitlines()[0].decode("utf-8")
         status = int(status_line.split()[1])
         return status, json.loads(response_body.decode("utf-8"))
+
+    def _request_log_record(self, records):
+        for record in records:
+            if record.getMessage() == "model_router_adapter.request":
+                return record
+        self.fail("request log record was not emitted")
 
 
 if __name__ == "__main__":

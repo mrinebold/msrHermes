@@ -2,6 +2,17 @@
 
 ## 2026-06-04
 
+- Completed Phase 5J Hermes adapter observability and CLI contract diagnosis.
+- Added optional localhost adapter request logging through `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true`.
+- Logged only request metadata by default: timestamp, method, path, response status, selected model, and elapsed time.
+- Added tests confirming chat-completion request logs redact prompt/message content and unknown endpoints log status metadata only.
+- Inspected local Hermes CLI help and bundled docs without sending live prompts.
+- Confirmed top-level `hermes -z` / `--oneshot` is the intended stdout-only one-shot invocation path for scriptable sandbox summaries.
+- Confirmed `hermes chat -q` is non-interactive chat but can include session behavior, and the installed Hermes version has no `hermes run` command.
+- Documented local OpenAI-compatible provider expectations: `model.provider=custom`, `model.base_url=http://127.0.0.1:8088/v1`, and only a dummy local key if Hermes requires one syntactically.
+- Added `docs/HERMES_CLI_INVOCATION_NOTES.md`.
+- Recommended Phase 5K as one bounded `hermes -z` diagnostic with adapter request logging enabled.
+- Confirmed no live prompts, persistent Hermes config changes, cloud credentials, background services, Google, Supabase, Home Assistant, Helio, or Agent Bus access were used.
 - Completed Phase 5I Hermes sandbox validation using the local model adapter.
 - Configured only an isolated temporary `HERMES_HOME` with `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key.
 - Measured Hermes startup at 0.394s.

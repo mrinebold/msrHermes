@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
@@ -33,7 +35,11 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
         server_version = "MSRModelRouterAdapter/0.1"
 
         def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
+            started = time.perf_counter()
+            selected_model = ""
+            status = 500
             if self.path == "/health":
+                status = 200
                 self._write_json(
                     200,
                     {
@@ -43,42 +49,63 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                         "port": config.port,
                     },
                 )
+                self._log_request(started, status, selected_model)
                 return
 
             if self.path == "/v1/models":
                 result = router.list_models()
                 if not getattr(result, "ok", False):
-                    self._write_json(502, error_response(getattr(result, "error", "model listing failed")))
+                    status = 502
+                    self._write_json(status, error_response(getattr(result, "error", "model listing failed")))
+                    self._log_request(started, status, selected_model)
                     return
-                self._write_json(200, models_response(normalize_models(getattr(result, "data", {}))))
+                status = 200
+                self._write_json(status, models_response(normalize_models(getattr(result, "data", {}))))
+                self._log_request(started, status, selected_model)
                 return
 
-            self._write_json(404, error_response("Unknown endpoint", "not_found"))
+            status = 404
+            self._write_json(status, error_response("Unknown endpoint", "not_found"))
+            self._log_request(started, status, selected_model)
 
         def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API
+            started = time.perf_counter()
+            selected_model = ""
+            status = 500
             if self.path != "/v1/chat/completions":
-                self._write_json(404, error_response("Unknown endpoint", "not_found"))
+                status = 404
+                self._write_json(status, error_response("Unknown endpoint", "not_found"))
+                self._log_request(started, status, selected_model)
                 return
 
             try:
                 payload = self._read_json()
                 messages = payload.get("messages")
                 if not isinstance(messages, list):
-                    self._write_json(400, error_response("messages must be a list", "bad_request"))
+                    status = 400
+                    self._write_json(status, error_response("messages must be a list", "bad_request"))
+                    self._log_request(started, status, selected_model)
                     return
 
                 model = str(payload.get("model") or "")
+                selected_model = model
                 task_type = str(payload.get("task_type") or config.default_task_type)
                 prompt = prompt_from_messages(messages)
                 route_response = router.generate(RouteRequest(task_type=task_type, prompt=prompt, model=model or None))
-                self._write_json(200, chat_completion_response(route_response, model))
+                selected_model = str(getattr(route_response, "model", model) or model)
+                status = 200
+                self._write_json(status, chat_completion_response(route_response, model))
             except ValueError as exc:
-                self._write_json(400, error_response(str(exc), "bad_request"))
+                status = 400
+                self._write_json(status, error_response(str(exc), "bad_request"))
             except RuntimeError as exc:
-                self._write_json(502, error_response(str(exc), "router_error"))
+                status = 502
+                self._write_json(status, error_response(str(exc), "router_error"))
+            finally:
+                self._log_request(started, status, selected_model)
 
         def log_message(self, format: str, *args: Any) -> None:
-            LOGGER.info("model_router_adapter.http", extra={"client": self.client_address[0], "message": format % args})
+            LOGGER.info("model_router_adapter.http", extra={"client": self.client_address[0], "http_message": format % args})
 
         def _read_json(self) -> dict[str, Any]:
             length = int(self.headers.get("Content-Length", "0") or "0")
@@ -103,6 +130,21 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
             self.end_headers()
             self.wfile.write(encoded)
 
+        def _log_request(self, started: float, status: int, selected_model: str) -> None:
+            if not config.log_requests:
+                return
+            LOGGER.info(
+                "model_router_adapter.request",
+                extra={
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "method": self.command,
+                    "path": self.path,
+                    "status": status,
+                    "selected_model": selected_model,
+                    "elapsed_seconds": round(time.perf_counter() - started, 3),
+                },
+            )
+
     return ModelRouterAdapterHandler
 
 
@@ -117,4 +159,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

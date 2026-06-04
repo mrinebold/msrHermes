@@ -16,6 +16,7 @@ class AdapterConfig:
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
     default_task_type: str = DEFAULT_TASK_TYPE
+    log_requests: bool = False
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "AdapterConfig":
@@ -24,6 +25,7 @@ class AdapterConfig:
             host=values.get("MODEL_ROUTER_ADAPTER_HOST", DEFAULT_HOST),
             port=_int_env(values, "MODEL_ROUTER_ADAPTER_PORT", DEFAULT_PORT),
             default_task_type=values.get("MODEL_ROUTER_ADAPTER_TASK_TYPE", DEFAULT_TASK_TYPE),
+            log_requests=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_REQUESTS", False),
         )
 
 
@@ -36,3 +38,9 @@ def _int_env(env: dict[str, str], name: str, default: int) -> int:
     except ValueError:
         return default
 
+
+def _bool_env(env: dict[str, str], name: str, default: bool) -> bool:
+    raw = env.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}

@@ -17,8 +17,11 @@ Environment overrides:
 - `MODEL_ROUTER_ADAPTER_HOST`
 - `MODEL_ROUTER_ADAPTER_PORT`
 - `MODEL_ROUTER_ADAPTER_TASK_TYPE`
+- `MODEL_ROUTER_ADAPTER_LOG_REQUESTS`
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
+
+Set `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true` only for bounded diagnostics. Request logs include timestamp, method, path, response status, selected model when available, and elapsed time. Prompt text, message content, API keys, OAuth tokens, Supabase keys, and other secrets are not logged by default.
 
 ## Endpoints
 
@@ -38,4 +41,3 @@ All other endpoints return `404`.
 - No external bind, LAN bind, Tailscale bind, or `0.0.0.0`.
 - Cloud providers remain fail-closed through `services/model_router`.
 - Tests use mocked router objects and do not send live prompts.
-

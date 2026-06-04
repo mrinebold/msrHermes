@@ -291,3 +291,29 @@ Validation results:
 Hermes was configured only with the localhost adapter and a dummy local key. No real OpenAI, Anthropic, OpenRouter, Google, Supabase, Home Assistant, GitHub, or Helio credentials were provided.
 
 Phase 5I proves Hermes can be pointed at the local adapter in an isolated home, but it does not yet prove usable summarization through Hermes. The next investigation should determine why Hermes returns `(empty)` despite the adapter working for direct OpenAI-compatible chat-completion calls.
+
+## Phase 5J Observability and CLI Diagnosis
+
+Status: complete on 2026-06-04.
+
+The localhost Model Router adapter now supports optional request metadata logging through:
+
+```text
+MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true
+```
+
+When enabled, logs include timestamp, method, path, response status, selected model when available, and elapsed time. Logs intentionally omit prompt text, message content, API keys, OAuth tokens, Supabase keys, and other secrets by default.
+
+Hermes CLI help and bundled local docs were inspected without sending prompts. Findings:
+
+- Top-level `hermes -z` / `hermes --oneshot` is the intended scriptable one-shot invocation and should print only final response text to stdout.
+- `hermes chat -q` is non-interactive chat, and `-Q` quiet mode may still include session information.
+- The installed Hermes version has no `hermes run` command.
+- Local OpenAI-compatible endpoints should use top-level `model.provider: custom` plus `model.base_url`.
+- `model.base_url` should point only to `http://127.0.0.1:8088/v1` for the sandbox adapter path.
+
+Phase 5J did not run Hermes against a live prompt, did not change persistent Hermes config, did not start background services, and did not connect cloud providers or external integrations.
+
+Next recommended phase:
+
+Phase 5K should run exactly one bounded `hermes -z` sandbox diagnostic with the adapter started manually on `127.0.0.1:8088` and request logging enabled, then inspect only stdout, stderr, output file size, and adapter request metadata.
