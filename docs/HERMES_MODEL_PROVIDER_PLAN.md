@@ -546,3 +546,34 @@ The adapter is receiving non-empty, file-like context from Hermes. The failure i
 Recommendation:
 
 Phase 5R should isolate prompt-shape behavior before another Hermes file-summary run. Preferred next checks are adapter-level and metadata-only: compare a plain user-only injected-content summary, the same content without `tools`, and the Hermes-like tool-present shape. Keep cloud providers fail-closed and avoid persistent Hermes configuration.
+
+## Phase 5R Tool Payload Compatibility
+
+Status: complete on 2026-06-04.
+
+No live Hermes prompts or live model calls were run. Local Hermes source was inspected only enough to confirm why `tools` are included: `hermes -z` constructs a normal `AIAgent`, uses configured CLI toolsets when no explicit toolsets are passed, and forwards `agent.tools` into chat-completion kwargs.
+
+Adapter/router diagnosis:
+
+- `tools` and `tool_choice` are currently ignored for routing.
+- The adapter converts all message text into one plain prompt and sends that prompt to `services/model_router`.
+- The router and DevMonster provider never receive tool schemas as executable tools.
+- Current behavior with `tools` present is therefore equivalent to stripping tools before routing.
+- The remaining compatibility issue is the Hermes multi-message system/user prompt shape that local Gemma receives.
+
+Mocked tests covered:
+
+| Case | Result |
+| --- | --- |
+| A. tools passed through unchanged | Router prompt includes message text only; tool metadata is absent. |
+| B. tools stripped | Router prompt is identical to A. |
+| C. messages flattened into a single Gemma-friendly prompt | Router receives a simpler single-user prompt shape. |
+| D. tools stripped plus messages flattened | Router receives the same simplified prompt without tool metadata. |
+
+Recommendation:
+
+For the DevMonster Gemma route, implement a local compatibility mode that strips tool semantics and flattens messages into a single Gemma-friendly prompt. Preserve future provider extensibility, but treat local Gemma as non-tool-capable until the router has a real tool execution contract.
+
+Next recommended phase:
+
+Phase 5S should implement the compatibility mode with mocked tests only. Do not run Hermes live prompts until the adapter behavior is implemented and reviewed.

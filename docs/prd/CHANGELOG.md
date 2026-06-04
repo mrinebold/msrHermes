@@ -2,6 +2,16 @@
 
 ## 2026-06-04
 
+- Completed Phase 5R Hermes tool-present prompt-shape isolation at the adapter/router boundary.
+- Did not run live Hermes prompts or live model calls.
+- Inspected local Hermes source only enough to confirm `hermes -z` constructs a normal `AIAgent`, uses configured CLI toolsets when no explicit toolsets are passed, and forwards `agent.tools` into chat-completion kwargs.
+- Added a sanitized mocked fixture that mimics the Phase 5Q metadata shape without actual prompt text or file contents.
+- Added mocked adapter tests for tools present, tools stripped, messages flattened into a single prompt, and tools stripped plus messages flattened.
+- Confirmed current adapter behavior already omits tool schemas from the router prompt, so tools-present and tools-stripped payloads route the same prompt.
+- Determined tool stripping alone is not enough for DevMonster Gemma compatibility.
+- Recommended a local Gemma compatibility mode that ignores `tools`/`tool_choice`, flattens Hermes multi-message payloads into a single Gemma-friendly prompt, prioritizes the final non-empty user instruction, and preserves file-like context without logging it.
+- Added `docs/HERMES_TOOL_PAYLOAD_COMPATIBILITY.md`.
+- Confirmed no prompt/file content logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5Q bounded Hermes file-summary metadata diagnostic.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, and message-structure logging enabled.
 - Ran exactly one bounded `hermes -z` diagnostic against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.

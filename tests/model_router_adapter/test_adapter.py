@@ -301,6 +301,78 @@ class ModelRouterAdapterTest(unittest.TestCase):
         joined = "\n".join(log.getMessage() for log in logs.records)
         self.assertNotIn("Hidden context", joined)
 
+    def test_phase5q_shape_with_tools_routes_flattened_messages_only(self):
+        payload = self._phase5q_payload()
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        self.assertIn("system: ", self.router.last_request.prompt)
+        self.assertIn("user: ", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+        self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", self.router.last_request.prompt)
+
+    def test_phase5q_shape_with_tools_stripped_routes_same_prompt(self):
+        payload_with_tools = self._phase5q_payload()
+        payload_without_tools = self._phase5q_payload()
+        payload_without_tools.pop("tools")
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload_with_tools)
+        prompt_with_tools = self.router.last_request.prompt
+        self.assertEqual(status, 200)
+        status, _, _ = self._post_raw("/v1/chat/completions", payload_without_tools)
+        prompt_without_tools = self.router.last_request.prompt
+
+        self.assertEqual(status, 200)
+        self.assertEqual(prompt_with_tools, prompt_without_tools)
+
+    def test_phase5q_shape_with_flattened_messages_routes_single_user_prompt(self):
+        payload = self._phase5q_payload()
+        payload["messages"] = [
+            {
+                "role": "user",
+                "content": (
+                    "Context:\n"
+                    + self._sanitized_context()
+                    + "\n\nInstruction:\nSANITIZED_SUMMARY_REQUEST"
+                ),
+            }
+        ]
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        self.assertIn("user: Context:", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
+        self.assertNotIn("system: ", self.router.last_request.prompt)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+
+    def test_phase5q_shape_with_tools_stripped_and_flattened_routes_single_user_prompt(self):
+        payload = self._phase5q_payload()
+        payload.pop("tools")
+        payload["messages"] = [
+            {
+                "role": "user",
+                "content": (
+                    "Context:\n"
+                    + self._sanitized_context()
+                    + "\n\nInstruction:\nSANITIZED_SUMMARY_REQUEST"
+                ),
+            }
+        ]
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        self.assertIn("user: Context:", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
+        self.assertNotIn("system: ", self.router.last_request.prompt)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
 
@@ -378,6 +450,29 @@ class ModelRouterAdapterTest(unittest.TestCase):
             if getattr(record, "event", "") == "model_router_adapter.message_structure":
                 return record
         self.fail("message structure log record was not emitted")
+
+    def _phase5q_payload(self):
+        return {
+            "model": "gemma4:26b",
+            "stream": True,
+            "messages": [
+                {"role": "system", "content": self._sanitized_context()},
+                {"role": "user", "content": "SANITIZED_SUMMARY_REQUEST"},
+            ],
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "read_sandbox_file",
+                        "description": "SANITIZED_TOOL_DESCRIPTION",
+                        "parameters": {"type": "object", "properties": {}},
+                    },
+                }
+            ],
+        }
+
+    def _sanitized_context(self):
+        return "\n".join(["SANITIZED_CONTEXT_LINE"] * 40)
 
 
 if __name__ == "__main__":

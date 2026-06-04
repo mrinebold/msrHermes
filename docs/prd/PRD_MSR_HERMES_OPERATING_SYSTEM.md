@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5Q complete. One bounded Hermes file-summary diagnostic ran with metadata-only logging and confirmed Hermes sends non-empty file-like context, but DevMonster still returns zero visible content for the tool-present multi-message shape.
+Phase 5R complete. Tool-present Hermes payloads were diagnosed offline at the adapter/router boundary; tool stripping alone is not enough because the adapter already omits tool schemas from the router prompt.
 
-Local repository status: complete work through Phase 5P has been published. Phase 5Q is local until the next approved push.
+Local repository status: complete work through Phase 5Q has been published. Phase 5R is local until the next approved push.
 
 ## Architecture Decision
 
@@ -39,6 +39,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5O | Complete | Ran two bounded sandbox file-summary attempts after the SSE fix; both exited 0 but returned `(empty)`. |
 | Phase 5P | Complete | Added metadata-only message-structure logging and documented that the adapter reads all messages but does not execute Hermes file tools. |
 | Phase 5Q | Complete | Ran one bounded sample-note metadata diagnostic; Hermes sent non-empty file-like context with tools present, but all four model calls returned zero content. |
+| Phase 5R | Complete | Diagnosed tool-present payload compatibility offline and recommended local Gemma prompt flattening plus tool semantic stripping. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -83,6 +84,7 @@ Completed and committed locally:
 - Phase 5O sandbox summaries after SSE fix: `sample_note.md` exited 0 in 36.241s with stdout 8 bytes `(empty)` and stderr 0 bytes; `sample_prd.md` exited 0 in 17.647s with stdout 8 bytes `(empty)` and stderr 0 bytes. Adapter metadata showed 8 successful chat-completion calls with selected model `gemma4:26b`, but all response-shape records had `content_length=0`. The output files are not usable summaries.
 - Phase 5P file-summary prompt diagnosis: no live prompts were run. The adapter/router path was inspected and confirmed to concatenate all OpenAI-style messages in order before delegating to `services/model_router`; it does not choose only the first or last message. Hermes `-z` still uses the normal `AIAgent` chat path and may send tools, tool-choice hints, multi-message context, and repeated turns. Added `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true` for metadata-only diagnostics that log message counts, roles, character counts, final-user-message emptiness, file-content heuristic status, and tool/option presence without logging prompt text, file contents, model output, or secrets.
 - Phase 5Q bounded metadata diagnostic: one `sample_note.md` file-summary diagnostic completed in 33.501s with exit code 0, stdout 8 bytes, and stderr 0 bytes. The output remained unusable. Adapter metadata showed four successful chat-completion calls, all `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`. Message-structure metadata was identical across calls: two messages, roles `system` and `user`, character counts `[5630, 71]`, final user message not empty, file-like content present by length/shape, `tools` present, `tool_choice` absent, `stream` present, and no `max_tokens` or `temperature`.
+- Phase 5R tool-payload compatibility: no live Hermes prompts or live model calls were run. Local Hermes source inspection confirmed `hermes -z` includes tools because it constructs a normal `AIAgent`, uses configured CLI toolsets when no explicit toolsets are passed, and forwards `agent.tools` into chat-completion kwargs. Mocked adapter tests showed `tools` present and `tools` stripped produce the same router prompt because the adapter already excludes tool schemas; the safer local Gemma fix must also flatten Hermes multi-message payloads into a single Gemma-friendly prompt.
 
 Not completed or not approved:
 
@@ -124,7 +126,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5R should isolate prompt-shape behavior before another Hermes file-summary run. Compare adapter/router behavior for a plain user-only injected-content summary, the same content without `tools`, and a Hermes-like tool-present multi-message shape, using metadata-only logging and synthetic sandbox content. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5S should implement local Gemma prompt compatibility in the adapter with mocked tests only: ignore `tools` and `tool_choice`, flatten system/developer/user context into a single prompt, prioritize the final non-empty user instruction, preserve file-like context without logging it, and keep SSE behavior unchanged. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -159,6 +161,8 @@ Phase 5O showed sandbox file-summary attempts still fail to produce visible cont
 Phase 5P added metadata-only message-structure logging to distinguish whether Hermes sends actual sandbox file contents, a blank final user message, or a tool-oriented multi-turn transcript during file-summary attempts. The adapter still does not execute Hermes file tools; if no file content reaches the model, the next fix should be an explicit content-injection summary pattern or an approved local-only Hermes file-read invocation pattern.
 
 Phase 5Q confirmed file-like context reaches the adapter by length/shape and the final user message is not empty. The remaining blocker is likely prompt/tool shape rather than transport or missing file content alone: Hermes sends `tools`, while the constrained adapter forwards text to DevMonster but does not execute Hermes tools or complete a tool loop.
+
+Phase 5R showed the adapter already omits tool schemas from the router prompt, so stripping tools alone will not change DevMonster input. The recommended fix is an explicit local Gemma compatibility prompt that flattens Hermes multi-message payloads into a simpler single-task prompt while preserving future room for tool-capable providers.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

@@ -139,3 +139,25 @@ Phase 5Q rules out the simplest missing-file-content theory. Hermes appears to s
 Recommendation:
 
 Phase 5R should avoid another full Hermes file-summary rerun at first. Instead, use mocked or direct adapter-level diagnostics to compare three prompt shapes without logging content: plain user-only summary with injected sandbox text, the same two-message shape without `tools`, and the same two-message shape with `tools` present but no executable tool loop. If a live model check is approved later, run one minimal non-Hermes adapter call using synthetic sandbox text to isolate DevMonster prompt-shape behavior from Hermes agent/tool orchestration.
+
+## Phase 5R Tool-Payload Compatibility Diagnosis
+
+Diagnosis date: 2026-06-04.
+
+Phase 5R ran no live Hermes prompts and sent no live model calls. A sanitized mocked fixture was added to mimic the Phase 5Q metadata shape: system and user messages, final user message non-empty, `tools` present, `stream=true`, and no real prompt/file content.
+
+Findings:
+
+- Hermes includes `tools` because `hermes -z` still builds a normal `AIAgent`, uses configured CLI toolsets when no explicit toolsets are passed, and passes `agent.tools` into chat-completion kwargs.
+- The adapter currently ignores `tools` and `tool_choice` for routing.
+- The adapter flattens all message text in order and sends only the resulting plain prompt to `services/model_router`.
+- Mocked case A, `tools` present, and case B, `tools` stripped, produce the same router prompt.
+- Mocked case C, messages pre-flattened into one user prompt, and case D, tools stripped plus pre-flattened, produce a simpler Gemma-facing prompt shape.
+
+Conclusion:
+
+Tool stripping alone is not sufficient because the adapter already omits tool schemas from the router prompt. The safer compatibility fix for local Gemma is to combine tool stripping with an explicit prompt-flattening mode that treats DevMonster Gemma as non-tool-capable and prioritizes the final non-empty user instruction.
+
+Recommendation:
+
+Phase 5S should implement local Gemma prompt compatibility in the adapter: ignore `tools` and `tool_choice`, flatten system/developer/user context into a single Gemma-friendly prompt, preserve file-like context without logging it, and keep SSE behavior unchanged. Preserve room for future tool-capable providers, but do not pass Hermes tool semantics to DevMonster until a real tool execution contract exists.
