@@ -22,6 +22,21 @@ flowchart LR
 
 Hermes may inspect local project state and prepare work requests. When the work belongs to the 34-agent team, Hermes submits a governed request to Helio. Helio validates the request, records the task/message state, routes to the right specialist, and returns status/results to Hermes.
 
+## Machine-Boundary Gating vs ANO Governance
+
+Hermes is gated because it can cross the Mac mini and external-system boundary. Its gates apply to shell access, file edits, secrets, local services, Google Workspace, Home Assistant, Supabase writes, GitHub writes, and external communication.
+
+The ANO agent society is not governed by Hermes. Helio/ANO governs agents through ANO rules, roles, permissions, consensus/workflow rules, and the agents' own policy framework. Hermes may request work from Helio/ANO, but it does not own the ANO, command the ANO, or directly subordinate the agents.
+
+In the Agent Bus context, this means:
+
+- Hermes may draft a work request.
+- Helio/ANO decides whether the request is valid under ANO governance.
+- Helio/ANO chooses the agent, workflow, consensus path, or refusal path.
+- Hermes receives status/results that Helio/ANO elects to expose.
+- Hermes approval gates protect the Mac mini, the human, credentials, and external systems.
+- ANO governance protects agent society operation and inter-agent workflow.
+
 ## How Hermes Submits Work Requests
 
 Hermes sends a local request to Helio, not directly to Supabase. The first safe interface can be an HTTP or MCP gateway on `127.0.0.1`:

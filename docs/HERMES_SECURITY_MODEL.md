@@ -10,6 +10,24 @@ Install Hermes later as the resident Mac mini operator without giving it uncontr
 
 Hermes may become the day-to-day local operator. Helio remains the governance layer for policy, audit, model routing, credentials, agent dispatch, and external integrations.
 
+## Machine-Boundary Gating vs ANO Governance
+
+Hermes is gated at the Mac mini and external-system boundary because it may eventually inspect local state, run approved scripts, edit files, touch secrets, call local services, and interact with Google Workspace, Home Assistant, Supabase, GitHub, or external communications.
+
+The ANO agent society is not governed by Hermes. ANO agents operate under Helio/ANO governance, roles, permissions, consensus/workflow rules, and their own policy framework. Hermes may request work from Helio/ANO, but Helio/ANO decides whether and how agent work proceeds.
+
+Hermes' approval gates protect:
+
+- the human
+- the Mac mini
+- local files and services
+- secrets and credentials
+- external accounts
+- physical-world systems
+- durable shared systems such as Supabase
+
+Hermes' approval gates do not make Hermes the supervisor of ANO agents and do not constrain internal ANO governance except where a Hermes-originated request crosses a protected machine or external-system boundary.
+
 ## Trust Boundaries
 
 ### Local Low-Risk Boundary

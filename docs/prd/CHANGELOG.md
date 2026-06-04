@@ -2,6 +2,10 @@
 
 ## 2026-06-03
 
+- Completed Phase ANO-GOV-1 Hermes gating versus ANO governance clarification.
+- Added "Machine-Boundary Gating vs ANO Governance" language across Hermes ownership, security, Agent Bus, adapter, and master PRD docs.
+- Clarified that Hermes is gated because it can affect the Mac mini, secrets, local services, external systems, and durable shared state.
+- Clarified that ANO agents are governed by Helio/ANO rules, roles, permissions, consensus/workflow rules, and agent policy frameworks, not by Hermes.
 - Completed Phase SECURITY-1 credential rotation tracking.
 - Added `docs/security/CREDENTIAL_ROTATION_CHECKLIST.md` for Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review.
 - Marked further live Agent Bus reads as blocked until high-risk exposed credentials are rotated and a later phase is approved.

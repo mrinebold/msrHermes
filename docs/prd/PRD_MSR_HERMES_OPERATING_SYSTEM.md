@@ -2,11 +2,19 @@
 
 ## Status
 
-Phase SECURITY-1 complete. Next recommended work: rotate exposed credentials before any additional live Agent Bus reads.
+Phase ANO-GOV-1 complete. Next recommended work: rotate exposed credentials before any additional live Agent Bus reads.
 
 ## Architecture Decision
 
-Hermes is the resident Mac mini operator. Helio is the governed dispatch layer for reaching the broader MSR/CivicGrantsAI agent team. Hermes must not bypass Helio to call specialist agents, connect Google Workspace, control Home Assistant, or write to the Supabase agent bus.
+Hermes is the resident Mac mini operator. Helio/ANO is the governed coordination layer for the broader MSR/CivicGrantsAI agent society. Hermes must not bypass Helio/ANO to request specialist work, connect Google Workspace, control Home Assistant, or write to the Supabase agent bus.
+
+## Machine-Boundary Gating vs ANO Governance
+
+Hermes is gated because it can cross the Mac mini and external-system boundary. Hermes-specific gates protect the human, local files, local services, secrets, Google Workspace, Home Assistant, Supabase writes, GitHub writes, and external communication.
+
+The broader ANO agent society is not governed by Hermes. Helio/ANO coordinates and governs agents through ANO governance rules, roles, permissions, consensus/workflow rules, and each agent's own policy framework.
+
+Hermes may request work from Helio/ANO, but it does not own or command the ANO. Other agents are not subordinate to Hermes. Hermes approval gates protect boundary-crossing actions; they do not restrict the internal freedom of the agent society.
 
 ## Phase History
 
@@ -23,6 +31,7 @@ Hermes is the resident Mac mini operator. Helio is the governed dispatch layer f
 | Phase 6G | Complete | Implemented a stdlib-only read-only preflight script and mocked tests without connecting Supabase or installing packages. |
 | Phase 6H | Complete | Ran live read-only anon-key validation for org `msr`, workspace `default`, and agent `hermes`; all approved reads returned safely with zero scoped rows. |
 | Phase SECURITY-1 | Complete | Documented credential exposure and created a rotation checklist without rotating credentials or calling external APIs. |
+| Phase ANO-GOV-1 | Complete | Clarified that Hermes is gated at the machine boundary while ANO agents are governed by Helio/ANO and are not subordinate to Hermes. |
 
 ## Phase 6A Finding
 

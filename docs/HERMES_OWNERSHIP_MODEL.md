@@ -27,6 +27,27 @@ User
       -> DevMonster, Google Workspace, GitHub, Home Assistant, Supabase, 40 agents
 ```
 
+## Machine-Boundary Gating vs ANO Governance
+
+Hermes is gated because Hermes is the resident Mac mini operator. Its approval gates protect the human, the local machine, local files, local services, secrets, and external systems.
+
+The broader ANO agent society is not governed by Hermes. Helio/ANO coordinates and governs the agent society through ANO governance rules, roles, permissions, consensus/workflow rules, and each agent's policy framework.
+
+Hermes may request work from Helio/ANO, but it does not own, command, or subordinate the ANO agents. When Hermes asks for specialist work, it is crossing from the Mac mini boundary into the agent society; Helio/ANO decides how that work is routed, approved, refused, decomposed, or handled by agents.
+
+Hermes-specific gates apply to boundary-crossing actions:
+
+- shell
+- file edits
+- secrets
+- local services
+- Google Workspace
+- Home Assistant
+- Supabase writes
+- external communication
+
+Those gates do not restrict the internal freedom of the ANO agent society. They restrict Hermes' ability to affect the Mac mini, the human's accounts, external systems, and durable shared state.
+
 ## Permission Boundaries
 
 Hermes owns local workflow coordination, but ownership does not mean unrestricted execution.

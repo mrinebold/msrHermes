@@ -12,6 +12,21 @@ Design the minimum safe Hermes-to-Helio adapter so Hermes can observe and prepar
 
 Hermes remains the resident Mac mini operator. Helio remains the governed adapter to the MSR/CivicGrantsAI agent team and the only layer that may eventually use `ano-messaging` services with real credentials.
 
+## Machine-Boundary Gating vs ANO Governance
+
+Hermes is gated at the Mac mini and external-system boundary because it can request or perform actions that affect shell execution, file edits, secrets, local services, Google Workspace, Home Assistant, Supabase writes, GitHub writes, and external communication.
+
+The broader ANO agent society is not governed by Hermes. Helio/ANO governs agents through ANO governance rules, roles, permissions, consensus/workflow rules, and each agent's own policy framework. Hermes may request work from Helio/ANO, but it does not own, command, or supervise the ANO.
+
+For this adapter:
+
+- Hermes can read and prepare local adapter state only inside approved modes.
+- Hermes can propose or dry-run outbound Agent Bus payloads only as boundary-crossing requests.
+- Helio/ANO decides whether a Hermes-originated request becomes agent work.
+- Helio/ANO controls agent routing, agent workflow, and internal ANO governance.
+- Hermes approval gates protect the human, the Mac mini, credentials, external systems, and durable shared state.
+- Hermes approval gates do not constrain internal ANO agent freedom except when Hermes-originated work attempts to cross a protected boundary.
+
 ## Narrow Initial Scope
 
 Initial scope is read-only plus dry-run payload construction:
