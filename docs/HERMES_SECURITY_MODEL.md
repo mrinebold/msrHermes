@@ -131,6 +131,25 @@ Direct Hermes custom endpoint access to DevMonster may be approved only as a tem
 
 Cloud model providers remain disabled until separately approved.
 
+## Phase 5E Sandbox Security Finding
+
+Phase 5E ran Hermes against synthetic local sandbox files with an isolated `HERMES_HOME`, empty isolated `.env`, no MCP servers, provider credential environment variables removed, no setup wizard, no launchd/background service, and no external integrations.
+
+Observed result:
+
+- Hermes CLI startup succeeded.
+- Hermes summarization failed closed because no inference provider was configured.
+- The non-zero exit is expected and acceptable for the credential-free validation phase.
+- No cloud credentials were provided.
+- No Google Workspace, Supabase, Home Assistant, Helio, or Agent Bus access was used.
+- No autonomous execution or resident/background operation was enabled.
+
+Security review item before resident operation:
+
+- Hermes plugin discovery registered provider plugins and logged lazy dependency behavior for a Bedrock provider. Before Hermes becomes resident, define a constrained profile that disables unneeded provider/plugin surfaces and prevents unexpected lazy dependency installation during local-only operation.
+
+Phase 5F should configure only the existing local model router and/or approved DevMonster Gemma endpoint. Do not configure cloud model providers for Phase 5F.
+
 ## Credential Policy
 
 No real credentials belong in this repository.

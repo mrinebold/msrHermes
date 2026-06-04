@@ -2,6 +2,14 @@
 
 ## 2026-06-04
 
+- Completed Phase 5E Hermes local sandbox validation.
+- Created `sandbox/input/` and `sandbox/output/` with synthetic local sample files only.
+- Ran Hermes from the sandbox with isolated `HERMES_HOME`, empty local `.env`, no MCP servers, provider credential environment variables removed, no cloud credentials, and no launchd/background service.
+- Measured startup at 0.161 seconds; summary attempts exited fail-closed in 4.989 seconds and 1.709 seconds because no inference provider is configured. The non-zero exit is expected and acceptable for Phase 5E.
+- Recorded output quality as not assessable: Hermes wrote only the expected no-provider diagnostic to `sandbox/output/`, and no sample summaries were produced.
+- Confirmed the sandbox run did not connect Google Workspace, Supabase, Home Assistant, Helio, or the agent bus.
+- Noted a Phase 5E security review item: Hermes plugin discovery registered provider plugins and logged lazy dependency behavior for a Bedrock provider, so resident operation must disable unnecessary provider/plugin surfaces before testing with an approved local model path.
+- Set Phase 5F direction: configure Hermes to use the existing local model router and/or approved DevMonster Gemma endpoint, not cloud providers.
 - Completed Phase 5D Hermes controlled local install.
 - Ran the official NousResearch Hermes installer pinned to `v2026.5.29.2` with `--skip-setup` and `--skip-browser`.
 - Verified `hermes` at `/Users/michaelrinebold/.local/bin/hermes`, version `Hermes Agent v0.15.2 (2026.5.29.2)`, install path `/Users/michaelrinebold/.hermes/hermes-agent`, tag `v2026.5.29.2`, and commit `77a1650c7`.
@@ -14,7 +22,7 @@
 - Confirmed no secrets were printed, no credentials were rotated, no external APIs were called, no Supabase connection was made, and no packages were installed.
 - Updated the master PRD with a completed-work snapshot through Phase SECURITY-2.
 - Recorded that published work is current through Phase ANO-GOV-1 and SECURITY-2 is tracked locally for commit.
-- Reaffirmed that Hermes remains uninstalled, autonomous execution remains disabled, and further live Agent Bus reads/writes remain blocked until rotation is confirmed or explicitly deferred.
+- Reaffirmed that Hermes is installed as a local client only, autonomous execution remains disabled, and further live Agent Bus reads/writes remain blocked until rotation is confirmed or explicitly deferred.
 
 ## 2026-06-03
 

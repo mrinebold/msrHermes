@@ -646,3 +646,64 @@ Do not:
 - create Home Assistant tokens
 - create GitHub/Supabase credentials
 - dispatch agents
+
+## Phase 5E Local Sandbox Fail-Closed Validation
+
+Status: complete on 2026-06-04.
+
+Phase 5E validated Hermes as a credential-free local client against synthetic sandbox files only. The goal was not to make Hermes useful yet; it was to confirm the boundary behavior before any model provider, cloud credential, external integration, resident gateway, or autonomous execution is enabled.
+
+### Sandbox Files
+
+Created:
+
+```text
+sandbox/
+  input/
+    sample_note.md
+    sample_prd.md
+  output/
+    sample_note_hermes_stdout.txt
+    sample_note_hermes_stderr.txt
+    sample_prd_hermes_stdout.txt
+    sample_prd_hermes_stderr.txt
+```
+
+### Execution Boundary
+
+Hermes was run with:
+
+- isolated `HERMES_HOME` under `/private/tmp/hermes-phase-5e-home`
+- empty isolated `.env`
+- no MCP servers
+- provider credential environment variables removed from the subprocess
+- sandbox working directory
+- no launchd/background service
+- no Hermes setup
+- no cloud provider configuration
+
+No Google Workspace, Supabase, Home Assistant, Helio, or Agent Bus access was used.
+
+### Result
+
+| Check | Result |
+| --- | --- |
+| CLI startup | Succeeded |
+| Startup time | 0.161 seconds |
+| `sample_note.md` summary attempt | Failed closed |
+| `sample_note.md` execution time | 4.989 seconds |
+| `sample_prd.md` summary attempt | Failed closed |
+| `sample_prd.md` execution time | 1.709 seconds |
+| Exit status | Non-zero, expected and acceptable for this phase |
+| Output quality | Not assessable because no summaries were produced |
+| Failure reason | `No inference provider configured` |
+
+The non-zero exit is the correct security outcome for Phase 5E. Hermes cannot perform summarization until a local inference path is configured, and this phase intentionally provided no cloud credentials or external provider access.
+
+### Security Review Item
+
+Hermes plugin discovery registered provider plugins and logged lazy dependency behavior for a Bedrock provider during the isolated run. Before resident operation, review how to disable unnecessary provider/plugin surfaces and prevent unexpected lazy dependency installation or provider registration in constrained local-only profiles.
+
+## Phase 5F Direction
+
+Phase 5F should configure Hermes to use the existing local model router and/or the approved DevMonster Gemma endpoint. It should not configure OpenAI, Anthropic/Claude, OpenRouter, Google, Supabase, Home Assistant, Helio dispatch, or any cloud provider credentials.
