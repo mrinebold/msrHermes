@@ -418,3 +418,40 @@ Mocked tests cover:
 Next recommended phase:
 
 Phase 5N should run one bounded live `hermes -z` adapter diagnostic against the SSE-enabled adapter. Keep it separate from file-summary validation and from any decision to support Hermes' optional discovery probes.
+
+## Phase 5N Oneshot After SSE Fix
+
+Status: complete on 2026-06-04.
+
+Hermes was run exactly once with:
+
+```text
+hermes -z "Reply with exactly: Hermes adapter diagnostic."
+```
+
+The run used a temporary isolated `HERMES_HOME` with only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled, then stopped immediately after the run.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 180s cap; no timeout |
+| Hermes exit code | 0 |
+| Hermes elapsed time | 18.712s |
+| Stdout | 27 bytes: `Hermes adapter diagnostic.` |
+| Stderr | 0 bytes |
+| Adapter chat calls | 1 `POST /v1/chat/completions` request |
+| Chat status/model | 200 with selected model `gemma4:26b` |
+| Adapter chat elapsed time | 14.976s |
+| Response-shape metadata | `streaming_requested=true`, `choices_count=1`, `content_length=26`, `finish_reason=stop` |
+| Adapter shutdown | stopped after diagnostic; no `8088` listener remained |
+
+Conclusion:
+
+The Phase 5M SSE implementation fixed the `hermes -z` stdout path for the bounded diagnostic. Hermes now returns usable stdout through the localhost adapter and DevMonster Gemma path.
+
+Hermes still issues unsupported discovery probes such as `/api/v1/models`, `/api/tags`, `/v1/props`, `/props`, `/version`, `/api/show`, and `/v1/models/gemma4:26b`. Those 404s did not block the one-shot diagnostic. Discovery compatibility should remain a separate decision from sandbox file-summary validation.
+
+Next recommended phase:
+
+Phase 5O should validate sandbox file summaries through the SSE-enabled adapter using synthetic sandbox inputs only. Keep the adapter manual/foreground, keep `HERMES_HOME` isolated, and do not configure Hermes persistently.

@@ -2,6 +2,15 @@
 
 ## 2026-06-04
 
+- Completed Phase 5N Hermes one-shot diagnostic after the SSE adapter fix.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled.
+- Ran exactly one approved command from an isolated temporary `HERMES_HOME`: `hermes -z "Reply with exactly: Hermes adapter diagnostic."`.
+- Recorded Hermes exit code 0, elapsed time 18.712s, stdout 27 bytes, stderr 0 bytes, and stdout text `Hermes adapter diagnostic.`.
+- Confirmed adapter request metadata showed one successful `POST /v1/chat/completions` call with selected model `gemma4:26b`, status 200, and adapter elapsed time 14.976s.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `content_length=26`, and `finish_reason=stop`.
+- Confirmed the SSE adapter fix resolved the previous `(empty)` stdout result for the bounded one-shot diagnostic.
+- Stopped the adapter immediately after validation and confirmed no `8088` listener remained.
+- Confirmed no file summaries, persistent Hermes config, real API keys, cloud providers, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5M streaming SSE support for the localhost Model Router adapter.
 - Updated `POST /v1/chat/completions` so requests with `stream=true` return OpenAI-compatible `text/event-stream`.
 - Implemented the first streaming path as full router generation followed by one `choices[0].delta.content` chunk, one finish chunk, and `data: [DONE]`.

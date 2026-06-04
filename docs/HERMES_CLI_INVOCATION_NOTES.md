@@ -254,3 +254,57 @@ No Hermes command was run in Phase 5M. No live prompts, persistent Hermes config
 Recommended next phase:
 
 Phase 5N should run one bounded `hermes -z` diagnostic against the SSE-enabled adapter using an isolated `HERMES_HOME`, request logging, and response-shape logging. Do not run file summaries or broaden endpoint support in the same phase.
+
+## Phase 5N Oneshot After SSE Fix
+
+Validation date: 2026-06-04.
+
+One bounded command was run from a temporary working directory with an isolated `HERMES_HOME`:
+
+```text
+hermes -z "Reply with exactly: Hermes adapter diagnostic."
+```
+
+Temporary Hermes config used only:
+
+```yaml
+model:
+  default: gemma4:26b
+  provider: custom
+  base_url: http://127.0.0.1:8088/v1
+  api_key: dummy-local-adapter-key
+```
+
+Result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 180s cap; command completed before timeout |
+| Exit code | 0 |
+| Elapsed time | 18.712s |
+| Stdout byte count | 27 bytes |
+| Stderr byte count | 0 bytes |
+| Stdout text | `Hermes adapter diagnostic.` |
+| Adapter shutdown | stopped immediately after diagnostic; no `8088` listener remained |
+
+Adapter metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /health` | 1 | 200 |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 1 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 17 | 404 |
+
+Response-shape metadata confirmed the chat-completion request had `streaming_requested=true`, one choice, content length 26, finish reason `stop`, and top-level keys `choices`, `created`, `id`, `model`, `msr_route`, `object`, and `usage`.
+
+Assessment:
+
+- `hermes -z` now returns usable stdout through the localhost adapter.
+- The SSE streaming fix resolved the prior `(empty)` stdout result for this bounded one-shot diagnostic.
+- Hermes still probes unsupported discovery endpoints, but those 404s did not block successful output in this phase.
+- No file summaries were run, no persistent Hermes config was changed, no real API keys were used, no background service was started, and no Google, Supabase, Home Assistant, Helio, or Agent Bus access was used.
+
+Recommended next phase:
+
+Phase 5O should perform a bounded sandbox file-summary validation through the SSE-enabled adapter, still using an isolated `HERMES_HOME`, synthetic sandbox inputs only, and no persistent Hermes configuration.
