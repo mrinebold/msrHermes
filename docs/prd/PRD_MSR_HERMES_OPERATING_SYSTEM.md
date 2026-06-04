@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5F complete. Recommended architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma. Direct Hermes -> DevMonster is rejected as the default path except for emergency diagnostic use with explicit approval. Cloud providers remain fail-closed.
+Phase 5G complete. Added a localhost-only OpenAI-compatible Model Router adapter scaffold for future Hermes use. The adapter defaults to `127.0.0.1:8088`, exposes only `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`, and delegates to `services/model_router`.
 
-Local repository status: complete work through Phase SECURITY-2 has been published. Phase 5F updates local inference integration planning.
+Local repository status: complete work through Phase 5F has been published. Phase 5G adds the local adapter scaffold.
 
 ## Architecture Decision
 
@@ -28,6 +28,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5D | Complete | Installed the pinned Hermes client locally with no setup wizard, no browser bootstrap, no credentials, no launchd service, and no integrations enabled. |
 | Phase 5E | Complete | Created a local sandbox and ran Hermes against sandbox prompts only; execution failed closed with no inference provider configured, so no summaries were produced. Non-zero exit was expected and acceptable. |
 | Phase 5F | Complete | Planned Hermes local inference through a localhost OpenAI-compatible MSR Model Router adapter instead of direct DevMonster or cloud providers. |
+| Phase 5G | Complete | Added the localhost-only OpenAI-compatible Model Router adapter scaffold with mocked tests and no Hermes configuration. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -60,6 +61,7 @@ Completed and committed locally:
 - Phase 5D validation: install tag `v2026.5.29.2`, commit `77a1650c7`, and absent launchd plist were verified; setup, browser bootstrap, model configuration, and live integrations were not enabled.
 - Phase 5E sandbox validation: `sandbox/input/` and `sandbox/output/` were created with synthetic sample docs, Hermes was run from the sandbox with an isolated `HERMES_HOME`, empty isolated `.env`, provider credential environment variables removed, no MCP servers configured, and no launchd/background service. Startup succeeded in 0.161 seconds. Summary attempts exited fail-closed in 4.989 seconds and 1.709 seconds with "No inference provider configured." No cloud credentials were provided.
 - Phase 5F model-provider planning: Option C was selected as the target architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma / future approved providers. Initial implementation should route only to DevMonster through the local adapter while cloud providers remain disabled and fail-closed.
+- Phase 5G adapter scaffold: `services/model_router_adapter/` was added using Python stdlib HTTP serving, default host `127.0.0.1`, default port `8088`, allowed endpoints only, `services/model_router` delegation, and mocked unit tests.
 
 Not completed or not approved:
 
@@ -68,8 +70,9 @@ Not completed or not approved:
 - Hermes setup was not run.
 - Hermes model configuration was not enabled.
 - Hermes did not produce local summaries in Phase 5E because no credential-free inference provider was configured.
-- Hermes is not connected to the MSR Model Router yet.
-- The MSR Model Router does not yet expose the localhost OpenAI-compatible adapter Hermes needs.
+- Hermes is not configured to use the MSR Model Router adapter yet.
+- The Model Router adapter was not started as a background service.
+- No live prompts were sent through the adapter.
 - Hermes background gateway/launchd operation is not enabled.
 - Google Workspace is not connected.
 - Home Assistant is not installed or connected.
@@ -100,7 +103,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5G should build the localhost OpenAI-compatible Model Router adapter in front of `services/model_router`. It should bind only to `127.0.0.1`, expose only `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`, include mocked tests, emit redacted audit events, and preserve cloud fail-closed behavior. Do not configure Hermes to use it until a later validation phase. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5H should validate the adapter with mocked/local-only requests first, then separately approve a controlled Hermes sandbox retry against the adapter. Do not configure Hermes permanently, start background services, expose the adapter externally, run live prompts, or enable cloud providers without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 

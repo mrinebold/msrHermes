@@ -2,6 +2,13 @@
 
 ## 2026-06-04
 
+- Completed Phase 5G localhost OpenAI-compatible Model Router adapter scaffold.
+- Added `services/model_router_adapter/` with stdlib HTTP server code, config, schemas, and README.
+- Added mocked `tests/model_router_adapter/` coverage for `GET /health`, `GET /v1/models`, `POST /v1/chat/completions`, unknown endpoint refusal, and default `127.0.0.1` binding.
+- Set adapter defaults to host `127.0.0.1` and port `8088`.
+- Limited adapter surface to `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
+- Delegated chat completion and model listing behavior to `services/model_router`.
+- Confirmed no server was started as a background service, no Hermes config was changed, no live prompts were sent, no cloud providers were connected, and no external network exposure was added.
 - Completed Phase 5F Hermes local inference integration planning.
 - Added `docs/HERMES_MODEL_PROVIDER_PLAN.md`.
 - Evaluated direct DevMonster Ollama, MSR Model Router to DevMonster, and MSR Model Router to DevMonster/future providers.
