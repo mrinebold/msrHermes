@@ -21,15 +21,23 @@ Give Hermes a local inference path that preserves Helio's model-routing policy i
 
 | Option | Path | Strengths | Risks | Recommendation |
 | --- | --- | --- | --- | --- |
-| A | Hermes -> DevMonster Ollama directly | Fewest moving parts; Hermes can likely use `model.provider=custom` with an OpenAI-compatible Ollama URL if `/v1` routes work. | Bypasses Helio task policy, audit records, cloud fail-closed placeholders, future approval checks, and provider abstraction. Makes Hermes responsible for knowing DevMonster details. | Reject except as emergency temporary fallback for low-risk local chat. |
+| A | Hermes -> DevMonster Ollama directly | Fewest moving parts; Hermes can likely use `model.provider=custom` with an OpenAI-compatible Ollama URL if `/v1` routes work. | Bypasses Helio task policy, audit records, cloud fail-closed placeholders, future approval checks, and provider abstraction. Makes Hermes responsible for knowing DevMonster details. | Reject as the default path. Permit only for emergency diagnostic use with explicit approval. |
 | B | Hermes -> MSR Model Router -> DevMonster | Preserves current local-first policy and audit fields; hides DevMonster details from Hermes; keeps cloud providers disabled; supports fail-closed routing. | Requires a small localhost OpenAI-compatible adapter because `services/model_router/` is currently a Python library, not an HTTP server. | Recommended immediate Phase 5F/5G path. |
 | C | Hermes -> MSR Model Router -> DevMonster / future providers | Same as B, plus future ability to add approved local or cloud providers behind one governed endpoint. Hermes can keep one provider configuration while Helio controls routing. | Future providers increase governance risk if the router ever permits cloud fallback without explicit policy gates. Requires strict default-deny and audit review. | Recommended target architecture, with current implementation limited to DevMonster only. |
 
 ## Recommendation
 
-Use Option C as the architecture, implemented initially as Option B.
+Use Option C as the recommended architecture:
+
+```text
+Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> services/model_router -> DevMonster Gemma
+```
+
+Implement Option C initially with only the DevMonster route enabled. This gives Hermes the same stable provider surface now while preserving a governed expansion path for future approved providers.
 
 Hermes should treat the MSR Model Router as its sole inference provider. The router should initially route only to DevMonster Gemma4 through the existing `devmonster_ollama` provider. Future providers may be added behind the router only after explicit approval, with cloud providers remaining fail-closed until approved.
+
+Direct Hermes -> DevMonster must not be the default path. It may be used only as an emergency diagnostic path after explicit approval, and only for low-risk local inference troubleshooting.
 
 This keeps Hermes simple:
 
@@ -56,8 +64,9 @@ DevMonster Ollama over Tailscale
 
 Hermes expects a model provider endpoint. The safest path is a local OpenAI-compatible adapter in front of `services/model_router`.
 
-Minimum adapter surface:
+The adapter should expose only:
 
+- `GET /health`
 - `GET /v1/models`
 - `POST /v1/chat/completions`
 
@@ -65,6 +74,10 @@ Adapter requirements:
 
 - bind to `127.0.0.1` only
 - no public interface
+- no Tailscale bind
+- no LAN bind
+- no `0.0.0.0`
+- no external network exposure
 - no launchd/background service until separately approved
 - no cloud credentials
 - no Supabase, Google Workspace, Home Assistant, GitHub, or Agent Bus access
@@ -198,9 +211,15 @@ Until the adapter exists, Hermes cannot use `services/model_router/` directly as
 
 Next implementation phase:
 
-1. Add a small local adapter for `services/model_router` with `GET /v1/models` and `POST /v1/chat/completions`.
-2. Bind only to `127.0.0.1`.
-3. Add mocked tests for route mapping, cloud fail-closed behavior, timeout handling, and redacted audit output.
-4. Do not start the adapter as a background service.
-5. Do not configure Hermes yet.
-6. After tests pass, request a separate validation phase to run Hermes against the adapter using sandbox files.
+Phase 5G: Build localhost OpenAI-compatible Model Router adapter.
+
+1. Add a small local adapter for `services/model_router`.
+2. Expose only `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
+3. Bind only to `127.0.0.1`.
+4. Add mocked tests for health, model listing, chat-completion mapping, cloud fail-closed behavior, timeout handling, loopback binding, and redacted audit output.
+5. Do not expose the adapter externally.
+6. Do not start the adapter as a background service.
+7. Do not configure Hermes yet.
+8. Do not run live prompts.
+9. Do not configure cloud providers.
+10. After tests pass, request a separate validation phase to run Hermes against the adapter using sandbox files.

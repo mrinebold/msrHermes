@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase 5F complete. Recommended architecture: Hermes should use the MSR Model Router as its sole inference provider through a future localhost OpenAI-compatible adapter, with current routing limited to DevMonster Gemma and cloud providers remaining fail-closed. Confirm or explicitly defer exposed credential rotation before any live Agent Bus reads or writes.
+Phase 5F complete. Recommended architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma. Direct Hermes -> DevMonster is rejected as the default path except for emergency diagnostic use with explicit approval. Cloud providers remain fail-closed.
 
 Local repository status: complete work through Phase SECURITY-2 has been published. Phase 5F updates local inference integration planning.
 
@@ -27,7 +27,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5C | Complete | Proposed exact install, config, and rollback commands only. Hermes was not installed. |
 | Phase 5D | Complete | Installed the pinned Hermes client locally with no setup wizard, no browser bootstrap, no credentials, no launchd service, and no integrations enabled. |
 | Phase 5E | Complete | Created a local sandbox and ran Hermes against sandbox prompts only; execution failed closed with no inference provider configured, so no summaries were produced. Non-zero exit was expected and acceptable. |
-| Phase 5F | Complete | Planned Hermes local inference through the MSR Model Router instead of direct DevMonster or cloud providers. |
+| Phase 5F | Complete | Planned Hermes local inference through a localhost OpenAI-compatible MSR Model Router adapter instead of direct DevMonster or cloud providers. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -59,7 +59,7 @@ Completed and committed locally:
 - SECURITY-2 rotation status: Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review remain pending user confirmation unless the user later confirms rotation or explicit deferral.
 - Phase 5D validation: install tag `v2026.5.29.2`, commit `77a1650c7`, and absent launchd plist were verified; setup, browser bootstrap, model configuration, and live integrations were not enabled.
 - Phase 5E sandbox validation: `sandbox/input/` and `sandbox/output/` were created with synthetic sample docs, Hermes was run from the sandbox with an isolated `HERMES_HOME`, empty isolated `.env`, provider credential environment variables removed, no MCP servers configured, and no launchd/background service. Startup succeeded in 0.161 seconds. Summary attempts exited fail-closed in 4.989 seconds and 1.709 seconds with "No inference provider configured." No cloud credentials were provided.
-- Phase 5F model-provider planning: Option C was selected as the target architecture: Hermes -> MSR Model Router -> DevMonster / future approved providers. Initial implementation should behave like Option B, routing only to DevMonster through a local router adapter while cloud providers remain disabled and fail-closed.
+- Phase 5F model-provider planning: Option C was selected as the target architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma / future approved providers. Initial implementation should route only to DevMonster through the local adapter while cloud providers remain disabled and fail-closed.
 
 Not completed or not approved:
 
@@ -100,7 +100,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5G should add a localhost-only OpenAI-compatible adapter in front of `services/model_router`, with `GET /v1/models` and `POST /v1/chat/completions`, mocked tests, redacted audit events, and cloud fail-closed behavior. Do not configure Hermes to use it until a later validation phase. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5G should build the localhost OpenAI-compatible Model Router adapter in front of `services/model_router`. It should bind only to `127.0.0.1`, expose only `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`, include mocked tests, emit redacted audit events, and preserve cloud fail-closed behavior. Do not configure Hermes to use it until a later validation phase. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -114,7 +114,7 @@ After rotation confirmation or explicit deferral, run local tests and `verify-co
 
 Phase 5E showed that a credential-free Hermes client can start locally but cannot complete agent summarization without a configured inference provider. The sandbox run did not connect Google Workspace, Supabase, Home Assistant, Helio, or the agent bus. The non-zero exit is expected and acceptable for this phase. Hermes did perform plugin discovery in the isolated runtime and logged provider registration plus a lazy dependency attempt for a Bedrock provider; this is a security review item before resident operation.
 
-Phase 5F determined that Hermes can treat the MSR Model Router as its sole inference provider if the router exposes a local OpenAI-compatible endpoint and Hermes is configured with `model.provider=custom` and a loopback-only `model.base_url`. Until that adapter exists, Hermes cannot use `services/model_router/` directly as a provider.
+Phase 5F determined that Hermes can treat the MSR Model Router as its sole inference provider if the router exposes a local OpenAI-compatible endpoint and Hermes is later configured with `model.provider=custom` and a loopback-only `model.base_url`. No Hermes config changes were made in Phase 5F. No live prompts, cloud provider config, external exposure, or background service setup was performed.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

@@ -5,11 +5,13 @@
 - Completed Phase 5F Hermes local inference integration planning.
 - Added `docs/HERMES_MODEL_PROVIDER_PLAN.md`.
 - Evaluated direct DevMonster Ollama, MSR Model Router to DevMonster, and MSR Model Router to DevMonster/future providers.
-- Recommended Option C as the target architecture, implemented first as Option B: Hermes uses only the MSR Model Router, and the router initially routes only to DevMonster.
+- Recommended Option C as the target architecture: Hermes -> localhost OpenAI-compatible MSR Model Router adapter -> `services/model_router` -> DevMonster Gemma, with future providers allowed only after approval.
+- Explicitly rejected direct Hermes -> DevMonster as the default path, except for emergency diagnostic use with explicit approval.
 - Determined Hermes can treat the MSR Model Router as its sole provider only after the router exposes a localhost OpenAI-compatible adapter.
 - Defined proposed future Hermes provider config with `model.provider=custom`, `model.base_url=http://127.0.0.1:<approved-port>/v1`, blank `api_key`, no fallback providers, and no cloud credentials.
+- Defined Phase 5G as building a localhost-only adapter that binds only to `127.0.0.1` and exposes only `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
 - Documented router-side environment variables, security controls, audit fields, and fail-closed behavior.
-- Confirmed no Hermes model connection, credential configuration, autonomous execution, provider install, cloud provider connection, or live inference was performed.
+- Confirmed no Hermes model connection, Hermes config change, credential configuration, autonomous execution, provider install, cloud provider connection, external exposure, background service, or live inference was performed.
 - Completed Phase 5E Hermes local sandbox validation.
 - Created `sandbox/input/` and `sandbox/output/` with synthetic local sample files only.
 - Ran Hermes from the sandbox with isolated `HERMES_HOME`, empty local `.env`, no MCP servers, provider credential environment variables removed, no cloud credentials, and no launchd/background service.
