@@ -2,7 +2,9 @@
 
 ## Status
 
-Phase SECURITY-1 tracking only. No credentials were rotated by this document. No external APIs were called.
+Phase SECURITY-2 post-exposure tracking only. No credentials were rotated by this document. No external APIs were called.
+
+No further live bus reads/writes until rotation is confirmed or explicitly deferred.
 
 ## Exposure Summary
 
@@ -14,13 +16,23 @@ Do not copy secret values into this repository, issues, pull requests, logs, or 
 
 | Credential type | Risk | Required action | Status |
 | --- | --- | --- | --- |
-| Supabase service-role key | Critical | Revoke or rotate immediately. | Pending |
-| OpenAI API key | High | Revoke or rotate immediately. | Pending |
-| Anthropic/Claude API key | High | Revoke or rotate immediately. | Pending |
-| GitHub token | Critical | Revoke or rotate immediately. | Pending |
-| Supabase anon key | Low | Review after service-role rotation; rotate if project policy requires it. | Review |
+| Supabase service-role key | Critical | Revoke or rotate immediately. | Pending user confirmation |
+| OpenAI API key | High | Revoke or rotate immediately. | Pending user confirmation |
+| Anthropic/Claude API key | High | Revoke or rotate immediately. | Pending user confirmation |
+| GitHub token | Critical | Revoke or rotate immediately. | Pending user confirmation |
+| Supabase anon key | Low | Review after service-role rotation; rotate if project policy requires it. | Pending user confirmation |
 
 The Supabase anon key is lower risk because it is designed for client-side use and should be constrained by RLS. It is still reviewable because it appeared in chat with other sensitive material.
+
+## Current Rotation Status
+
+| Item | Current status | Basis | Next required confirmation |
+| --- | --- | --- | --- |
+| Supabase service-role key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
+| OpenAI key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
+| Anthropic/Claude key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
+| GitHub token | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
+| Supabase anon key review | Pending user confirmation | No review or rotation decision was confirmed in this phase. | User confirms review complete and whether rotation is required. |
 
 ## Immediate Actions
 
@@ -32,7 +44,7 @@ The Supabase anon key is lower risk because it is designed for client-side use a
 - [ ] Update `config/local.env` after rotation using only the minimum keys needed for the next approved phase.
 - [ ] Verify `config/local.env` remains gitignored and is not staged.
 - [ ] Remove any stale local secret files that are no longer needed.
-- [ ] Avoid further live reads until the high-risk credentials are rotated.
+- [ ] Confirm or explicitly defer rotation before any further live bus read or write.
 
 ## Post-Rotation Validation
 

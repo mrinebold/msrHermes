@@ -2,9 +2,14 @@
 
 ## 2026-06-04
 
-- Updated the master PRD with a completed-work snapshot through Phase ANO-GOV-1.
-- Recorded that local work is committed and publishing is pending until DNS/network access to GitHub is available in the Codex session.
-- Reaffirmed that Hermes remains uninstalled, autonomous execution remains disabled, and further live Agent Bus reads remain blocked until high-risk exposed credentials are rotated.
+- Completed Phase SECURITY-2 post-exposure rotation status tracking.
+- Added a credential status table for Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review.
+- Marked all rotation/review items as pending user confirmation because no provider consoles or external APIs were checked.
+- Blocked further live bus reads/writes until rotation is confirmed or explicitly deferred.
+- Confirmed no secrets were printed, no credentials were rotated, no external APIs were called, no Supabase connection was made, and no packages were installed.
+- Updated the master PRD with a completed-work snapshot through Phase SECURITY-2.
+- Recorded that published work is current through Phase ANO-GOV-1 and SECURITY-2 is tracked locally for commit.
+- Reaffirmed that Hermes remains uninstalled, autonomous execution remains disabled, and further live Agent Bus reads/writes remain blocked until rotation is confirmed or explicitly deferred.
 
 ## 2026-06-03
 

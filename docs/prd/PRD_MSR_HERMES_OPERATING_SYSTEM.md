@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase ANO-GOV-1 complete. Next recommended work: rotate exposed credentials before any additional live Agent Bus reads.
+Phase SECURITY-2 complete. Next recommended work: confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
-Local repository status: complete work through Phase ANO-GOV-1 is committed locally. The branch is ahead of `origin/main`; publishing is pending until DNS/network access to GitHub is available in the local Codex session.
+Local repository status: complete work through Phase ANO-GOV-1 has been published. Phase SECURITY-2 updates credential-rotation status tracking locally.
 
 ## Architecture Decision
 
@@ -34,6 +34,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 6H | Complete | Ran live read-only anon-key validation for org `msr`, workspace `default`, and agent `hermes`; all approved reads returned safely with zero scoped rows. |
 | Phase SECURITY-1 | Complete | Documented credential exposure and created a rotation checklist without rotating credentials or calling external APIs. |
 | Phase ANO-GOV-1 | Complete | Clarified that Hermes is gated at the machine boundary while ANO agents are governed by Helio/ANO and are not subordinate to Hermes. |
+| Phase SECURITY-2 | Complete | Added post-exposure rotation status tracking and blocked further live bus reads/writes until rotation is confirmed or explicitly deferred. |
 
 ## Completed Work Snapshot
 
@@ -51,6 +52,7 @@ Completed and committed locally:
 - Live read-only validation: anon-key validation ran for org `msr`, workspace `default`, agent `hermes`; all approved reads returned 0 scoped rows.
 - Credential rotation tracking: exposed credential types were documented in the rotation checklist; no rotation was performed automatically.
 - ANO governance clarification: Hermes gating is machine-boundary protection, not governance over the ANO agent society.
+- SECURITY-2 rotation status: Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review remain pending user confirmation unless the user later confirms rotation or explicit deferral.
 
 Not completed or not approved:
 
@@ -62,6 +64,7 @@ Not completed or not approved:
 - Agent dispatch is not enabled.
 - Service-role access is not approved for Hermes.
 - Further live Agent Bus reads are blocked until high-risk exposed credentials are rotated and a new phase is approved.
+- Further live Agent Bus writes are blocked until exposed credential rotation is confirmed or explicitly deferred.
 
 ## Phase 6A Finding
 
@@ -84,13 +87,13 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Rotate exposed credentials before any additional live Agent Bus reads.
+Confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
 - [Credential Rotation Checklist](../security/CREDENTIAL_ROTATION_CHECKLIST.md)
 
-After rotation, run local tests and `verify-config` only. Do not run `list-org-configs`, `read-hermes-messages`, or `read-outbound-audit` again until the exposed high-risk credentials are revoked or rotated and a new phase is explicitly approved.
+After rotation confirmation or explicit deferral, run local tests and `verify-config` only. Do not run `list-org-configs`, `read-hermes-messages`, `read-outbound-audit`, or any write-oriented bus operation until the exposed high-risk credentials are revoked, rotated, or explicitly deferred by the user and a new phase is explicitly approved.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 
