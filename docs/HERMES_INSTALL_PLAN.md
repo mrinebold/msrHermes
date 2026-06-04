@@ -588,14 +588,56 @@ Expected Phase 5C install characteristics:
 - setup wizard: skipped with `--skip-setup`.
 - browser bootstrap: skipped with `--skip-browser`.
 
-## Stop Conditions
+## Phase 5D Controlled Install Result
 
-Stop Phase 5C command proposal after documenting exact commands and asking for approval.
+Status: complete on 2026-06-04.
+
+Phase 5D performed a credential-free local client install only. It did not run the setup wizard, configure model providers, enable autonomous execution, create a launchd service, connect Supabase, connect Google Workspace, connect Home Assistant, connect Helio, send messages, or perform live bus reads/writes.
+
+### Command Run
+
+The approved Phase 5C install command was run from the downloaded official installer:
+
+```sh
+bash /private/tmp/hermes-install/install.sh \
+  --skip-setup \
+  --skip-browser \
+  --branch v2026.5.29.2 \
+  --hermes-home "$HOME/.hermes" \
+  --dir "$HOME/.hermes/hermes-agent"
+```
+
+### Verification
+
+| Check | Result |
+| --- | --- |
+| Hermes command | `/Users/michaelrinebold/.local/bin/hermes` |
+| Hermes version | `Hermes Agent v0.15.2 (2026.5.29.2)` |
+| Install path | `/Users/michaelrinebold/.hermes/hermes-agent` |
+| Git tag | `v2026.5.29.2` |
+| Git commit | `77a1650c7` |
+| LaunchAgent | absent: `~/Library/LaunchAgents/ai.hermes.gateway.plist` was not created |
+| Setup wizard | skipped with `--skip-setup` |
+| Browser bootstrap | skipped with `--skip-browser` |
+| Live credential check | no populated provider credential keys were reported by key-name-only inspection |
+
+The installer created default local Hermes config files under `~/.hermes/`. Those files are runtime-local and untracked. Phase 5D did not add secrets to this repository and did not intentionally configure any live provider credential.
+
+### Install Notes
+
+- The installer provisioned managed `uv` under `~/.hermes/bin`.
+- The installer used Python 3.11.14 and found existing Git, Node.js, and ripgrep.
+- Optional `ffmpeg` installation via Homebrew failed because Homebrew paths were not writable in this controlled session.
+- Optional npm/TUI/browser-tool dependency steps reported failures or were skipped; browser bootstrap was intentionally skipped.
+- `hermes --version` reported the pinned release and noted that newer upstream commits exist. The install remains pinned to `v2026.5.29.2` by design.
+
+## Phase 5D Stop Conditions
+
+Stop Phase 5D after installing the local client, verifying the pinned version/path, updating docs, running tests, and committing the result.
 
 Do not:
 
-- install Hermes
-- run the Hermes installer
+- run the Hermes installer again
 - run `hermes setup`
 - run `hermes model`
 - run `hermes gateway install`

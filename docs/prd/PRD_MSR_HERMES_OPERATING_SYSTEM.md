@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase SECURITY-2 complete. Next recommended work: confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5D complete. Hermes client is installed locally in credential-free, non-autonomous mode. Next recommended work: confirm or explicitly defer exposed credential rotation before any live Agent Bus reads or writes.
 
-Local repository status: complete work through Phase ANO-GOV-1 has been published. Phase SECURITY-2 updates credential-rotation status tracking locally.
+Local repository status: complete work through Phase SECURITY-2 has been published. Phase 5D updates local install status tracking.
 
 ## Architecture Decision
 
@@ -25,6 +25,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5A | Complete | Defined Hermes-owned Mac mini architecture with Helio as the controlled interface to the agent team. |
 | Phase 5B | Complete | Documented Hermes installation, security, configuration, and approval gates without installing Hermes. |
 | Phase 5C | Complete | Proposed exact install, config, and rollback commands only. Hermes was not installed. |
+| Phase 5D | Complete | Installed the pinned Hermes client locally with no setup wizard, no browser bootstrap, no credentials, no launchd service, and no integrations enabled. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -42,6 +43,7 @@ Completed and committed locally:
 
 - Hermes ownership architecture: Hermes is the resident Mac mini operator, while Helio/ANO is the governed coordination layer for the broader agent society.
 - Hermes install planning: install options, security model, prerequisites, config layout, rollback planning, and install-command proposal were documented without installing Hermes.
+- Hermes controlled install: Hermes Agent v0.15.2 / 2026.5.29.2 was installed at `~/.hermes/hermes-agent` with command launcher `~/.local/bin/hermes`.
 - Model routing and DevMonster planning: Hermes remains local-first through the existing Helio model router and DevMonster Gemma4 path.
 - Google Workspace and Home Assistant planning: both remain future gated integrations; neither is connected or enabled.
 - Supabase Agent Bus discovery: `packages/ano-messaging` was elevated as the primary canonical message-bus source candidate.
@@ -53,11 +55,15 @@ Completed and committed locally:
 - Credential rotation tracking: exposed credential types were documented in the rotation checklist; no rotation was performed automatically.
 - ANO governance clarification: Hermes gating is machine-boundary protection, not governance over the ANO agent society.
 - SECURITY-2 rotation status: Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review remain pending user confirmation unless the user later confirms rotation or explicit deferral.
+- Phase 5D validation: install tag `v2026.5.29.2`, commit `77a1650c7`, and absent launchd plist were verified; setup, browser bootstrap, model configuration, and live integrations were not enabled.
 
 Not completed or not approved:
 
-- Hermes is not installed.
+- Hermes is installed as a local client only.
 - Autonomous execution is not enabled.
+- Hermes setup was not run.
+- Hermes model configuration was not enabled.
+- Hermes background gateway/launchd operation is not enabled.
 - Google Workspace is not connected.
 - Home Assistant is not installed or connected.
 - Supabase writes are not enabled.
@@ -127,8 +133,9 @@ Phase 6E reference:
 
 ## Non-Goals
 
-- Do not install Hermes.
-- Do not enable autonomous execution.
+- Do not run Hermes setup.
+- Do not start Hermes as a background or resident service.
+- Do not enable Hermes autonomous execution.
 - Do not connect Supabase.
 - Do not store real secrets.
 - Do not send messages to agents.

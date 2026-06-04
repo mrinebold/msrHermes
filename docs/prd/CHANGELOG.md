@@ -2,6 +2,11 @@
 
 ## 2026-06-04
 
+- Completed Phase 5D Hermes controlled local install.
+- Ran the official NousResearch Hermes installer pinned to `v2026.5.29.2` with `--skip-setup` and `--skip-browser`.
+- Verified `hermes` at `/Users/michaelrinebold/.local/bin/hermes`, version `Hermes Agent v0.15.2 (2026.5.29.2)`, install path `/Users/michaelrinebold/.hermes/hermes-agent`, tag `v2026.5.29.2`, and commit `77a1650c7`.
+- Confirmed no Hermes setup wizard, model configuration, launchd/background service, Google Workspace connection, Supabase connection, Home Assistant connection, Helio connection, autonomous execution, message send, or live bus read/write was enabled.
+- Recorded install caveats: optional Homebrew `ffmpeg` install could not complete because Homebrew paths were not writable, browser bootstrap was intentionally skipped, and optional npm/TUI/browser-tool dependency steps reported failures.
 - Completed Phase SECURITY-2 post-exposure rotation status tracking.
 - Added a credential status table for Supabase service-role, OpenAI, Anthropic/Claude, GitHub token, and Supabase anon-key review.
 - Marked all rotation/review items as pending user confirmation because no provider consoles or external APIs were checked.
