@@ -483,3 +483,30 @@ The Phase 5M SSE fix remains valid because Phase 5N proved simple one-shot stdou
 Next recommended phase:
 
 Phase 5P should diagnose local file-summary behavior before another live summary attempt. Inspect Hermes one-shot toolset configuration, local file read tool availability, and whether the file-summary prompt needs explicit content injection or approved `--toolsets` selection.
+
+## Phase 5P File Summary Prompt Diagnosis
+
+Status: complete on 2026-06-04.
+
+No live prompts were run in Phase 5P. The local adapter/router prompt path and Hermes one-shot chat-completions path were inspected.
+
+Findings:
+
+- The adapter reads all OpenAI-style messages in order, preserving role labels in the generated router prompt.
+- The adapter does not choose only the first message, last message, or only user messages.
+- The router does not inspect OpenAI message structures; it receives a plain prompt string from the adapter and passes it to the selected provider.
+- The DevMonster provider sends that prompt to Ollama `/api/generate` with `stream=false` and maps Ollama's `response` field into the adapter's chat-completion content.
+- Hermes `-z` still runs the full `AIAgent` chat path. Depending on toolsets and prompt behavior, file-summary attempts may include multi-message context, tool schemas, tool-choice hints, and repeated tool/retry turns.
+- The constrained localhost adapter does not execute Hermes tools. If Hermes expects a tool loop to read files, the model may never receive the actual sandbox file contents.
+
+Phase 5P added optional message-structure logging behind:
+
+```text
+MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true
+```
+
+The log records only metadata: message count, roles present, character counts per message, final-user-message emptiness, file-content heuristic status, whether `tools` and `tool_choice` are present, and whether `max_tokens`, `temperature`, and `stream` are present. It does not log prompt text, file contents, tool descriptions, model output, API keys, OAuth tokens, Supabase keys, or other secrets.
+
+Recommendation:
+
+Phase 5Q should run a single bounded file-summary diagnostic with request, response-shape, and message-structure logging enabled. If no message contains file content, use explicit sandbox file content injection or an approved local-only Hermes file-read invocation pattern before attempting summaries again. If messages do contain file content and output remains zero length, focus on prompt simplification and DevMonster Gemma response behavior rather than adapter transport.

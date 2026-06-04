@@ -346,3 +346,30 @@ Assessment:
 Recommended next phase:
 
 Phase 5P should diagnose why Hermes file-summary prompts produce zero-content model responses while the simple one-shot diagnostic returns usable stdout. Do this without live file-summary reruns at first: inspect Hermes tool availability in isolated one-shot mode, whether local file tools are enabled for `-z`, whether the prompts triggered tool calls, and whether `--toolsets` or prompt structure must be adjusted for local file reads.
+
+## Phase 5P File Summary Prompt Diagnosis
+
+Status: complete on 2026-06-04.
+
+Phase 5P did not run live Hermes prompts. Local Hermes source and the adapter/router prompt path were inspected only.
+
+Findings:
+
+- `hermes -z` remains the correct one-shot command for stdout capture.
+- One-shot mode still constructs an `AIAgent` and uses the normal chat-completions flow.
+- One-shot mode sets noninteractive approval flags internally, so local tool use may be attempted as part of a prompt.
+- Hermes' chat-completions flow can include `tools`, `tool_choice`, multiple messages, and streaming options.
+- The adapter converts all incoming OpenAI-style messages into one router prompt in order. It does not choose only the first or last message.
+- The adapter delegates only message text to `services/model_router`; it does not execute Hermes tool calls or turn tool schemas into file reads.
+
+Phase 5P added:
+
+```text
+MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true
+```
+
+This optional diagnostic records message count, roles present, character counts, final-user-message emptiness, file-content heuristic status, and request option presence for tools/tool choice/max tokens/temperature/streaming. It does not log prompt text, file contents, tool descriptions, model output, or secrets.
+
+Recommended next phase:
+
+Phase 5Q should run one bounded file-summary diagnostic with request logging, response-shape logging, and message-structure logging enabled. If the logs show no file content in messages, switch to explicit sandbox file content injection or an approved local-only Hermes toolset pattern. If file content is present but output remains empty, diagnose prompt shape and DevMonster Gemma behavior next.

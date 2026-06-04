@@ -46,11 +46,13 @@ class ModelRouterAdapterTest(unittest.TestCase):
             {
                 "MODEL_ROUTER_ADAPTER_LOG_REQUESTS": "true",
                 "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES": "true",
+                "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE": "true",
             }
         )
 
         self.assertTrue(config.log_requests)
         self.assertTrue(config.log_response_shapes)
+        self.assertTrue(config.log_message_structure)
 
     def test_health(self):
         status, payload = self._get("/health")
@@ -214,6 +216,91 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("Sensitive sandbox prompt text", joined)
         self.assertNotIn("Sandbox summary.", joined)
 
+    def test_message_structure_log_redacts_prompt_and_file_content(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw(
+                "/v1/chat/completions",
+                {
+                    "model": "gemma4:26b",
+                    "stream": True,
+                    "temperature": 0,
+                    "max_tokens": 200,
+                    "tool_choice": "auto",
+                    "tools": [
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "read_file",
+                                "description": "Do not leak this tool description.",
+                            },
+                        }
+                    ],
+                    "messages": [
+                        {"role": "system", "content": "Sensitive system instruction."},
+                        {
+                            "role": "user",
+                            "content": "# Sample Local Note\nExternal integrations remain disabled.\nDo not leak this sandbox file content.\n",
+                        },
+                    ],
+                },
+            )
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertEqual(record.path, "/v1/chat/completions")
+        self.assertEqual(record.message_count, 2)
+        self.assertEqual(record.roles_present, ["system", "user"])
+        self.assertEqual(len(record.message_char_counts), 2)
+        self.assertFalse(record.final_user_message_empty)
+        self.assertTrue(record.any_message_contains_file_content)
+        self.assertTrue(record.tools_present)
+        self.assertTrue(record.tool_choice_present)
+        self.assertTrue(record.max_tokens_present)
+        self.assertTrue(record.temperature_present)
+        self.assertTrue(record.stream_present)
+        self.assertTrue(record.streaming_requested)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertIn("model_router_adapter.message_structure", joined)
+        self.assertNotIn("Sensitive system instruction", joined)
+        self.assertNotIn("External integrations remain disabled", joined)
+        self.assertNotIn("Do not leak this sandbox file content", joined)
+        self.assertNotIn("Do not leak this tool description", joined)
+
+    def test_message_structure_log_detects_empty_final_user_message(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw(
+                "/v1/chat/completions",
+                {
+                    "model": "gemma4:26b",
+                    "messages": [
+                        {"role": "system", "content": "Hidden context."},
+                        {"role": "user", "content": "   "},
+                    ],
+                },
+            )
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertTrue(record.final_user_message_empty)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("Hidden context", joined)
+
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
 
@@ -285,6 +372,12 @@ class ModelRouterAdapterTest(unittest.TestCase):
             if getattr(record, "event", "") == "model_router_adapter.response_shape":
                 return record
         self.fail("response shape log record was not emitted")
+
+    def _message_structure_log_record(self, records):
+        for record in records:
+            if getattr(record, "event", "") == "model_router_adapter.message_structure":
+                return record
+        self.fail("message structure log record was not emitted")
 
 
 if __name__ == "__main__":

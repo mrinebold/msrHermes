@@ -10,11 +10,25 @@ def prompt_from_messages(messages: list[dict[str, Any]]) -> str:
     parts: list[str] = []
     for message in messages:
         role = str(message.get("role", "user"))
-        content = message.get("content", "")
-        if isinstance(content, list):
-            content = " ".join(str(item.get("text", item)) for item in content)
+        content = message_content_text(message.get("content", ""))
         parts.append(f"{role}: {content}")
     return "\n".join(parts).strip()
+
+
+def message_content_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for item in content:
+            if isinstance(item, dict):
+                parts.append(str(item.get("text", "")))
+            else:
+                parts.append(str(item))
+        return " ".join(parts)
+    if content is None:
+        return ""
+    return str(content)
 
 
 def normalize_models(data: Any) -> list[dict[str, Any]]:

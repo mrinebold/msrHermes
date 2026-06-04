@@ -18,6 +18,7 @@ class AdapterConfig:
     default_task_type: str = DEFAULT_TASK_TYPE
     log_requests: bool = False
     log_response_shapes: bool = False
+    log_message_structure: bool = False
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "AdapterConfig":
@@ -28,6 +29,7 @@ class AdapterConfig:
             default_task_type=values.get("MODEL_ROUTER_ADAPTER_TASK_TYPE", DEFAULT_TASK_TYPE),
             log_requests=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_REQUESTS", False),
             log_response_shapes=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES", False),
+            log_message_structure=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE", False),
         )
 
 

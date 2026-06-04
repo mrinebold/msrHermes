@@ -16,6 +16,7 @@ from .schemas import (
     chat_completion_response,
     chat_completion_stream_chunks,
     error_response,
+    message_content_text,
     models_response,
     normalize_models,
     prompt_from_messages,
@@ -92,6 +93,7 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 model = str(payload.get("model") or "")
                 selected_model = model
                 task_type = str(payload.get("task_type") or config.default_task_type)
+                self._log_message_structure(payload, messages, streaming_requested)
                 prompt = prompt_from_messages(messages)
                 route_response = router.generate(RouteRequest(task_type=task_type, prompt=prompt, model=model or None))
                 selected_model = str(getattr(route_response, "model", model) or model)
@@ -185,12 +187,70 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
             }
             LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
 
+        def _log_message_structure(
+            self,
+            payload: dict[str, Any],
+            messages: list[Any],
+            streaming_requested: bool,
+        ) -> None:
+            if not config.log_message_structure:
+                return
+
+            roles: list[str] = []
+            char_counts: list[int] = []
+            final_user_length: int | None = None
+            contains_file_content = False
+            for message in messages:
+                if not isinstance(message, dict):
+                    role = "unknown"
+                    text = ""
+                else:
+                    role = str(message.get("role", "user"))
+                    text = message_content_text(message.get("content", ""))
+                roles.append(role)
+                char_counts.append(len(text))
+                if role == "user":
+                    final_user_length = len(text.strip())
+                if _looks_like_file_content(text):
+                    contains_file_content = True
+
+            metadata = {
+                "event": "model_router_adapter.message_structure",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "path": self.path,
+                "message_count": len(messages),
+                "roles_present": sorted(set(roles)),
+                "message_char_counts": char_counts,
+                "final_user_message_empty": final_user_length in (None, 0),
+                "any_message_contains_file_content": contains_file_content,
+                "tools_present": bool(payload.get("tools")),
+                "tool_choice_present": "tool_choice" in payload,
+                "max_tokens_present": "max_tokens" in payload or "max_completion_tokens" in payload,
+                "temperature_present": "temperature" in payload,
+                "stream_present": "stream" in payload,
+                "streaming_requested": streaming_requested,
+            }
+            LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
+
     return ModelRouterAdapterHandler
+
+
+def _looks_like_file_content(text: str) -> bool:
+    if not text:
+        return False
+    stripped = text.lstrip()
+    return (
+        stripped.startswith("# ")
+        or "\n# " in text
+        or "```" in text
+        or text.count("\n") >= 3
+        or "---\n" in text
+    )
 
 
 def main() -> None:
     config = AdapterConfig.from_env()
-    if config.log_requests or config.log_response_shapes:
+    if config.log_requests or config.log_response_shapes or config.log_message_structure:
         logging.basicConfig(level=logging.INFO, format="%(message)s")
     if config.host != "127.0.0.1":
         raise SystemExit("MODEL_ROUTER_ADAPTER_HOST must be 127.0.0.1 for Phase 5G")

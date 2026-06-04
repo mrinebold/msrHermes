@@ -2,6 +2,16 @@
 
 ## 2026-06-04
 
+- Completed Phase 5P Hermes file-summary prompt behavior diagnosis without running live prompts.
+- Inspected the adapter/router path and confirmed the adapter converts all OpenAI-style messages in order into a single router prompt; it does not read only the first message, last message, or user messages only.
+- Confirmed `services/model_router` receives that plain prompt string and the DevMonster provider sends it to Ollama `/api/generate`, then maps the returned `response` field into chat-completion content.
+- Inspected local Hermes one-shot source and confirmed `hermes -z` still uses the normal `AIAgent` chat path, which may include multi-message context, tools, tool-choice hints, streaming options, and repeated tool/retry turns.
+- Added `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true` for metadata-only diagnostics.
+- Message-structure logs record message count, roles present, character counts per message, final-user-message emptiness, file-content heuristic status, and request option presence for tools, tool choice, max tokens, temperature, and streaming.
+- Added tests proving message-structure logs redact prompt text, file contents, tool descriptions, and other content.
+- Added `docs/HERMES_FILE_SUMMARY_DIAGNOSTIC.md`.
+- Recommended Phase 5Q as one bounded sandbox file-summary diagnostic with request, response-shape, and message-structure logging enabled.
+- Confirmed no live prompts, persistent Hermes config changes, cloud providers, real API keys, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5O Hermes sandbox summaries after the SSE adapter fix.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging and response-shape logging enabled.
 - Ran two bounded one-shot summary attempts from an isolated temporary `HERMES_HOME` against synthetic sandbox inputs only.
