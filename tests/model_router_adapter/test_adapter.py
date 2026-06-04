@@ -82,6 +82,57 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertEqual(self.router.last_request.model, "gemma4:26b")
         self.assertIn("Summarize sandbox note.", self.router.last_request.prompt)
 
+    def test_chat_completions_stream_false_uses_json_response(self):
+        status, headers, body = self._post_raw(
+            "/v1/chat/completions",
+            {
+                "model": "gemma4:26b",
+                "stream": False,
+                "messages": [{"role": "user", "content": "Summarize sandbox note."}],
+            },
+        )
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["content-type"], "application/json")
+        payload = json.loads(body)
+        self.assertEqual(payload["object"], "chat.completion")
+        self.assertEqual(payload["choices"][0]["message"]["content"], "Sandbox summary.")
+
+    def test_streaming_chat_completions_returns_event_stream(self):
+        status, headers, body = self._post_raw(
+            "/v1/chat/completions",
+            {
+                "model": "gemma4:26b",
+                "stream": True,
+                "messages": [{"role": "user", "content": "Summarize sandbox note."}],
+            },
+        )
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["content-type"], "text/event-stream")
+        self.assertEqual(headers["cache-control"], "no-cache")
+        self.assertEqual(headers["connection"], "keep-alive")
+        self.assertTrue(body.endswith("data: [DONE]\n\n"))
+
+    def test_streaming_chat_completions_includes_delta_content(self):
+        status, _, body = self._post_raw(
+            "/v1/chat/completions",
+            {
+                "model": "gemma4:26b",
+                "stream": True,
+                "messages": [{"role": "user", "content": "Summarize sandbox note."}],
+            },
+        )
+
+        self.assertEqual(status, 200)
+        chunks = self._sse_json_chunks(body)
+        self.assertEqual(chunks[0]["object"], "chat.completion.chunk")
+        self.assertEqual(chunks[0]["model"], "gemma4:26b")
+        self.assertEqual(chunks[0]["choices"][0]["delta"]["content"], "Sandbox summary.")
+        self.assertIsNone(chunks[0]["choices"][0]["finish_reason"])
+        self.assertEqual(chunks[1]["choices"][0]["delta"], {})
+        self.assertEqual(chunks[1]["choices"][0]["finish_reason"], "stop")
+
     def test_refuses_unknown_get_endpoint(self):
         status, payload = self._get("/v1/embeddings")
 
@@ -93,7 +144,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.handler_cls = make_handler(self.router, self.config)
 
         with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
-            status, _ = self._post(
+            status, _, _ = self._post_raw(
                 "/v1/chat/completions",
                 {
                     "model": "gemma4:26b",
@@ -141,7 +192,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.handler_cls = make_handler(self.router, self.config)
 
         with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
-            status, _ = self._post(
+            status, _, _ = self._post_raw(
                 "/v1/chat/completions",
                 {
                     "model": "gemma4:26b",
@@ -175,7 +226,14 @@ class ModelRouterAdapterTest(unittest.TestCase):
     def _post(self, path, payload):
         return self._request("POST", path, payload)
 
+    def _post_raw(self, path, payload):
+        return self._request_raw("POST", path, payload)
+
     def _request(self, method, path, payload):
+        status, _, response_body = self._request_raw(method, path, payload)
+        return status, json.loads(response_body)
+
+    def _request_raw(self, method, path, payload):
         body = b"" if payload is None else json.dumps(payload).encode("utf-8")
         handler = self.handler_cls.__new__(self.handler_cls)
         handler.command = method
@@ -197,9 +255,24 @@ class ModelRouterAdapterTest(unittest.TestCase):
 
         raw = handler.wfile.getvalue()
         header_block, response_body = raw.split(b"\r\n\r\n", 1)
-        status_line = header_block.splitlines()[0].decode("utf-8")
+        header_lines = [line.decode("utf-8") for line in header_block.splitlines()]
+        status_line = header_lines[0]
         status = int(status_line.split()[1])
-        return status, json.loads(response_body.decode("utf-8"))
+        headers = {}
+        for line in header_lines[1:]:
+            if ":" in line:
+                key, value = line.split(":", 1)
+                headers[key.lower()] = value.strip()
+        return status, headers, response_body.decode("utf-8")
+
+    def _sse_json_chunks(self, body):
+        chunks = []
+        for frame in body.split("\n\n"):
+            if not frame.strip() or frame == "data: [DONE]":
+                continue
+            self.assertTrue(frame.startswith("data: "))
+            chunks.append(json.loads(frame[len("data: ") :]))
+        return chunks
 
     def _request_log_record(self, records):
         for record in records:

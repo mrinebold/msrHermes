@@ -81,6 +81,40 @@ def chat_completion_response(route_response: Any, request_model: str) -> dict[st
     }
 
 
+def chat_completion_stream_chunks(route_response: Any, request_model: str) -> list[dict[str, Any]]:
+    created = int(time.time())
+    model = getattr(route_response, "model", request_model)
+    text = getattr(route_response, "text", "")
+    chunk_id = f"chatcmpl-msr-{created}"
+    return [
+        {
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [
+                {
+                    "index": 0,
+                    "delta": {"content": text},
+                    "finish_reason": None,
+                }
+            ],
+        },
+        {
+            "id": chunk_id,
+            "object": "chat.completion.chunk",
+            "created": created,
+            "model": model,
+            "choices": [
+                {
+                    "index": 0,
+                    "delta": {},
+                    "finish_reason": "stop",
+                }
+            ],
+        },
+    ]
+
+
 def error_response(message: str, code: str = "adapter_error") -> dict[str, Any]:
     return {"error": {"message": message, "type": code}}
-

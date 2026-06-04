@@ -2,6 +2,14 @@
 
 ## 2026-06-04
 
+- Completed Phase 5M streaming SSE support for the localhost Model Router adapter.
+- Updated `POST /v1/chat/completions` so requests with `stream=true` return OpenAI-compatible `text/event-stream`.
+- Implemented the first streaming path as full router generation followed by one `choices[0].delta.content` chunk, one finish chunk, and `data: [DONE]`.
+- Preserved existing non-streaming JSON behavior for requests with `stream=false` or no `stream` field.
+- Kept the adapter endpoint surface unchanged: `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
+- Added mocked tests for event-stream headers, delta content, `[DONE]`, explicit `stream=false` JSON behavior, response-shape metadata redaction, and unknown endpoint rejection.
+- Confirmed prompt text and model output are not logged by default.
+- Confirmed no live prompts, persistent Hermes config, cloud providers, real API keys, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5L Hermes response contract diagnosis.
 - Inspected Hermes provider/client code locally under `~/.hermes/hermes-agent` without modifying Hermes source.
 - Confirmed Hermes non-streaming chat-completions parsing expects `choices[0].message.content`, `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, optional reasoning fields, and optional `usage`.

@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5L complete. Local Hermes source inspection found the likely stdout issue: Hermes prefers streaming chat completions, while the adapter currently returns non-streaming JSON even when `stream=true`.
+Phase 5M complete. The localhost Model Router adapter now supports OpenAI-compatible SSE streaming for `POST /v1/chat/completions` when Hermes sends `stream=true`.
 
-Local repository status: complete work through Phase 5H retry has been published. Phase 5I through Phase 5L are local until the next approved push.
+Local repository status: complete work through Phase 5H retry has been published. Phase 5I through Phase 5M are local until the next approved push.
 
 ## Architecture Decision
 
@@ -34,6 +34,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5J | Complete | Added adapter request logging and documented Hermes CLI one-shot invocation behavior without sending live prompts. |
 | Phase 5K | Complete | Ran one bounded `hermes -z` diagnostic; Hermes called the adapter, including chat completions, but stdout remained `(empty)`. |
 | Phase 5L | Complete | Diagnosed Hermes' chat-completions response contract and added metadata-only adapter response-shape logging. |
+| Phase 5M | Complete | Added OpenAI-compatible SSE support for `stream=true` chat-completions requests with mocked tests only. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -73,6 +74,7 @@ Completed and committed locally:
 - Phase 5J Hermes CLI diagnosis: local help/docs confirm top-level `hermes -z` / `--oneshot` is the intended stdout-only scriptable prompt path; `hermes chat -q` is non-interactive chat but can include session behavior; this installed Hermes version has no `hermes run` command; local OpenAI-compatible endpoints should use `model.provider=custom` and `model.base_url=http://127.0.0.1:8088/v1`.
 - Phase 5K one-shot diagnostic: one bounded `hermes -z "Reply with exactly: Hermes adapter diagnostic."` run completed in 45.539s with exit code 0, stdout 8 bytes containing `(empty)`, and stderr 0 bytes. Adapter request metadata confirmed Hermes called `GET /v1/models` twice and `POST /v1/chat/completions` four times; all chat calls returned 200 with selected model `gemma4:26b`. Hermes also probed unsupported discovery endpoints that returned 404. The adapter was stopped immediately after validation and no `8088` listener remained.
 - Phase 5L response-contract diagnosis: local Hermes source inspection showed non-streaming parsing expects `choices[0].message.content`, `finish_reason`, optional tool calls, reasoning fields, and usage, which the adapter already provides. Hermes' default chat-completions path sends `stream=true` and expects SSE chunks with `choices[0].delta.content`; the adapter does not yet implement streaming. Added `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true` for metadata-only response-shape diagnostics.
+- Phase 5M streaming adapter support: `POST /v1/chat/completions` now returns OpenAI-compatible `text/event-stream` when `stream=true`, emitting one content delta chunk, one finish chunk, and `data: [DONE]` after the router completes. Requests with `stream=false` or no stream field keep the existing non-streaming JSON behavior. No live Hermes prompt was run in Phase 5M.
 
 Not completed or not approved:
 
@@ -114,7 +116,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5M should add OpenAI-compatible SSE handling to the existing `POST /v1/chat/completions` endpoint for `stream=true`, then run mocked tests only unless a separate live prompt validation phase is approved. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5N should run one bounded Hermes one-shot diagnostic against the SSE-enabled adapter with isolated `HERMES_HOME`, request logging, and response-shape logging. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -139,6 +141,8 @@ Phase 5J confirmed the next diagnostic should use top-level `hermes -z` / `--one
 Phase 5K proved `hermes -z` reaches the localhost adapter and receives 200 responses from `/v1/chat/completions`, but it still prints `(empty)`. The remaining investigation should focus on Hermes' custom-provider wire contract, streaming expectations, response parsing, and model capability discovery probes before expanding the adapter or rerunning prompts.
 
 Phase 5L determined the adapter's non-streaming response shape matches Hermes' non-streaming parser, but Hermes prefers streaming by default. The recommended adapter fix is to support OpenAI-compatible SSE chunks for `stream=true` within the already-approved chat-completions endpoint, while leaving unsupported discovery endpoints out of scope until separately approved.
+
+Phase 5M implemented that SSE fix in the adapter using mocked tests only. The endpoint surface remains limited to `GET /health`, `GET /v1/models`, and `POST /v1/chat/completions`.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

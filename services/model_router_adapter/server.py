@@ -14,6 +14,7 @@ from services.model_router.router import ModelRouter, RouteRequest
 from .config import AdapterConfig
 from .schemas import (
     chat_completion_response,
+    chat_completion_stream_chunks,
     error_response,
     models_response,
     normalize_models,
@@ -97,7 +98,10 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 status = 200
                 response_payload = chat_completion_response(route_response, model)
                 self._log_response_shape(response_payload, streaming_requested)
-                self._write_json(status, response_payload)
+                if streaming_requested:
+                    self._write_sse(status, chat_completion_stream_chunks(route_response, model))
+                else:
+                    self._write_json(status, response_payload)
             except ValueError as exc:
                 status = 400
                 self._write_json(status, error_response(str(exc), "bad_request"))
@@ -129,6 +133,18 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
             encoded = json.dumps(payload).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(encoded)))
+            self.end_headers()
+            self.wfile.write(encoded)
+
+        def _write_sse(self, status: int, chunks: list[dict[str, Any]]) -> None:
+            encoded_chunks = [f"data: {json.dumps(chunk)}\n\n".encode("utf-8") for chunk in chunks]
+            encoded_chunks.append(b"data: [DONE]\n\n")
+            encoded = b"".join(encoded_chunks)
+            self.send_response(status)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
             self.send_header("Content-Length", str(len(encoded)))
             self.end_headers()
             self.wfile.write(encoded)

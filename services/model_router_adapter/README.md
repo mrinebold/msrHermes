@@ -30,9 +30,9 @@ Set `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true` only for bounded diagnostics
 
 Hermes' non-streaming OpenAI-compatible parser expects `choices[0].message.content`, `choices[0].finish_reason`, optional `choices[0].message.tool_calls`, and optional `usage`.
 
-Hermes' default chat-completions path prefers streaming, including in quiet one-shot mode. For `stream=true`, Hermes expects OpenAI-compatible SSE chat-completion chunks using `choices[0].delta.content`, followed by a terminal chunk with `finish_reason`.
+Hermes' default chat-completions path prefers streaming, including in quiet one-shot mode. For `stream=true`, Hermes expects OpenAI-compatible SSE chat-completion chunks using `choices[0].delta.content`, followed by a terminal chunk with `finish_reason` and `data: [DONE]`.
 
-The current adapter returns non-streaming JSON from `POST /v1/chat/completions`. That shape is correct for non-streaming requests but is not sufficient for Hermes' default streaming path.
+The adapter keeps non-streaming JSON for requests without `stream=true` and returns `text/event-stream` for requests with `stream=true`. The first streaming implementation waits for `services/model_router` to return the full response, then emits one content delta chunk, one finish chunk, and `data: [DONE]`.
 
 ## Endpoints
 

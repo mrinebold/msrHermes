@@ -389,3 +389,32 @@ Recommended adapter fix:
 Implement OpenAI-compatible SSE responses inside the existing `POST /v1/chat/completions` endpoint when `stream=true`. The initial implementation may stream the completed router response as one content chunk after model generation completes. Keep the current non-streaming JSON path for requests without `stream=true`.
 
 Do not add new Hermes discovery endpoints in the same fix. The unsupported discovery probes from Phase 5K should remain a separate compatibility decision because Phase 5G intentionally limited the adapter surface.
+
+## Phase 5M Streaming SSE Support
+
+Status: complete on 2026-06-04.
+
+The adapter now supports the OpenAI-compatible streaming behavior Hermes expects on the existing chat-completions endpoint.
+
+Implemented behavior:
+
+| Request | Response |
+| --- | --- |
+| `POST /v1/chat/completions` with `stream=true` | `text/event-stream` with one content delta chunk, one finish chunk, then `data: [DONE]` |
+| `POST /v1/chat/completions` with `stream=false` | Existing non-streaming JSON response |
+| `POST /v1/chat/completions` without `stream` | Existing non-streaming JSON response |
+
+The first streaming implementation remains simple and governed: it waits for `services/model_router` to complete, then emits a valid SSE transcript. This fixes the wire contract Hermes expects without exposing new endpoints, changing Hermes configuration, adding credentials, or starting background services.
+
+Mocked tests cover:
+
+- `stream=true` returns `text/event-stream`
+- `stream=true` includes `choices[0].delta.content`
+- `stream=true` ends with `data: [DONE]`
+- `stream=false` keeps JSON behavior
+- response-shape logging remains metadata-only
+- unknown endpoints still return 404
+
+Next recommended phase:
+
+Phase 5N should run one bounded live `hermes -z` adapter diagnostic against the SSE-enabled adapter. Keep it separate from file-summary validation and from any decision to support Hermes' optional discovery probes.

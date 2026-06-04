@@ -223,3 +223,34 @@ Implement OpenAI-compatible SSE handling for `POST /v1/chat/completions` when th
 5. `[DONE]`
 
 Keep the endpoint surface unchanged. Do not add new endpoints unless a later phase explicitly approves Hermes model-discovery compatibility work.
+
+## Phase 5M Streaming SSE Support
+
+Implementation date: 2026-06-04.
+
+The localhost adapter now supports Hermes' default streaming chat-completions behavior without changing the approved endpoint surface.
+
+Behavior:
+
+- `POST /v1/chat/completions` with `stream=true` returns `Content-Type: text/event-stream`.
+- The adapter still calls `services/model_router` and waits for the full response first.
+- After the router response returns, the adapter emits one OpenAI-compatible content delta chunk, one finish chunk, and `data: [DONE]`.
+- `POST /v1/chat/completions` with `stream=false` or no `stream` field keeps the existing non-streaming JSON response.
+
+Streaming chunks use:
+
+```text
+data: {"object": "chat.completion.chunk", "choices": [{"delta": {"content": "..."}, "finish_reason": null}]}
+
+data: {"object": "chat.completion.chunk", "choices": [{"delta": {}, "finish_reason": "stop"}]}
+
+data: [DONE]
+```
+
+The implementation does not log prompt text or model output by default. Response-shape diagnostics remain metadata-only.
+
+No Hermes command was run in Phase 5M. No live prompts, persistent Hermes config, cloud providers, real API keys, background services, Google, Supabase, Home Assistant, Helio, or Agent Bus access were used.
+
+Recommended next phase:
+
+Phase 5N should run one bounded `hermes -z` diagnostic against the SSE-enabled adapter using an isolated `HERMES_HOME`, request logging, and response-shape logging. Do not run file summaries or broaden endpoint support in the same phase.
