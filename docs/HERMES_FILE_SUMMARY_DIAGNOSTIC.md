@@ -552,3 +552,38 @@ MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
 ```
 
 Keep `sample_prd.md` out of scope until `sample_note.md` produces usable output.
+
+## Phase 5AA Tuned Local Summary Success
+
+Validation date: 2026-06-05.
+
+One bounded Hermes file-summary retry was run against `sandbox/input/sample_note.md` only with:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+```
+
+| Check | Result |
+| --- | --- |
+| Hermes exit code | 0 |
+| Elapsed time | 112.635s |
+| Stdout file | `sandbox/output/sample_note_phase5aa_summary.md` |
+| Stdout byte count | 285 |
+| Stderr byte count | 0 |
+| Output usable | Yes |
+| Adapter shutdown | Stopped immediately; no listener remained on `8088` |
+| Chat completion | 1 call, status 200 |
+| Selected model | `gemma4:26b` |
+| Response content length | 284 |
+| Context truncation | 2899 -> 1499 chars |
+| Timeout used | 120s |
+
+Conclusion:
+
+The tuned local-summary path produced the first usable Hermes sandbox summary through the localhost adapter.
+
+Recommendation:
+
+Phase 5AB should repeat the same tuned settings for `sandbox/input/sample_prd.md` only, still using an isolated `HERMES_HOME`, foreground adapter, no cloud credentials, and no background services.

@@ -302,3 +302,25 @@ Truncation preserves the beginning and end of extracted context and records only
 Recommendation:
 
 The next live retry should test timeout 120 plus context budget 1500 together. If that still times out, reduce the context budget further before considering any broader Hermes or provider changes.
+
+## Phase 5AA Tuned Local Summary Success
+
+Validation date: 2026-06-05.
+
+The tuned `local_summary` retry succeeded:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `local_summary` |
+| Provider timeout | 120s |
+| Context budget | 1500 chars |
+| Context truncation | 2899 -> 1499 chars |
+| Chat-completion calls | 1 |
+| Status | 200 |
+| Selected model | `gemma4:26b` |
+| Response content length | 284 |
+| Output usable | yes |
+
+Conclusion:
+
+Hermes file-summary compatibility no longer appears blocked by tool schemas, Hermes scaffold, SSE transport, or model timeout for the tuned `sample_note.md` path. The validated baseline is local-summary extraction plus a 1500-character context budget and 120-second provider timeout.

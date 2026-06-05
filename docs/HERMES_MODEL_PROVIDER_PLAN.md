@@ -914,3 +914,38 @@ New metadata-only fields:
 Recommendation:
 
 For the next bounded live retry, keep the adapter localhost-only and run one `sample_note.md` validation with local compat mode, `local_summary`, provider timeout 120 seconds, and context budget 1500 characters. Do not run `sample_prd.md` until `sample_note.md` is usable.
+
+## Phase 5AA Tuned Local Summary Success
+
+Status: complete on 2026-06-05.
+
+The tuned local summary validation succeeded with:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+```
+
+| Check | Result |
+| --- | --- |
+| Hermes exit code | 0 |
+| Elapsed time | 112.635s |
+| Stdout | 285 bytes |
+| Stderr | 0 bytes |
+| Output file | `sandbox/output/sample_note_phase5aa_summary.md` |
+| Output usable | Yes |
+| Adapter shutdown | stopped; no `8088` listener remained |
+| Chat completion | 1 call, status 200 |
+| Selected model | `gemma4:26b` |
+| Response content length | 284 |
+| Context truncation | 2899 -> 1499 chars |
+| Timeout used | 120s |
+
+Conclusion:
+
+The local adapter can now produce usable Hermes sandbox summary output through the governed localhost model router path.
+
+Recommendation:
+
+Keep these settings as the current validated baseline for Hermes file-summary work. The next live validation should use the same settings for `sample_prd.md` in a separate approved phase.

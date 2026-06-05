@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5Z complete. The adapter/router now support local summary context budgeting and configurable local provider timeout for the next bounded retry.
+Phase 5AA complete. Hermes produced a usable `sample_note.md` summary through the localhost adapter using tuned local-summary settings.
 
-Local repository status: complete work through Phase 5U has been published. Phase 5V through 5Z are local until the next approved push.
+Local repository status: complete work through Phase 5U has been published. Phase 5V through 5AA are local until the next approved push.
 
 ## Architecture Decision
 
@@ -48,6 +48,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5X | Complete | Added `local_summary` prompt mode to extract user instruction and file-like context while dropping unrelated Hermes scaffold. |
 | Phase 5Y | Complete | Ran one bounded sample-note retry with `local_summary`; prompt extraction succeeded, but DevMonster/Gemma timed out after 30s on each retry. |
 | Phase 5Z | Complete | Added provider timeout and local summary context-budget controls; no live prompts were run. |
+| Phase 5AA | Complete | Ran one bounded tuned local-summary retry for `sample_note.md`; Hermes produced usable five-bullet output. |
 | Phase DESKTOP-1 | Complete | Added planning-only Hermes Desktop install roadmap and safety gates; Desktop was not downloaded or installed. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
@@ -102,6 +103,7 @@ Completed and committed locally:
 - Phase 5X local summary prompt mode: no live Hermes prompts or live model calls were run. Added `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, which extracts the latest user instruction plus file-like context, uses file-like system/developer context only when needed, omits tool schemas and tool-choice semantics, avoids role-labeled full transcripts, drops unrelated Hermes scaffold, and fails closed when no useful instruction/context pair is found. Added metadata-only logs for instruction/context character counts, dropped system characters, dropped tool schema count, and extraction success.
 - Phase 5Y local summary live validation: one bounded `sample_note.md` Hermes file-summary test completed in 101.268s with exit code 0, stdout 110 bytes, and stderr 0 bytes. The output was not a usable summary; it contained a provider timeout diagnostic. Adapter metadata showed three `POST /v1/chat/completions` attempts, all `502` after about 30s, selected model `gemma4:26b`. Prompt metadata confirmed `gemma_prompt_mode=local_summary`, extraction success, `prompt_total_chars=3139`, `instruction_chars=83`, `context_chars=2899`, `dropped_system_chars=5628`, `dropped_tool_schema_count=26`, and `tool_schemas_forwarded=false`.
 - Phase 5Z timeout/context tuning: no live Hermes prompts or live model calls were run. Added `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` as the primary local provider timeout setting with `GEMMA_TIMEOUT` preserved as a legacy fallback. Added `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` with default 3000. `local_summary` now preserves the beginning and end of context when truncation is needed and logs metadata-only fields for original context chars, sent context chars, truncation status, and timeout seconds.
+- Phase 5AA tuned local summary validation: one bounded `sample_note.md` Hermes file-summary test completed in 112.635s with exit code 0, stdout 285 bytes, and stderr 0 bytes. Output was usable. Adapter metadata showed one `POST /v1/chat/completions` call, status 200, selected model `gemma4:26b`, response content length 284, context truncated from 2899 to 1499 chars, and timeout used 120s.
 - Phase DESKTOP-1 planning: added the official Nous Research Hermes Desktop roadmap. Desktop is deferred until Hermes CLI can produce useful sandbox output through the localhost adapter. Desktop must be installed before resident/background operation and before durable credentials are granted, but only after explicit approval. Safety gates require official download source, macOS identity verification if possible, no Nous Portal login, no cloud credentials, no broad filesystem grants, no background operation, no Google/Supabase/Home Assistant/Helio/Agent Bus connection, and localhost adapter use if configurable.
 
 Not completed or not approved:
@@ -145,7 +147,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5AA should run one bounded `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`, and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`. Keep `sample_prd.md` out of scope until `sample_note.md` can produce usable output. Hermes Desktop must remain planning-only until the CLI/local adapter path produces useful sandbox output and a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain planning-only until the CLI/local adapter path produces useful sandbox output for both sandbox files and a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -198,6 +200,8 @@ Phase 5X implemented that compact local summary prompt mode with mocked tests on
 Phase 5Y confirmed local summary extraction works and changes the failure mode from zero-content 200s to 30-second provider timeouts. The next blocker is router/provider timeout or context budgeting.
 
 Phase 5Z added the timeout and context-budget controls needed for the next bounded live retry.
+
+Phase 5AA confirmed the tuned settings produce usable Hermes summary output for `sample_note.md`.
 
 Phase DESKTOP-1 added Hermes Desktop to the roadmap as a future official Nous Research install only. Desktop is gated after useful CLI/local-adapter sandbox output and before resident/background operation or durable credentials.
 

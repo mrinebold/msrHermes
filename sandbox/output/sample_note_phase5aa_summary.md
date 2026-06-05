@@ -1,0 +1,5 @@
+- Execute tool calls immediately upon promising an action.
+- Continue working until tasks are fully completed.
+- Use simple text instead of markdown for terminal compatibility.
+- Avoid using MEDIA:/path tags in responses.
+- Do not modify other profiles or memories without permission.

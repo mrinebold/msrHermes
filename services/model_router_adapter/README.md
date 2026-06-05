@@ -84,6 +84,8 @@ MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
 MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
 ```
 
+These settings were validated successfully for `sandbox/input/sample_note.md` in Phase 5AA. The adapter produced one successful chat completion with `gemma4:26b`, response content length 284, and usable five-bullet output.
+
 ## Endpoints
 
 The adapter exposes only:

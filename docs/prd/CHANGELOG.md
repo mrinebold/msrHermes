@@ -2,6 +2,15 @@
 
 ## 2026-06-05
 
+- Completed Phase 5AA tuned local-summary validation.
+- Used `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`, and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`.
+- Ran one bounded `sample_note.md` retry through the localhost adapter with isolated `HERMES_HOME`, dummy local API key, and no persistent Hermes config.
+- Recorded Hermes exit code 0, elapsed time 112.635s, stdout 285 bytes, stderr 0 bytes, and output file `sandbox/output/sample_note_phase5aa_summary.md`.
+- Confirmed the adapter was stopped immediately and no `8088` listener remained.
+- Confirmed one chat-completion call returned status 200 with selected model `gemma4:26b` and response content length 284.
+- Confirmed context truncation from 2899 to 1499 chars and timeout used 120s.
+- Marked output usable.
+- Recommended Phase 5AB as the same tuned settings against `sample_prd.md` only.
 - Completed Phase 5Z local summary timeout and context-budget tuning.
 - Added `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` as the primary local provider timeout env var; `GEMMA_TIMEOUT` remains a legacy fallback.
 - Added `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` with default 3000.
