@@ -50,6 +50,8 @@ class ModelRouterAdapterTest(unittest.TestCase):
                 "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE": "true",
                 "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE": "true",
                 "MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "local_summary",
+                "MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS": "1500",
+                "MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS": "120",
             }
         )
 
@@ -58,6 +60,8 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertTrue(config.log_message_structure)
         self.assertTrue(config.local_compat_mode)
         self.assertEqual(config.gemma_prompt_mode, "local_summary")
+        self.assertEqual(config.local_summary_max_context_chars, 1500)
+        self.assertEqual(config.provider_timeout_seconds, 120.0)
 
     def test_invalid_gemma_prompt_mode_defaults_to_flattened(self):
         config = AdapterConfig.from_env({"MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "unsafe"})
@@ -464,6 +468,21 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("HERMES_SYSTEM_SCAFFOLD", prompt)
         self.assertNotIn("Source file:", prompt)
 
+    def test_gemma_prompt_mode_local_summary_applies_context_budget(self):
+        prompt = gemma_prompt_from_messages(
+            [
+                {"role": "user", "content": "Summarize in exactly five concise bullets.\n\n# Sample Note\n" + ("A" * 120) + "\n" + ("Z" * 120)},
+            ],
+            "local_summary",
+            max_context_chars=80,
+        )
+
+        context = prompt.split("Document/context:\n", 1)[1].split("\n\nReturn only", 1)[0]
+        self.assertLessEqual(len(context), 80)
+        self.assertIn("A", context)
+        self.assertIn("Z", context)
+        self.assertIn("truncated", context)
+
     def test_gemma_prompt_mode_local_summary_uses_file_like_system_context_when_user_has_instruction(self):
         prompt = gemma_prompt_from_messages(
             [
@@ -547,6 +566,25 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertTrue(body.endswith("data: [DONE]\n\n"))
         chunks = self._sse_json_chunks(body)
         self.assertEqual(chunks[0]["choices"][0]["delta"]["content"], "Sandbox summary.")
+
+    def test_local_summary_prompt_mode_uses_configured_context_budget(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+            local_summary_max_context_chars=120,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+        payload = self._local_summary_payload(context_line_count=30)
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        context = self.router.last_request.prompt.split("Document/context:\n", 1)[1].split("\n\nReturn only", 1)[0]
+        self.assertLessEqual(len(context), 120)
+        self.assertIn("truncated", context)
 
     def test_local_compat_mode_uses_configured_gemma_prompt_mode(self):
         self.config = AdapterConfig(
@@ -743,6 +781,9 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertTrue(record.local_summary_extraction_success)
         self.assertGreater(record.instruction_chars, 0)
         self.assertGreater(record.context_chars, 0)
+        self.assertGreater(record.context_original_chars, 0)
+        self.assertEqual(record.context_sent_chars, record.context_chars)
+        self.assertFalse(record.context_truncated)
         self.assertGreater(record.dropped_system_chars, 0)
         self.assertEqual(record.dropped_tool_schema_count, 1)
         joined = "\n".join(log.getMessage() for log in logs.records)
@@ -750,6 +791,33 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("SANITIZED_CONTEXT_LINE", joined)
         self.assertNotIn("HERMES_SYSTEM_SCAFFOLD", joined)
         self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", joined)
+
+    def test_local_summary_truncation_metadata_log_redacts_context(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+            local_summary_max_context_chars=100,
+            provider_timeout_seconds=120.0,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw("/v1/chat/completions", self._local_summary_payload(context_line_count=40))
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertTrue(record.local_summary_extraction_success)
+        self.assertTrue(record.context_truncated)
+        self.assertGreater(record.context_original_chars, record.context_sent_chars)
+        self.assertEqual(record.context_sent_chars, record.context_chars)
+        self.assertEqual(record.timeout_seconds, 120.0)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("SANITIZED_CONTEXT_LINE", joined)
+        self.assertNotIn("SANITIZED_SUMMARY_REQUEST", joined)
 
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
@@ -849,7 +917,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
             ],
         }
 
-    def _local_summary_payload(self):
+    def _local_summary_payload(self, context_line_count=4):
         return {
             "model": "gemma4:26b",
             "stream": True,
@@ -859,7 +927,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
                     "content": (
                         "HERMES_SYSTEM_SCAFFOLD tool schema call\n"
                         "# Sample Note\n"
-                        + "\n".join(["SANITIZED_CONTEXT_LINE"] * 4)
+                        + "\n".join(["SANITIZED_CONTEXT_LINE"] * context_line_count)
                     ),
                 },
                 {"role": "user", "content": "SANITIZED_SUMMARY_REQUEST"},

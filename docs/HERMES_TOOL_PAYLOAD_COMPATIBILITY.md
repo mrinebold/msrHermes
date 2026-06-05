@@ -283,3 +283,22 @@ The compact prompt mode successfully removed the unrelated Hermes scaffold and e
 Recommendation:
 
 Treat the next blocker as a local router/provider timeout issue for compact summary prompts, not a Hermes tool-schema compatibility issue. Do not run more live retries until timeout/context-budget behavior is adjusted or diagnosed.
+
+## Phase 5Z Timeout And Context Budget Controls
+
+Implementation date: 2026-06-05.
+
+Phase 5Z added offline controls for the provider timeout and local summary context budget. No live Hermes prompts or model calls were run.
+
+New controls:
+
+| Variable | Purpose | Next retry value |
+| --- | --- | --- |
+| `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` | Local provider HTTP timeout for `services/model_router`. | `120` |
+| `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` | Maximum context characters sent by `local_summary`. | `1500` |
+
+Truncation preserves the beginning and end of extracted context and records only metadata: original context length, sent context length, and truncation status.
+
+Recommendation:
+
+The next live retry should test timeout 120 plus context budget 1500 together. If that still times out, reduce the context budget further before considering any broader Hermes or provider changes.

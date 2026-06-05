@@ -35,7 +35,10 @@ class ModelRouterConfig:
             fast_local_model=os.getenv("FAST_LOCAL_MODEL", DEFAULT_FAST_LOCAL_MODEL),
             openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
-            timeout_seconds=_float_env("GEMMA_TIMEOUT", DEFAULT_TIMEOUT_SECONDS),
+            timeout_seconds=_float_env(
+                "MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS",
+                _float_env("GEMMA_TIMEOUT", DEFAULT_TIMEOUT_SECONDS),
+            ),
         )
 
 

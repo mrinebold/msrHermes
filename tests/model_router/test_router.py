@@ -1,5 +1,7 @@
 import logging
+import os
 import unittest
+from unittest.mock import patch
 
 from services.model_router.config import ModelRouterConfig
 from services.model_router.providers.devmonster_ollama import ProviderResult
@@ -22,6 +24,18 @@ class FakeDevMonsterProvider:
 
 
 class ModelRouterTest(unittest.TestCase):
+    def test_provider_timeout_config_prefers_model_router_env(self):
+        with patch.dict(os.environ, {"MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS": "120", "GEMMA_TIMEOUT": "30"}, clear=True):
+            config = ModelRouterConfig.from_env()
+
+        self.assertEqual(config.timeout_seconds, 120.0)
+
+    def test_provider_timeout_config_falls_back_to_legacy_gemma_timeout(self):
+        with patch.dict(os.environ, {"GEMMA_TIMEOUT": "45"}, clear=True):
+            config = ModelRouterConfig.from_env()
+
+        self.assertEqual(config.timeout_seconds, 45.0)
+
     def test_safe_gemma4_generate_route(self):
         provider = FakeDevMonsterProvider()
         config = ModelRouterConfig(

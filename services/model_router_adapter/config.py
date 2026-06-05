@@ -10,6 +10,8 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8088
 DEFAULT_TASK_TYPE = "summary"
 DEFAULT_GEMMA_PROMPT_MODE = "flattened"
+DEFAULT_LOCAL_SUMMARY_MAX_CONTEXT_CHARS = 3000
+DEFAULT_PROVIDER_TIMEOUT_SECONDS = 30.0
 GEMMA_PROMPT_MODES = {
     "flattened",
     "user_only",
@@ -30,6 +32,8 @@ class AdapterConfig:
     log_message_structure: bool = False
     local_compat_mode: bool = False
     gemma_prompt_mode: str = DEFAULT_GEMMA_PROMPT_MODE
+    local_summary_max_context_chars: int = DEFAULT_LOCAL_SUMMARY_MAX_CONTEXT_CHARS
+    provider_timeout_seconds: float = DEFAULT_PROVIDER_TIMEOUT_SECONDS
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "AdapterConfig":
@@ -43,6 +47,16 @@ class AdapterConfig:
             log_message_structure=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE", False),
             local_compat_mode=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE", False),
             gemma_prompt_mode=_prompt_mode_env(values),
+            local_summary_max_context_chars=_int_env(
+                values,
+                "MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS",
+                DEFAULT_LOCAL_SUMMARY_MAX_CONTEXT_CHARS,
+            ),
+            provider_timeout_seconds=_float_env(
+                values,
+                "MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS",
+                _float_env(values, "GEMMA_TIMEOUT", DEFAULT_PROVIDER_TIMEOUT_SECONDS),
+            ),
         )
 
 
@@ -61,6 +75,16 @@ def _bool_env(env: dict[str, str], name: str, default: bool) -> bool:
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _float_env(env: dict[str, str], name: str, default: float) -> float:
+    raw = env.get(name)
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
 
 
 def _prompt_mode_env(env: dict[str, str]) -> str:

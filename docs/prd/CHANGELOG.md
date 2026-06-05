@@ -2,6 +2,14 @@
 
 ## 2026-06-05
 
+- Completed Phase 5Z local summary timeout and context-budget tuning.
+- Added `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` as the primary local provider timeout env var; `GEMMA_TIMEOUT` remains a legacy fallback.
+- Added `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` with default 3000.
+- Updated `local_summary` to apply the context budget while preserving the beginning and end of context when truncation is needed.
+- Added metadata-only fields for `context_original_chars`, `context_sent_chars`, `context_truncated`, and `timeout_seconds`.
+- Added tests for provider timeout config loading, local summary context budgeting, metadata-only truncation logs, redaction, and existing prompt modes.
+- Ran no live Hermes prompts and sent no live model calls.
+- Recommended the next bounded live retry with `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120` and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`.
 - Completed Phase 5Y live Hermes file-summary validation using `local_summary` prompt mode.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`.
 - Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.

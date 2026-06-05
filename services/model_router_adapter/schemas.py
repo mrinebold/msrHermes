@@ -27,13 +27,21 @@ def prompt_from_messages(messages: list[dict[str, Any]]) -> str:
     return "\n".join(parts).strip()
 
 
-def local_compat_prompt_from_messages(messages: list[Any], mode: str = "flattened") -> str:
-    return gemma_prompt_from_messages(messages, mode)
+def local_compat_prompt_from_messages(
+    messages: list[Any],
+    mode: str = "flattened",
+    max_context_chars: int | None = None,
+) -> str:
+    return gemma_prompt_from_messages(messages, mode, max_context_chars=max_context_chars)
 
 
-def gemma_prompt_from_messages(messages: list[Any], mode: str = "flattened") -> str:
+def gemma_prompt_from_messages(
+    messages: list[Any],
+    mode: str = "flattened",
+    max_context_chars: int | None = None,
+) -> str:
     if mode == "local_summary":
-        return local_summary_prompt_from_messages(messages)
+        return local_summary_prompt_from_messages(messages, max_context_chars=max_context_chars)
     sections = _message_sections(messages)
     if mode == "user_only":
         return _join_sections(section for section in sections if section["role"] == "user")
@@ -50,8 +58,8 @@ def gemma_prompt_from_messages(messages: list[Any], mode: str = "flattened") -> 
     return _join_sections(sections)
 
 
-def local_summary_prompt_from_messages(messages: list[Any]) -> str:
-    extraction = local_summary_extraction(messages)
+def local_summary_prompt_from_messages(messages: list[Any], max_context_chars: int | None = None) -> str:
+    extraction = local_summary_extraction(messages, max_context_chars=max_context_chars)
     if not extraction["success"]:
         return ""
     return (
@@ -65,7 +73,7 @@ def local_summary_prompt_from_messages(messages: list[Any]) -> str:
     )
 
 
-def local_summary_extraction(messages: list[Any]) -> dict[str, Any]:
+def local_summary_extraction(messages: list[Any], max_context_chars: int | None = None) -> dict[str, Any]:
     sections = _message_sections(messages)
     latest_user = _final_user_section(sections)
     instruction = latest_user["content"].strip() if latest_user else ""
@@ -75,12 +83,17 @@ def local_summary_extraction(messages: list[Any]) -> dict[str, Any]:
     context = user_context or _largest_file_like_context(sections)
     instruction = _clean_summary_text(instruction)
     context = _clean_context_text(context)
+    context_original_chars = len(context)
+    context = _truncate_context(context, max_context_chars)
     return {
         "success": bool(instruction and context),
         "instruction": instruction,
         "context": context,
         "instruction_chars": len(instruction),
         "context_chars": len(context),
+        "context_original_chars": context_original_chars,
+        "context_sent_chars": len(context),
+        "context_truncated": bool(context_original_chars and len(context) < context_original_chars),
         "dropped_system_chars": sum(len(section["content"]) for section in sections if section["role"] in {"system", "developer"}),
     }
 
@@ -167,6 +180,18 @@ def _clean_context_text(text: str) -> str:
     return "\n".join(lines).strip()
 
 
+def _truncate_context(text: str, max_chars: int | None) -> str:
+    if max_chars is None or max_chars <= 0 or len(text) <= max_chars:
+        return text
+    marker = "\n\n[...local summary context truncated...]\n\n"
+    if max_chars <= len(marker) + 20:
+        return text[:max_chars].rstrip()
+    remaining = max_chars - len(marker)
+    head_chars = remaining // 2
+    tail_chars = remaining - head_chars
+    return f"{text[:head_chars].rstrip()}{marker}{text[-tail_chars:].lstrip()}"
+
+
 def _looks_like_tool_scaffold(line: str) -> bool:
     lowered = line.strip().lower()
     if not lowered:
@@ -184,7 +209,11 @@ def _looks_like_tool_scaffold(line: str) -> bool:
     )
 
 
-def prompt_construction_metadata(messages: list[Any], prompt: str) -> dict[str, Any]:
+def prompt_construction_metadata(
+    messages: list[Any],
+    prompt: str,
+    max_context_chars: int | None = None,
+) -> dict[str, Any]:
     sections = _message_sections(messages)
     role_sections = [section["role"] for section in sections]
     user_chars = sum(len(section["content"]) for section in sections if section["role"] == "user")
@@ -216,11 +245,14 @@ def prompt_construction_metadata(messages: list[Any], prompt: str) -> dict[str, 
         "system_content_chars": system_chars,
         "user_content_dominates_system": user_chars > system_chars,
     }
-    extraction = local_summary_extraction(messages)
+    extraction = local_summary_extraction(messages, max_context_chars=max_context_chars)
     metadata.update(
         {
             "instruction_chars": extraction["instruction_chars"] if extraction["success"] else 0,
             "context_chars": extraction["context_chars"] if extraction["success"] else 0,
+            "context_original_chars": extraction["context_original_chars"] if extraction["success"] else 0,
+            "context_sent_chars": extraction["context_sent_chars"] if extraction["success"] else 0,
+            "context_truncated": extraction["context_truncated"] if extraction["success"] else False,
             "dropped_system_chars": extraction["dropped_system_chars"] if extraction["success"] else 0,
             "local_summary_extraction_success": extraction["success"],
         }

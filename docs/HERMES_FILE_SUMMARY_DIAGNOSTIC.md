@@ -507,3 +507,48 @@ Conclusion:
 Recommendation:
 
 The next phase should not rerun Hermes unchanged. Diagnose the local router/provider timeout for compact summary prompts first. Likely options are increasing the approved Gemma generation timeout for this task, reducing `local_summary` context further, or adding a shorter local-summary context budget. Keep `sample_prd.md` out of scope until `sample_note.md` returns usable output.
+
+## Phase 5Z Timeout And Context Budget Tuning
+
+Implementation date: 2026-06-05.
+
+Phase 5Z added timeout and context-budget controls without running live Hermes prompts or sending live model calls.
+
+New local provider timeout setting:
+
+```text
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS
+```
+
+Default remains 30 seconds through current behavior. `GEMMA_TIMEOUT` remains a legacy fallback. The recommended value for the next bounded `local_summary` live retry is 120 seconds.
+
+New local summary context budget:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS
+```
+
+Default is 3000 characters. The recommended value for the next bounded live retry is 1500 characters.
+
+`local_summary` now truncates context when needed while preserving the beginning and end of the document/context body with a neutral truncation marker. The user instruction remains first.
+
+Additional metadata-only fields:
+
+- `context_original_chars`
+- `context_sent_chars`
+- `context_truncated`
+- `timeout_seconds`
+
+The adapter still does not log actual prompt text, instruction text, file contents, tool schemas, model output, or secrets by default.
+
+Recommendation:
+
+Phase 5AA should run exactly one bounded `sample_note.md` retry with:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+```
+
+Keep `sample_prd.md` out of scope until `sample_note.md` produces usable output.

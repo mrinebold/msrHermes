@@ -22,6 +22,8 @@ Environment overrides:
 - `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE`
 - `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE`
 - `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE`
+- `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS`
+- `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS`
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
 
@@ -72,6 +74,15 @@ Return only the requested answer.
 ```
 
 The mode extracts the latest user instruction, preserves file-like context from the user message or from file-like system/developer context when needed, drops tool schemas and tool-choice semantics, and fails closed with `400` if it cannot identify both a useful instruction and file-like context. Metadata logs include only character counts and extraction status, never instruction text or file contents.
+
+Use `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` to cap context sent to Gemma. When truncation is needed, the adapter preserves the beginning and end of the context with a neutral truncation marker between them. Metadata records `context_original_chars`, `context_sent_chars`, and `context_truncated`, but not the context text.
+
+Use `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` to set the local provider HTTP timeout used by `services/model_router`; `GEMMA_TIMEOUT` remains a legacy fallback. The recommended next bounded live retry settings are:
+
+```text
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+```
 
 ## Endpoints
 

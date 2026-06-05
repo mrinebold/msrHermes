@@ -881,3 +881,36 @@ Conclusion:
 Recommendation:
 
 Diagnose the router/provider timeout before another Hermes run. Candidate fixes are an approved longer Gemma timeout for local summary tasks, a smaller local-summary context budget, or both. Keep the adapter localhost-only, keep cloud providers fail-closed, and do not run `sample_prd.md` yet.
+
+## Phase 5Z Timeout And Context Budget Tuning
+
+Status: complete on 2026-06-05.
+
+Phase 5Z added offline tuning controls for the Phase 5Y timeout failure. No live Hermes prompts or live model calls were run.
+
+Provider timeout:
+
+```text
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+```
+
+This is now the primary model-router timeout env var. `GEMMA_TIMEOUT` remains as a legacy fallback. The default remains 30 seconds.
+
+Local summary context budget:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+```
+
+The adapter default is 3000 characters. When the extracted context exceeds the configured budget, `local_summary` preserves the beginning and end of context and inserts a neutral truncation marker. It does not log context text.
+
+New metadata-only fields:
+
+- `context_original_chars`
+- `context_sent_chars`
+- `context_truncated`
+- `timeout_seconds`
+
+Recommendation:
+
+For the next bounded live retry, keep the adapter localhost-only and run one `sample_note.md` validation with local compat mode, `local_summary`, provider timeout 120 seconds, and context budget 1500 characters. Do not run `sample_prd.md` until `sample_note.md` is usable.

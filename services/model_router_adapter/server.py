@@ -100,13 +100,17 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 use_local_compat = _uses_local_compat(config, model)
                 if use_local_compat and not has_nonempty_user_content(messages):
                     status = 400
-                    prompt = local_compat_prompt_from_messages(messages, config.gemma_prompt_mode)
+                    prompt = local_compat_prompt_from_messages(
+                        messages,
+                        config.gemma_prompt_mode,
+                        config.local_summary_max_context_chars,
+                    )
                     self._log_message_structure(payload, messages, streaming_requested, use_local_compat, prompt)
                     self._write_json(status, error_response("local compatibility mode requires non-empty user content", "bad_request"))
                     self._log_request(started, status, selected_model)
                     return
                 if use_local_compat and config.gemma_prompt_mode == "local_summary":
-                    extraction = local_summary_extraction(messages)
+                    extraction = local_summary_extraction(messages, config.local_summary_max_context_chars)
                     if not extraction["success"]:
                         status = 400
                         self._log_message_structure(payload, messages, streaming_requested, use_local_compat, "")
@@ -115,7 +119,11 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                         return
 
                 prompt = (
-                    local_compat_prompt_from_messages(messages, config.gemma_prompt_mode)
+                    local_compat_prompt_from_messages(
+                        messages,
+                        config.gemma_prompt_mode,
+                        config.local_summary_max_context_chars,
+                    )
                     if use_local_compat
                     else prompt_from_messages(messages)
                 )
@@ -263,9 +271,16 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 "tool_schemas_forwarded": False,
                 "dropped_tool_schema_count": len(payload.get("tools")) if isinstance(payload.get("tools"), list) else 0,
                 "gemma_prompt_mode": config.gemma_prompt_mode if compat_mode_enabled else "",
+                "timeout_seconds": config.provider_timeout_seconds if compat_mode_enabled else 0,
             }
             if compat_mode_enabled:
-                metadata.update(prompt_construction_metadata(messages, flattened_prompt))
+                metadata.update(
+                    prompt_construction_metadata(
+                        messages,
+                        flattened_prompt,
+                        config.local_summary_max_context_chars,
+                    )
+                )
             LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
 
     return ModelRouterAdapterHandler
