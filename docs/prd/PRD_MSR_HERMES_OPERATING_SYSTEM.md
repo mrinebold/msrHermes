@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase DESKTOP-2 install-command proposal complete. Hermes Desktop has a controlled future Mac mini install sequence documented, but Desktop was not downloaded, installed, launched, configured, or connected.
+Phase DESKTOP-3 controlled install complete. Hermes Desktop is installed at `/Applications/Hermes.app` on the Mac mini, but it was not launched, configured, signed into, granted permissions, or connected.
 
-Repository status is maintained by git; this PRD records Phase DESKTOP-2 as proposal-only and complete.
+Repository status is maintained by git; this PRD records Phase DESKTOP-3 as install-only and complete.
 
 ## Architecture Decision
 
@@ -51,6 +51,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5AA | Complete | Ran one bounded tuned local-summary retry for `sample_note.md`; Hermes produced usable five-bullet output. |
 | Phase DESKTOP-1 | Complete | Added planning-only Hermes Desktop install roadmaps for Mac mini and DevMonster; Desktop was not downloaded or installed. |
 | Phase DESKTOP-2 | Complete | Documented exact future Mac mini Desktop download, inspection, install, first-launch validation, and rollback commands without downloading or launching Desktop. |
+| Phase DESKTOP-3 | Complete | Installed Hermes Desktop on the Mac mini at `/Applications/Hermes.app`; Desktop was not launched or configured. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -107,11 +108,12 @@ Completed and committed locally:
 - Phase 5AA tuned local summary validation: one bounded `sample_note.md` Hermes file-summary test completed in 112.635s with exit code 0, stdout 285 bytes, and stderr 0 bytes. Output was usable. Adapter metadata showed one `POST /v1/chat/completions` call, status 200, selected model `gemma4:26b`, response content length 284, context truncated from 2899 to 1499 chars, and timeout used 120s.
 - Phase DESKTOP-1 planning: added the official Nous Research Hermes Desktop roadmaps for Mac mini and DevMonster. Phase 5AA satisfied the initial useful-output gate for `sample_note.md`, but Desktop still requires a later explicit install/open approval. Desktop must be planned before resident/background operation and before durable credentials are granted. Safety gates require official download source, macOS identity verification if possible, no Nous Portal login, no cloud credentials, no broad filesystem grants, no background operation, no Google/Supabase/Home Assistant/GitHub/Helio/Agent Bus connection, localhost adapter use if configurable, ANO governance preservation, and no DevMonster Ollama/Gemma/Tailscale/model-worker changes.
 - Phase DESKTOP-2 install-command proposal: documented the future Mac mini Desktop sequence using official source `https://hermes-agent.nousresearch.com/desktop` and macOS DMG target `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`. The proposal includes checksum capture, quarantine/image inspection, Gatekeeper assessment, app bundle code-signing assessment, copy to `/Applications`, first-launch baseline checks, post-launch launchd/login/background checks, `~/.hermes` write inspection, and rollback removal commands. No Desktop download, install, launch, runtime config change, credential setup, or external service connection was performed.
+- Phase DESKTOP-3 controlled install: downloaded the official macOS DMG, verified SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`, confirmed `hdiutil verify` passed, and installed the app at `/Applications/Hermes.app` from Terminal because the Codex sandbox could not mount the DMG. Installed bundle metadata: name `Hermes`, identifier `com.nousresearch.hermes.setup`, version `0.0.1`, arm64 executable `Hermes-Setup`, Team ID `T2F6S8MF7C`, hardened runtime present, stapled notarization ticket present. Desktop was not launched or configured. No Hermes/Nous user LaunchAgent, Application Support, Preferences, or launchctl entry was found, and no `~/.hermes` files were modified during verification. Process-list and login-item checks were partly blocked by macOS sandbox permissions.
 
 Not completed or not approved:
 
 - Hermes is installed as a local client only.
-- Hermes Desktop is not installed.
+- Hermes Desktop is installed but not launched or configured.
 - Autonomous execution is not enabled.
 - Hermes setup was not run.
 - Hermes model configuration was not enabled.
@@ -149,7 +151,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain proposal-only until a later phase explicitly approves Desktop download/install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain install-only until a later phase explicitly approves first launch/configuration. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -208,6 +210,8 @@ Phase 5AA confirmed the tuned settings produce usable Hermes summary output for 
 Phase DESKTOP-1 added Hermes Desktop to the roadmap as a future official Nous Research install only for both Mac mini and DevMonster. Desktop remains a UI surface under Helio/ANO governance, is gated before resident/background operation or durable credentials, and must not alter DevMonster Ollama/Gemma/Tailscale/model-worker configuration.
 
 Phase DESKTOP-2 documented the Mac mini Desktop install command proposal only. The future install must use the official DMG, inspect quarantine/signature/notarization state, validate first-launch behavior, avoid portal/cloud/integration setup, preserve existing CLI config, and keep rollback limited to Desktop artifacts unless separately approved.
+
+Phase DESKTOP-3 installed Hermes Desktop from the official DMG at `/Applications/Hermes.app` without launching it. First launch, provider setup, portal login, permission grants, external integrations, background/resident operation, and CLI config changes remain unapproved.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

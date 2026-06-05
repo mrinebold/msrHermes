@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-2 is install-command proposal only. Do not download, install, open, configure, sign in to, or grant permissions to Hermes Desktop in this phase.
+Phase DESKTOP-3 completed a controlled Mac mini install. Hermes Desktop was downloaded from the official Nous Research source and copied to `/Applications`, but it was not launched, configured, signed in, granted permissions, or connected to external services.
 
 ## Scope
 
@@ -33,6 +33,7 @@ Current Mac mini CLI state:
 - CLI path: `~/.local/bin/hermes`
 - Install path: `~/.hermes/hermes-agent`
 - Phase 5AA confirmed usable `sample_note.md` summary output through the localhost MSR Model Router adapter.
+- Phase DESKTOP-3 installed Hermes Desktop at `/Applications/Hermes.app` without launching it.
 
 ## Install Timing
 
@@ -140,6 +141,55 @@ find "$HOME/.hermes" -maxdepth 2 -type f -mtime -1 -print
 ```
 
 First launch must stop before chat, setup, portal login, external integration setup, broad permission grants, or background/resident enablement. If Desktop exposes provider configuration, select only a custom OpenAI-compatible localhost adapter endpoint, and only if doing so does not alter existing Hermes CLI config.
+
+## Phase DESKTOP-3 Controlled Mac mini Install Result
+
+Status: complete on 2026-06-05.
+
+Install method:
+
+- The official macOS DMG was downloaded from `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`.
+- The downloaded file SHA-256 was `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`.
+- `hdiutil verify` reported the DMG checksum as valid.
+- The Codex app sandbox could not mount the DMG with `hdiutil attach` because the disk image helper returned `Device not configured`, so the final mount/copy was performed by the user from Terminal with the documented commands.
+- The app was copied to `/Applications/Hermes.app`.
+
+Installed app verification:
+
+| Check | Result |
+| --- | --- |
+| App path | `/Applications/Hermes.app` |
+| App exists | Yes |
+| App bundle size | 12M |
+| Bundle name | `Hermes` |
+| Bundle identifier | `com.nousresearch.hermes.setup` |
+| Bundle short version | `0.0.1` |
+| Bundle version | `0.0.1` |
+| Bundle minimum system version | `11.0` in `Info.plist`; official page states macOS 12+ |
+| Executable | `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup` |
+| Architecture | arm64 |
+| Team identifier | `T2F6S8MF7C` |
+| Hardened runtime | Present |
+| Notarization ticket | Stapled |
+| Gatekeeper assessment | `spctl --assess --type execute` returned an internal Code Signing subsystem error in this sandbox, so it was not recorded as passing |
+
+Post-install safety checks:
+
+- Desktop was not launched.
+- No Nous Portal sign-in was performed.
+- No provider credentials were added.
+- No broad filesystem permission grant was performed.
+- No Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus connection was configured.
+- Existing Hermes CLI config was not altered.
+- No Hermes/Nous user LaunchAgent was found in `~/Library/LaunchAgents`.
+- No Hermes/Nous user Application Support or Preferences files were found during verification.
+- `launchctl print gui/$(id -u)` returned no Hermes/Nous match.
+- No `~/.hermes` files were modified in the verification window.
+- The installed app bundle and executable had `com.apple.provenance` extended attributes.
+- Process-list checks from the Codex sandbox were blocked by macOS sandbox permissions, so absence of a running Desktop process is based on the user not launching the app plus no launchd/LaunchAgent evidence.
+- Login item inspection from the Codex sandbox returned macOS error `-10827`; re-check from an unsandboxed Terminal before first launch if needed.
+
+DESKTOP-3 does not approve first launch. A later phase must explicitly approve opening Desktop and must preserve the guardrails below.
 
 ## Safety Requirements
 

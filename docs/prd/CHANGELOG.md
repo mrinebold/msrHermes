@@ -2,6 +2,16 @@
 
 ## 2026-06-05
 
+- Completed Phase DESKTOP-3 controlled Hermes Desktop install on the Mac mini.
+- Downloaded the official macOS DMG from `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`.
+- Recorded SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4` and confirmed `hdiutil verify` reported the DMG checksum as valid.
+- Installed Hermes Desktop at `/Applications/Hermes.app` from Terminal after the Codex sandbox could not mount the DMG with `hdiutil attach`.
+- Verified installed app metadata: bundle name `Hermes`, bundle identifier `com.nousresearch.hermes.setup`, version `0.0.1`, arm64 executable `Hermes-Setup`, Team ID `T2F6S8MF7C`, hardened runtime present, and stapled notarization ticket present.
+- Recorded that `spctl --assess --type execute` returned an internal Code Signing subsystem error from the Codex sandbox, so Gatekeeper execution assessment was not recorded as passing.
+- Confirmed no Hermes/Nous user LaunchAgent, Application Support, Preferences, or `launchctl` entry was found and no `~/.hermes` files were modified during verification.
+- Recorded `com.apple.provenance` extended attributes on the installed app bundle and executable.
+- Recorded that process-list and login-item checks were partly blocked by macOS sandbox permissions.
+- Confirmed Hermes Desktop was not launched, configured, signed into, granted permissions, connected to Google/Supabase/Home Assistant/GitHub/Helio, or enabled for background/resident operation.
 - Completed Phase DESKTOP-2 Hermes Desktop install command proposal only.
 - Identified the official macOS Desktop download target as `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`, linked from the official Nous Research Desktop page.
 - Recorded visible package facts: DMG filename `Hermes-Setup.dmg`, visible version Hermes Agent v0.15.2, macOS 12+ support, no checksum visible on the rendered official page, no signature/notarization details visible before local inspection, and unknown admin privilege requirement.
