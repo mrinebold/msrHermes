@@ -147,3 +147,26 @@ All four chat-completion calls returned 200 with selected model `gemma4:26b`, bu
 Conclusion:
 
 Local compat mode works mechanically, but it is insufficient for Hermes file summaries. Tool-schema forwarding is no longer a plausible root cause. The next fix should focus on the Gemma-facing prompt itself: prompt ordering, reducing or demoting Hermes' system scaffold, or a dedicated local summarization prompt shape that gives Gemma only the sandbox file text and the summary instruction.
+
+## Phase 5U Prompt Construction Diagnosis
+
+Diagnosis date: 2026-06-05.
+
+Phase 5U added offline prompt-construction diagnostics and mocked prompt modes without running Hermes live prompts or sending live model calls.
+
+The new prompt metadata confirms the next investigation should focus on how local Gemma receives the flattened Hermes transcript, not on tool schemas. The Phase 5T live metadata showed a large system section followed by a small final user instruction. Since tool schemas are not forwarded, remaining likely causes are:
+
+- Hermes system/developer scaffold dominates the prompt.
+- The final user instruction appears after the large context.
+- Tool/function/schema/call vocabulary appears inside message text even after schema JSON is stripped.
+- Markdown, XML-like, or JSON-looking structures inside the prompt may affect local Gemma's response behavior.
+
+The adapter now supports a diagnostic prompt-mode flag for local compat mode:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=flattened|user_only|final_user|instruction_context|no_tool_vocab
+```
+
+Recommendation:
+
+Use `instruction_context` for the next bounded live sample-note retry. It keeps local Gemma non-tool-capable, keeps tool schemas out of the prompt, preserves the available file-like context, and moves the concise final user instruction before the large Hermes scaffold.

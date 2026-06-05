@@ -231,3 +231,38 @@ Phase 5T proves local compat mode activated and tool schemas were not forwarded,
 Recommended next phase:
 
 Phase 5U should avoid another Hermes retry at first. Use mocked or direct adapter-level diagnostics to compare local Gemma prompt variants without Hermes agent scaffolding: final-user-first prompt ordering, system-context truncation or demotion, and a purpose-built summary prompt containing only sandbox file text plus the five-bullet instruction. Do not run `sample_prd.md` until `sample_note.md` can produce usable output.
+
+## Phase 5U Gemma Prompt Construction Diagnosis
+
+Diagnosis date: 2026-06-05.
+
+Phase 5U ran no live Hermes prompts and sent no live model calls. The adapter flattening strategy was inspected and expanded with metadata-only prompt-construction diagnostics.
+
+New diagnostics, emitted only when `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true` and local compat mode is active, include:
+
+- flattened prompt total character count
+- role sections included and section order
+- first/last prompt snippet lengths, fixed at 0 characters
+- markdown fence count
+- XML/tool-like tag count by pattern
+- JSON-looking block count by pattern
+- plain `tool`, `function`, `schema`, and `call` keyword counts and booleans
+- final user content start index
+- user and system character counts
+- whether user content dominates system content
+
+These diagnostics do not log prompt text, file contents, tool schema JSON, model output, API keys, OAuth tokens, Supabase keys, or other secrets.
+
+Prompt-mode options were added for mocked/offline diagnosis behind:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE
+```
+
+Supported values are `flattened`, `user_only`, `final_user`, `instruction_context`, and `no_tool_vocab`. The default remains `flattened`.
+
+Phase 5T's recorded shape strongly suggests that `flattened` is not the right next live mode: the prompt contained two sections, with about 5,628 system characters before about 78 final-user characters. The final instruction therefore arrives after a much larger Hermes scaffold.
+
+Recommendation:
+
+For the next approved live retry, use `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context` with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. This preserves the file-like context but places the final user instruction first, reducing the chance that local Gemma treats Hermes' system scaffold as the main task. If that still returns zero content, the next offline comparison should try `no_tool_vocab` or a purpose-built local summary prompt that strips Hermes system/developer scaffold more aggressively.

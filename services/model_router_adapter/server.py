@@ -21,6 +21,7 @@ from .schemas import (
     message_content_text,
     models_response,
     normalize_models,
+    prompt_construction_metadata,
     prompt_from_messages,
 )
 
@@ -98,13 +99,17 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 use_local_compat = _uses_local_compat(config, model)
                 if use_local_compat and not has_nonempty_user_content(messages):
                     status = 400
-                    prompt = local_compat_prompt_from_messages(messages)
+                    prompt = local_compat_prompt_from_messages(messages, config.gemma_prompt_mode)
                     self._log_message_structure(payload, messages, streaming_requested, use_local_compat, prompt)
                     self._write_json(status, error_response("local compatibility mode requires non-empty user content", "bad_request"))
                     self._log_request(started, status, selected_model)
                     return
 
-                prompt = local_compat_prompt_from_messages(messages) if use_local_compat else prompt_from_messages(messages)
+                prompt = (
+                    local_compat_prompt_from_messages(messages, config.gemma_prompt_mode)
+                    if use_local_compat
+                    else prompt_from_messages(messages)
+                )
                 self._log_message_structure(payload, messages, streaming_requested, use_local_compat, prompt)
                 route_response = router.generate(RouteRequest(task_type=task_type, prompt=prompt, model=model or None))
                 selected_model = str(getattr(route_response, "model", model) or model)
@@ -247,7 +252,10 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 "flattened_prompt_chars": len(flattened_prompt) if compat_mode_enabled else 0,
                 "tool_schemas_present": bool(payload.get("tools")),
                 "tool_schemas_forwarded": False,
+                "gemma_prompt_mode": config.gemma_prompt_mode if compat_mode_enabled else "",
             }
+            if compat_mode_enabled:
+                metadata.update(prompt_construction_metadata(messages, flattened_prompt))
             LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
 
     return ModelRouterAdapterHandler

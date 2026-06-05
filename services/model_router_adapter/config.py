@@ -9,6 +9,14 @@ from dataclasses import dataclass
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8088
 DEFAULT_TASK_TYPE = "summary"
+DEFAULT_GEMMA_PROMPT_MODE = "flattened"
+GEMMA_PROMPT_MODES = {
+    "flattened",
+    "user_only",
+    "final_user",
+    "instruction_context",
+    "no_tool_vocab",
+}
 
 
 @dataclass(frozen=True)
@@ -20,6 +28,7 @@ class AdapterConfig:
     log_response_shapes: bool = False
     log_message_structure: bool = False
     local_compat_mode: bool = False
+    gemma_prompt_mode: str = DEFAULT_GEMMA_PROMPT_MODE
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "AdapterConfig":
@@ -32,6 +41,7 @@ class AdapterConfig:
             log_response_shapes=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES", False),
             log_message_structure=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE", False),
             local_compat_mode=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE", False),
+            gemma_prompt_mode=_prompt_mode_env(values),
         )
 
 
@@ -50,3 +60,11 @@ def _bool_env(env: dict[str, str], name: str, default: bool) -> bool:
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _prompt_mode_env(env: dict[str, str]) -> str:
+    raw = env.get("MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE", DEFAULT_GEMMA_PROMPT_MODE)
+    normalized = raw.strip().lower()
+    if normalized in GEMMA_PROMPT_MODES:
+        return normalized
+    return DEFAULT_GEMMA_PROMPT_MODE

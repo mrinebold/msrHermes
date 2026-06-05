@@ -7,6 +7,7 @@ from services.model_router.providers.devmonster_ollama import ProviderResult
 from services.model_router.router import RouteResponse
 from services.model_router_adapter.config import AdapterConfig
 from services.model_router_adapter.server import make_handler
+from services.model_router_adapter.schemas import gemma_prompt_from_messages
 
 
 class FakeRouter:
@@ -48,6 +49,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
                 "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES": "true",
                 "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE": "true",
                 "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE": "true",
+                "MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "instruction_context",
             }
         )
 
@@ -55,6 +57,12 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertTrue(config.log_response_shapes)
         self.assertTrue(config.log_message_structure)
         self.assertTrue(config.local_compat_mode)
+        self.assertEqual(config.gemma_prompt_mode, "instruction_context")
+
+    def test_invalid_gemma_prompt_mode_defaults_to_flattened(self):
+        config = AdapterConfig.from_env({"MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "unsafe"})
+
+        self.assertEqual(config.gemma_prompt_mode, "flattened")
 
     def test_health(self):
         status, payload = self._get("/health")
@@ -389,6 +397,63 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("system: ", self.router.last_request.prompt)
         self.assertNotIn("user: ", self.router.last_request.prompt)
 
+    def test_gemma_prompt_mode_flattened_keeps_original_role_order(self):
+        prompt = gemma_prompt_from_messages(self._prompt_mode_messages(), "flattened")
+
+        self.assertLess(prompt.index("[system]"), prompt.index("[user]\nFIRST_USER"))
+        self.assertLess(prompt.index("[user]\nFIRST_USER"), prompt.index("[assistant]"))
+        self.assertLess(prompt.index("[assistant]"), prompt.index("[user]\nFINAL_USER"))
+
+    def test_gemma_prompt_mode_user_only_keeps_user_sections_only(self):
+        prompt = gemma_prompt_from_messages(self._prompt_mode_messages(), "user_only")
+
+        self.assertIn("[user]\nFIRST_USER", prompt)
+        self.assertIn("[user]\nFINAL_USER", prompt)
+        self.assertNotIn("[system]", prompt)
+        self.assertNotIn("[assistant]", prompt)
+
+    def test_gemma_prompt_mode_final_user_keeps_only_final_user(self):
+        prompt = gemma_prompt_from_messages(self._prompt_mode_messages(), "final_user")
+
+        self.assertEqual(prompt, "[user]\nFINAL_USER")
+
+    def test_gemma_prompt_mode_instruction_context_moves_final_user_first(self):
+        prompt = gemma_prompt_from_messages(self._prompt_mode_messages(), "instruction_context")
+
+        self.assertTrue(prompt.startswith("[user]\nFINAL_USER"))
+        self.assertLess(prompt.index("[user]\nFINAL_USER"), prompt.index("[system]"))
+        self.assertIn("[user]\nFIRST_USER", prompt)
+
+    def test_gemma_prompt_mode_no_tool_vocab_removes_tool_words(self):
+        prompt = gemma_prompt_from_messages(
+            [
+                {"role": "system", "content": "tool function schema call"},
+                {"role": "user", "content": "FINAL_USER"},
+            ],
+            "no_tool_vocab",
+        )
+
+        self.assertNotIn("tool", prompt.lower())
+        self.assertNotIn("function", prompt.lower())
+        self.assertNotIn("schema", prompt.lower())
+        self.assertNotIn("call", prompt.lower())
+        self.assertIn("FINAL_USER", prompt)
+
+    def test_local_compat_mode_uses_configured_gemma_prompt_mode(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            local_compat_mode=True,
+            gemma_prompt_mode="final_user",
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, _, _ = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        self.assertEqual(self.router.last_request.prompt, "[user]\nSANITIZED_SUMMARY_REQUEST")
+
     def test_local_compat_mode_excludes_tool_schema_from_flattened_prompt(self):
         self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
         self.handler_cls = make_handler(self.router, self.config)
@@ -492,6 +557,63 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", joined)
         self.assertNotIn("read_sandbox_file", joined)
 
+    def test_prompt_construction_metadata_log_redacts_content(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+            local_compat_mode=True,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+        payload = {
+            "model": "gemma4:26b",
+            "stream": True,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "SECRET_SYSTEM_WITH_TOOL_WORDS tool function schema call\n"
+                        "```json\n{\"safe_key\":\"safe_value\"}\n```\n"
+                        "<tool_call></tool_call>"
+                    ),
+                },
+                {"role": "user", "content": "SECRET_FINAL_USER_INSTRUCTION"},
+            ],
+            "tools": [{"type": "function", "function": {"name": "read_sandbox_file"}}],
+        }
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertEqual(record.gemma_prompt_mode, "flattened")
+        self.assertEqual(record.prompt_total_chars, record.flattened_prompt_chars)
+        self.assertEqual(record.prompt_role_sections, ["system", "user"])
+        self.assertEqual(record.prompt_section_order, ["system", "user"])
+        self.assertEqual(record.prompt_prefix_chars_logged, 0)
+        self.assertEqual(record.prompt_suffix_chars_logged, 0)
+        self.assertEqual(record.markdown_fence_count, 2)
+        self.assertGreaterEqual(record.xml_or_tool_like_tag_count, 2)
+        self.assertGreaterEqual(record.json_like_block_count, 1)
+        self.assertEqual(record.tool_keyword_count, 1)
+        self.assertEqual(record.function_keyword_count, 1)
+        self.assertEqual(record.schema_keyword_count, 1)
+        self.assertEqual(record.call_keyword_count, 1)
+        self.assertTrue(record.contains_tool_keyword)
+        self.assertTrue(record.contains_function_keyword)
+        self.assertTrue(record.contains_schema_keyword)
+        self.assertTrue(record.contains_call_keyword)
+        self.assertGreater(record.final_user_content_start_index, 0)
+        self.assertGreater(record.system_content_chars, record.user_content_chars)
+        self.assertFalse(record.user_content_dominates_system)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("SECRET_SYSTEM_WITH_TOOL_WORDS", joined)
+        self.assertNotIn("SECRET_FINAL_USER_INSTRUCTION", joined)
+        self.assertNotIn("safe_key", joined)
+        self.assertNotIn("safe_value", joined)
+
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
 
@@ -592,6 +714,14 @@ class ModelRouterAdapterTest(unittest.TestCase):
 
     def _sanitized_context(self):
         return "\n".join(["SANITIZED_CONTEXT_LINE"] * 40)
+
+    def _prompt_mode_messages(self):
+        return [
+            {"role": "system", "content": "SYSTEM_CONTEXT"},
+            {"role": "user", "content": "FIRST_USER"},
+            {"role": "assistant", "content": "ASSISTANT_CONTEXT"},
+            {"role": "user", "content": "FINAL_USER"},
+        ]
 
 
 if __name__ == "__main__":

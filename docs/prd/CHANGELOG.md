@@ -2,6 +2,14 @@
 
 ## 2026-06-05
 
+- Completed Phase 5U Gemma-facing prompt construction diagnosis.
+- Ran no live Hermes prompts and sent no live model calls.
+- Added metadata-only prompt-construction diagnostics to the localhost adapter for local compat mode: flattened prompt character count, role sections, section order, markdown fence count, XML/tool-like tag count, JSON-looking block count, tool/function/schema/call keyword counts, final user content start index, and user/system character counts.
+- Kept first/last prompt snippet logging fixed at 0 characters; prompt text, file contents, tool schema JSON, model output, credentials, and secrets are not logged by default.
+- Added `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE` with supported values `flattened`, `user_only`, `final_user`, `instruction_context`, and `no_tool_vocab`.
+- Preserved current default behavior with `flattened` unless a bounded diagnostic explicitly selects another prompt mode.
+- Added mocked tests for prompt construction modes, configured prompt-mode routing, metadata-only logging, and log redaction.
+- Recommended `instruction_context` for the next bounded live `sample_note.md` retry because it keeps file-like context while moving the final user instruction before Hermes' large system scaffold.
 - Completed Phase DESKTOP-1 Hermes Desktop install planning only.
 - Added `docs/HERMES_DESKTOP_INSTALL_PLAN.md`.
 - Verified the official Nous Research Hermes Desktop page lists macOS 12+ and Hermes Agent v0.15.2.

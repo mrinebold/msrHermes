@@ -656,3 +656,44 @@ Desktop must not become an alternate route around the MSR model router. If Deskt
 Reference:
 
 - [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
+
+## Phase 5U Gemma Prompt Construction Diagnosis
+
+Status: complete on 2026-06-05.
+
+Phase 5U ran no live Hermes prompts and sent no live model calls. It inspected the adapter's local Gemma prompt construction path and added metadata-only diagnostics for the prompt shape that reaches `services/model_router`.
+
+Added adapter diagnostics:
+
+- flattened prompt total characters
+- role sections included
+- section order
+- first/last prompt snippet logging fixed at 0 characters
+- markdown fence count
+- XML/tool-like tag count
+- JSON-looking block count
+- plain `tool`, `function`, `schema`, and `call` keyword counts
+- final user content start index
+- user/system character counts and dominance flag
+
+Added local compat prompt-mode selector:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=flattened|user_only|final_user|instruction_context|no_tool_vocab
+```
+
+The default remains `flattened`, so existing behavior is unchanged unless a bounded diagnostic explicitly selects another mode.
+
+Prompt modes:
+
+| Mode | Use |
+| --- | --- |
+| `flattened` | Preserve current role-labeled order. |
+| `user_only` | Drop system/assistant context and keep user messages only. |
+| `final_user` | Keep only the final user instruction. |
+| `instruction_context` | Move final user instruction first, then append prior context. |
+| `no_tool_vocab` | Preserve flattened sections but remove plain tool/function/schema/call vocabulary. |
+
+Recommendation:
+
+For the next live Hermes file-summary retry, use `instruction_context` with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. This is the safest first variant because it preserves file-like context while moving the concise final instruction ahead of Hermes' large system scaffold. Keep cloud providers fail-closed, keep the adapter localhost-only, and do not configure Hermes persistently.

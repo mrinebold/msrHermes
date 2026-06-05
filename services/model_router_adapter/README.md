@@ -21,6 +21,7 @@ Environment overrides:
 - `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES`
 - `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE`
 - `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE`
+- `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE`
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
 
@@ -29,6 +30,8 @@ Set `MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true` only for bounded diagnostics. Reque
 Set `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true` only for bounded diagnostics. Response-shape logs are emitted as JSON lines with top-level response keys, choices count, assistant content length, finish reason, and whether the request asked for streaming. They do not include prompt text, message content, model output, API keys, OAuth tokens, Supabase keys, or other secrets.
 
 Set `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true` only for bounded diagnostics. Message-structure logs include message count, roles present, character counts per message, final-user-message emptiness, file-content heuristic status, and request option presence for tools, tool choice, max tokens, temperature, and streaming. They do not include prompt text, message content, file contents, tool descriptions, model output, API keys, OAuth tokens, Supabase keys, or other secrets.
+
+When local compat mode is enabled, message-structure diagnostics also include prompt-construction metadata only: flattened prompt character count, role sections included, section order, markdown fence count, XML/tool-like tag count, JSON-looking block count, tool/function/schema/call keyword counts, the final user content start index, and user/system character counts. The first and last prompt snippets are intentionally logged as 0 characters.
 
 ## Hermes Contract Notes
 
@@ -41,6 +44,18 @@ The adapter keeps non-streaming JSON for requests without `stream=true` and retu
 For the current DevMonster Gemma route, Hermes tool schemas are diagnostic metadata only. The adapter does not execute tools and does not forward tool schemas to `services/model_router`.
 
 Set `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true` to treat local Gemma as non-tool-capable. In this mode, Gemma requests are flattened into a single prompt with role-labeled blocks like `[system]`, `[user]`, and `[assistant]`; only message text is included, tool schemas and `tool_choice` are ignored for routing, non-text structured parts are omitted, and requests without non-empty user content fail closed with an adapter `400`.
+
+`MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE` is a diagnostic prompt-shaping flag for local compat mode. Supported values are:
+
+| Mode | Behavior |
+| --- | --- |
+| `flattened` | Default; preserve non-empty role-labeled message sections in original order. |
+| `user_only` | Keep only user message sections. |
+| `final_user` | Keep only the final non-empty user message. |
+| `instruction_context` | Move the final non-empty user message first, then append prior context sections. |
+| `no_tool_vocab` | Preserve flattened sections while removing plain `tool`, `function`, `schema`, and `call` vocabulary. |
+
+For the next bounded Hermes file-summary retry, prefer `instruction_context` because it preserves file-like context while putting the concise final instruction before Hermes' large system scaffold.
 
 ## Endpoints
 
