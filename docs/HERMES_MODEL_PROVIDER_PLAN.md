@@ -642,7 +642,7 @@ Phase 5U should isolate prompt variants before another Hermes retry. Prefer adap
 
 Status: planning only on 2026-06-05.
 
-Hermes Desktop should not be installed until the CLI path can produce useful sandbox output through the localhost MSR Model Router adapter. Desktop should inherit the same local-first model policy:
+Phase 5AA confirmed the CLI path can produce useful `sample_note.md` sandbox output through the localhost MSR Model Router adapter. Hermes Desktop is now planned for Mac mini and DevMonster, but must not be installed, opened, or configured until a later phase explicitly approves that work. Desktop should inherit the same local-first model policy:
 
 - local adapter first
 - `http://127.0.0.1:8088/v1` if Desktop supports a custom OpenAI-compatible endpoint
@@ -653,9 +653,12 @@ Hermes Desktop should not be installed until the CLI path can produce useful san
 
 Desktop must not become an alternate route around the MSR model router. If Desktop cannot use the localhost adapter without cloud login or durable credentials, Desktop validation should stop and record the blocker.
 
+DevMonster-specific rule: Desktop on DevMonster is a human-facing workstation UI only. It must not change DevMonster Ollama/Gemma serving, Tailscale binding, host binding, launch behavior, firewall/network exposure, or the approved model-worker configuration. Direct Desktop-to-Ollama routing is not the default path; keep the localhost OpenAI-compatible adapter as the configured model surface if Desktop supports it.
+
 Reference:
 
 - [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
+- [Hermes Desktop DevMonster Plan](HERMES_DESKTOP_DEVMONSTER_PLAN.md)
 
 ## Phase 5U Gemma Prompt Construction Diagnosis
 

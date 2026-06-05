@@ -278,17 +278,22 @@ Future Desktop validation must follow these minimum rules:
 - do not sign into Nous Portal until explicitly approved
 - do not add cloud provider credentials
 - do not grant broad filesystem permissions on first launch
-- do not connect Google, Supabase, Home Assistant, Helio, or Agent Bus
+- do not connect Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus
 - do not enable background/resident operation
 - keep Desktop pointed at the localhost model adapter if configurable
 - confirm whether Desktop shares `~/.hermes` with CLI before adding any durable credentials
 - confirm whether Desktop starts background services, launch items, login items, or helper processes
+- preserve ANO governance: Desktop is a UI surface only, not a bypass around Helio/ANO rules, roles, permissions, approvals, or audit requirements
+- on DevMonster, do not change Ollama/Gemma serving, Tailscale binding, host binding, firewall/network exposure, launch behavior, or model-worker configuration
 
 Desktop rollback must remove the app and Desktop-specific launch/login items while leaving CLI state intact unless a separate phase approves CLI rollback.
+
+DevMonster rollback must also leave Ollama/Gemma, Tailscale, and approved model-worker configuration intact.
 
 Reference:
 
 - [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
+- [Hermes Desktop DevMonster Plan](HERMES_DESKTOP_DEVMONSTER_PLAN.md)
 
 ## Audit Requirements
 

@@ -726,9 +726,10 @@ Observed source facts:
 
 Install timing:
 
-- after the CLI/local adapter path can produce useful sandbox output through the localhost adapter
+- after Phase 5AA success, which confirmed usable Hermes sandbox output through the localhost adapter
 - before resident/background Hermes operation
-- before Google, Supabase, Home Assistant, Helio, or Hermes Desktop receives durable credentials
+- before Google, Supabase, Home Assistant, GitHub, Helio, or Hermes Desktop receives durable credentials
+- DevMonster Desktop planning may follow Mac mini Desktop planning, but must not alter DevMonster Ollama, Gemma, Tailscale, host binding, launch behavior, or firewall/network exposure
 
 Desktop safety requirements:
 
@@ -738,13 +739,15 @@ Desktop safety requirements:
 - do not add cloud provider credentials
 - do not enable background or resident operation
 - do not grant broad filesystem permissions on first launch
-- do not connect Google, Supabase, Home Assistant, Helio, or Agent Bus
+- do not connect Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus
 - keep Desktop pointed at the localhost model adapter if configurable
+- preserve ANO governance: Desktop is a UI surface, not a bypass around Helio/ANO rules, roles, permissions, approvals, or audit requirements
 
-Future Desktop validation must confirm version, whether Desktop shares `~/.hermes` with CLI, whether it reads existing Hermes config, whether it starts background services, whether it attempts browser or portal login, whether it can use the localhost adapter, and whether any external integration is enabled.
+Future Desktop validation must confirm version, whether Desktop shares `~/.hermes` with CLI, whether it reads existing Hermes config, whether it starts launchd/background services, whether it attempts browser or portal login, whether it can use the localhost/OpenAI-compatible adapter, and whether any external integration is enabled.
 
-Rollback should remove the Desktop app and any Desktop-specific launch/login items while leaving the CLI install intact unless a separate rollback phase approves CLI removal.
+Rollback should remove the Desktop app and any Desktop-specific launch/login items while leaving the CLI install intact unless a separate rollback phase approves CLI removal. DevMonster rollback must also leave Ollama/Gemma, Tailscale, and approved model-worker configuration intact.
 
 Reference:
 
 - [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
+- [Hermes Desktop DevMonster Plan](HERMES_DESKTOP_DEVMONSTER_PLAN.md)

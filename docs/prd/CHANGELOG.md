@@ -2,6 +2,14 @@
 
 ## 2026-06-05
 
+- Refreshed Phase DESKTOP-1 Hermes Desktop install planning for both Mac mini and DevMonster.
+- Added `docs/HERMES_DESKTOP_DEVMONSTER_PLAN.md` and updated `docs/HERMES_DESKTOP_INSTALL_PLAN.md` for the Mac mini scope.
+- Confirmed Phase 5AA is the install-timing gate: Hermes CLI can now produce usable sandbox output through the localhost MSR Model Router adapter, but Desktop still requires a later explicit install/open approval.
+- Added DevMonster-specific Desktop constraints: do not alter Ollama/Gemma, Tailscale, host binding, launch behavior, firewall/network exposure, or approved model-worker configuration.
+- Added Desktop safety requirements for no Nous Portal sign-in without approval, no cloud provider credentials, no Google/Supabase/Home Assistant/GitHub/Helio/Agent Bus connection, no broad filesystem grants, no background/resident operation, localhost adapter use if configurable, and ANO governance preservation.
+- Added validation checks for Desktop version, shared `~/.hermes` behavior, existing config reads, launchd/background services, browser/portal login attempts, localhost/OpenAI-compatible adapter support, and disabled external integrations.
+- Added rollback requirements to remove Desktop app and Desktop-specific launch/login items while leaving Hermes CLI intact and preserving DevMonster Ollama/Gemma/Tailscale/model-worker configuration.
+- Confirmed Hermes Desktop was not downloaded, installed, launched, configured, or connected to external services.
 - Completed Phase 5AA tuned local-summary validation.
 - Used `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`, and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`.
 - Ran one bounded `sample_note.md` retry through the localhost adapter with isolated `HERMES_HOME`, dummy local API key, and no persistent Hermes config.
