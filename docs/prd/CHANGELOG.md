@@ -2,6 +2,12 @@
 
 ## 2026-06-05
 
+- Completed Phase DESKTOP-2 Hermes Desktop install command proposal only.
+- Identified the official macOS Desktop download target as `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`, linked from the official Nous Research Desktop page.
+- Recorded visible package facts: DMG filename `Hermes-Setup.dmg`, visible version Hermes Agent v0.15.2, macOS 12+ support, no checksum visible on the rendered official page, no signature/notarization details visible before local inspection, and unknown admin privilege requirement.
+- Added future-only commands for controlled download, checksum capture, quarantine/image inspection, Gatekeeper assessment, app-bundle code-signing assessment, copy to `/Applications`, first-launch baseline and post-launch checks, and rollback/removal.
+- Added first-launch guardrails: no Nous Portal sign-in without approval, no cloud credentials, no broad filesystem permissions, no Google/Supabase/Home Assistant/GitHub/Helio connection, no background/resident operation, no existing Hermes CLI config changes, and localhost adapter use only if configurable.
+- Confirmed Hermes Desktop was not downloaded, installed, launched, configured, or connected to external services.
 - Refreshed Phase DESKTOP-1 Hermes Desktop install planning for both Mac mini and DevMonster.
 - Added `docs/HERMES_DESKTOP_DEVMONSTER_PLAN.md` and updated `docs/HERMES_DESKTOP_INSTALL_PLAN.md` for the Mac mini scope.
 - Confirmed Phase 5AA is the install-timing gate: Hermes CLI can now produce usable sandbox output through the localhost MSR Model Router adapter, but Desktop still requires a later explicit install/open approval.

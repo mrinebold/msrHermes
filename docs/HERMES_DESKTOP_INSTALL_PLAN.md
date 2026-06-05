@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-1 is planning only. Do not download, install, open, configure, sign in to, or grant permissions to Hermes Desktop in this phase.
+Phase DESKTOP-2 is install-command proposal only. Do not download, install, open, configure, sign in to, or grant permissions to Hermes Desktop in this phase.
 
 ## Scope
 
@@ -23,7 +23,9 @@ Observed on 2026-06-05:
 - macOS 12+ is listed for the macOS Desktop build.
 - Hermes Agent v0.15.2 is shown on the page.
 - The page links Desktop downloads under the Nous Research Hermes Agent site.
+- The visible macOS download target is a DMG named `Hermes-Setup.dmg` at `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`.
 - The page links Nous Portal, so portal login behavior must be treated as a validation item, not assumed safe.
+- The rendered official page does not publish a checksum, detached signature, notarization ticket, installer identifier, or admin privilege requirement.
 
 Current Mac mini CLI state:
 
@@ -51,6 +53,93 @@ Install before:
 5. durable GitHub, Helio, or Agent Bus credentials
 
 Desktop must not become the first place where Hermes receives durable credentials or external integration authority.
+
+## Phase DESKTOP-2 Proposed Mac mini Install Commands
+
+Status: proposal only. Do not run these commands until a later phase explicitly approves Desktop download/install/open.
+
+Known and unknown package facts:
+
+| Item | Current finding |
+| --- | --- |
+| Official page | `https://hermes-agent.nousresearch.com/desktop` |
+| macOS download URL | `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg` |
+| Visible filename | `Hermes-Setup.dmg` |
+| Package type | DMG |
+| Visible version | Hermes Agent v0.15.2 |
+| Checksum | Not visible on the rendered official page |
+| Signature/notarization info | Not visible on the rendered official page; must be inspected locally before launch |
+| Admin privileges | Unknown; copying to `/Applications` may require admin depending local permissions, while `~/Applications` can avoid admin if approved |
+| `~/.hermes` writes | Likely possible because Desktop is expected to share or inspect Hermes state, but unconfirmed until first-launch validation |
+| Launch/login/background items | Unknown; must be checked because Hermes advertises unattended gateway-style operation |
+
+Future controlled download:
+
+```sh
+mkdir -p "$HOME/Downloads/hermes-desktop"
+curl --fail --location --proto '=https' --tlsv1.2 \
+  --output "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg" \
+  "https://hermes-assets.nousresearch.com/Hermes-Setup.dmg"
+shasum -a 256 "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg"
+```
+
+Future quarantine and image inspection:
+
+```sh
+xattr -l "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg" || true
+hdiutil imageinfo "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg"
+spctl --assess --type open --verbose=4 "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg"
+```
+
+Future mount and app identity inspection:
+
+```sh
+MOUNT_DIR="$(mktemp -d /tmp/hermes-desktop-dmg.XXXXXX)"
+hdiutil attach -readonly -nobrowse \
+  -mountpoint "$MOUNT_DIR" \
+  "$HOME/Downloads/hermes-desktop/Hermes-Setup.dmg"
+find "$MOUNT_DIR" -maxdepth 2 -name "*.app" -print
+codesign --display --verbose=4 "$MOUNT_DIR/Hermes Desktop.app"
+spctl --assess --type execute --verbose=4 "$MOUNT_DIR/Hermes Desktop.app"
+```
+
+If the app bundle name differs from `Hermes Desktop.app`, stop and update this plan before install.
+
+Future install or copy step:
+
+```sh
+ditto "$MOUNT_DIR/Hermes Desktop.app" "/Applications/Hermes Desktop.app"
+hdiutil detach "$MOUNT_DIR"
+```
+
+If `/Applications` requires admin privileges, stop and ask whether to use an admin-approved copy or a user-local `"$HOME/Applications"` install. Do not use `sudo` unless a later phase explicitly approves it.
+
+Future pre-launch baseline:
+
+```sh
+pgrep -af -i "hermes|nous" || true
+launchctl print "gui/$(id -u)" | rg -i "hermes|nous" || true
+ls "$HOME/Library/LaunchAgents" | rg -i "hermes|nous" || true
+osascript -e 'tell application "System Events" to get the name of every login item' | tr ',' '\n' | rg -i "hermes|nous" || true
+```
+
+Future first launch validation:
+
+```sh
+open -a "Hermes Desktop"
+```
+
+Immediately after first launch, validate:
+
+```sh
+pgrep -af -i "hermes|nous" || true
+launchctl print "gui/$(id -u)" | rg -i "hermes|nous" || true
+ls "$HOME/Library/LaunchAgents" | rg -i "hermes|nous" || true
+osascript -e 'tell application "System Events" to get the name of every login item' | tr ',' '\n' | rg -i "hermes|nous" || true
+find "$HOME/.hermes" -maxdepth 2 -type f -mtime -1 -print
+```
+
+First launch must stop before chat, setup, portal login, external integration setup, broad permission grants, or background/resident enablement. If Desktop exposes provider configuration, select only a custom OpenAI-compatible localhost adapter endpoint, and only if doing so does not alter existing Hermes CLI config.
 
 ## Safety Requirements
 
@@ -98,6 +187,24 @@ Rollback steps:
 
 Do not delete `~/.hermes` during Desktop rollback unless a separate state-removal phase is approved.
 
+Future rollback command proposal:
+
+```sh
+osascript -e 'quit app "Hermes Desktop"' || true
+rm -rf "/Applications/Hermes Desktop.app"
+rm -rf "$HOME/Applications/Hermes Desktop.app"
+```
+
+After removing the app, inspect launch/login/background items before deleting anything else:
+
+```sh
+launchctl print "gui/$(id -u)" | rg -i "hermes|nous" || true
+ls "$HOME/Library/LaunchAgents" | rg -i "hermes|nous" || true
+osascript -e 'tell application "System Events" to get the name of every login item' | tr ',' '\n' | rg -i "hermes|nous" || true
+```
+
+Remove launch agents, login items, or helper files only after confirming they belong to Desktop and are not used by the CLI.
+
 ## Open Questions
 
 - Does Hermes Desktop share `~/.hermes` with the CLI?
@@ -110,7 +217,7 @@ Do not delete `~/.hermes` during Desktop rollback unless a separate state-remova
 
 Stop before install or launch unless a later phase explicitly approves Desktop installation.
 
-Phase DESKTOP-1 does not approve:
+Phase DESKTOP-2 does not approve:
 
 - Desktop download
 - Desktop install

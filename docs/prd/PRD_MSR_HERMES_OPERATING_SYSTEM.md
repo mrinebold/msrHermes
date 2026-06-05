@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase DESKTOP-1 planning refresh complete. Hermes produced usable `sample_note.md` output in Phase 5AA, and Hermes Desktop is now roadmapped for both Mac mini and DevMonster without installing or launching Desktop.
+Phase DESKTOP-2 install-command proposal complete. Hermes Desktop has a controlled future Mac mini install sequence documented, but Desktop was not downloaded, installed, launched, configured, or connected.
 
-Repository status is maintained by git; this PRD records Phase DESKTOP-1 planning as complete.
+Repository status is maintained by git; this PRD records Phase DESKTOP-2 as proposal-only and complete.
 
 ## Architecture Decision
 
@@ -50,6 +50,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5Z | Complete | Added provider timeout and local summary context-budget controls; no live prompts were run. |
 | Phase 5AA | Complete | Ran one bounded tuned local-summary retry for `sample_note.md`; Hermes produced usable five-bullet output. |
 | Phase DESKTOP-1 | Complete | Added planning-only Hermes Desktop install roadmaps for Mac mini and DevMonster; Desktop was not downloaded or installed. |
+| Phase DESKTOP-2 | Complete | Documented exact future Mac mini Desktop download, inspection, install, first-launch validation, and rollback commands without downloading or launching Desktop. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -105,6 +106,7 @@ Completed and committed locally:
 - Phase 5Z timeout/context tuning: no live Hermes prompts or live model calls were run. Added `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS` as the primary local provider timeout setting with `GEMMA_TIMEOUT` preserved as a legacy fallback. Added `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS` with default 3000. `local_summary` now preserves the beginning and end of context when truncation is needed and logs metadata-only fields for original context chars, sent context chars, truncation status, and timeout seconds.
 - Phase 5AA tuned local summary validation: one bounded `sample_note.md` Hermes file-summary test completed in 112.635s with exit code 0, stdout 285 bytes, and stderr 0 bytes. Output was usable. Adapter metadata showed one `POST /v1/chat/completions` call, status 200, selected model `gemma4:26b`, response content length 284, context truncated from 2899 to 1499 chars, and timeout used 120s.
 - Phase DESKTOP-1 planning: added the official Nous Research Hermes Desktop roadmaps for Mac mini and DevMonster. Phase 5AA satisfied the initial useful-output gate for `sample_note.md`, but Desktop still requires a later explicit install/open approval. Desktop must be planned before resident/background operation and before durable credentials are granted. Safety gates require official download source, macOS identity verification if possible, no Nous Portal login, no cloud credentials, no broad filesystem grants, no background operation, no Google/Supabase/Home Assistant/GitHub/Helio/Agent Bus connection, localhost adapter use if configurable, ANO governance preservation, and no DevMonster Ollama/Gemma/Tailscale/model-worker changes.
+- Phase DESKTOP-2 install-command proposal: documented the future Mac mini Desktop sequence using official source `https://hermes-agent.nousresearch.com/desktop` and macOS DMG target `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`. The proposal includes checksum capture, quarantine/image inspection, Gatekeeper assessment, app bundle code-signing assessment, copy to `/Applications`, first-launch baseline checks, post-launch launchd/login/background checks, `~/.hermes` write inspection, and rollback removal commands. No Desktop download, install, launch, runtime config change, credential setup, or external service connection was performed.
 
 Not completed or not approved:
 
@@ -147,7 +149,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain planning-only until a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain proposal-only until a later phase explicitly approves Desktop download/install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -204,6 +206,8 @@ Phase 5Z added the timeout and context-budget controls needed for the next bound
 Phase 5AA confirmed the tuned settings produce usable Hermes summary output for `sample_note.md`.
 
 Phase DESKTOP-1 added Hermes Desktop to the roadmap as a future official Nous Research install only for both Mac mini and DevMonster. Desktop remains a UI surface under Helio/ANO governance, is gated before resident/background operation or durable credentials, and must not alter DevMonster Ollama/Gemma/Tailscale/model-worker configuration.
+
+Phase DESKTOP-2 documented the Mac mini Desktop install command proposal only. The future install must use the official DMG, inspect quarantine/signature/notarization state, validate first-launch behavior, avoid portal/cloud/integration setup, preserve existing CLI config, and keep rollback limited to Desktop artifacts unless separately approved.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 
