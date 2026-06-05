@@ -2,6 +2,18 @@
 
 ## 2026-06-05
 
+- Completed Phase 5V live Hermes file-summary retry using `instruction_context` prompt mode.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context`.
+- Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
+- Captured stdout to `sandbox/output/sample_note_phase5v_summary.md` and stderr to `sandbox/output/sample_note_phase5v_stderr.txt`.
+- Recorded exit code 0, elapsed time 58.639s, stdout 8 bytes, stderr 0 bytes, and no timeout under the 240s cap.
+- Confirmed the output is not usable as an exactly five-bullet summary.
+- Confirmed adapter request metadata showed four successful `POST /v1/chat/completions` calls, all status 200 with selected model `gemma4:26b`; chat elapsed times were 28.975s, 4.843s, 12.543s, and 8.489s.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0` for all four chat-completion calls.
+- Confirmed prompt construction metadata showed `gemma_prompt_mode=instruction_context`, `compat_mode_enabled=true`, `prompt_total_chars=5729`, `message_count=2`, `tool_schemas_present=true`, `tool_schemas_forwarded=false`, and final user content starting at index 7.
+- Stopped the adapter immediately after inspection and confirmed no `8088` listener remained.
+- Recommended either one bounded `no_tool_vocab` retry for `sample_note.md` or a stronger local summary prompt mode that strips Hermes agent/tool scaffold while preserving file-like context.
+- Confirmed no `sample_prd.md` run, prompt/file content logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5U Gemma-facing prompt construction diagnosis.
 - Ran no live Hermes prompts and sent no live model calls.
 - Added metadata-only prompt-construction diagnostics to the localhost adapter for local compat mode: flattened prompt character count, role sections, section order, markdown fence count, XML/tool-like tag count, JSON-looking block count, tool/function/schema/call keyword counts, final user content start index, and user/system character counts.

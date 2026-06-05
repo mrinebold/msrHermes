@@ -266,3 +266,67 @@ Phase 5T's recorded shape strongly suggests that `flattened` is not the right ne
 Recommendation:
 
 For the next approved live retry, use `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context` with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. This preserves the file-like context but places the final user instruction first, reducing the chance that local Gemma treats Hermes' system scaffold as the main task. If that still returns zero content, the next offline comparison should try `no_tool_vocab` or a purpose-built local summary prompt that strips Hermes system/developer scaffold more aggressively.
+
+## Phase 5V Instruction-Context Live Retry
+
+Validation date: 2026-06-05.
+
+One bounded Hermes file-summary test was run against `sandbox/input/sample_note.md` only. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context`. Hermes used a temporary isolated `HERMES_HOME` with only the localhost adapter, `gemma4:26b`, and a dummy local API key. The adapter was stopped immediately after the run.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Exit code | 0 |
+| Elapsed time | 58.639s |
+| Stdout file | `sandbox/output/sample_note_phase5v_summary.md` |
+| Stdout byte count | 8 |
+| Stderr file | `sandbox/output/sample_note_phase5v_stderr.txt` |
+| Stderr byte count | 0 |
+| Output usable | No; it contains only the empty-response sentinel |
+| Adapter shutdown | Stopped immediately; no listener remained on `8088` |
+
+Adapter metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 4 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 17 | 404 |
+
+Chat-completion elapsed times were 28.975s, 4.843s, 12.543s, and 8.489s.
+
+Response-shape metadata:
+
+| Chat call count | Streaming requested | Choices | Finish reason | Content length |
+| ---: | --- | ---: | --- | ---: |
+| 4 | true | 1 each | `stop` | 0 each |
+
+Prompt-construction metadata was identical for all four chat-completion calls:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `instruction_context` |
+| Compat mode | true |
+| Message count | 2 |
+| Message character counts | `[5628, 83]` |
+| Prompt characters | 5729 |
+| Final user content start index | 7 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Content length | 0 |
+| User content dominates system content | false |
+| Tool keyword count | 9 |
+| Call keyword count | 1 |
+| XML/tool-like tag count | 1 |
+| Markdown fence count | 0 |
+| JSON-looking block count | 0 |
+
+Conclusion:
+
+`instruction_context` worked mechanically: the final user instruction moved to the front of the prompt, with its content starting at index 7. However, DevMonster Gemma still returned zero visible content for all four chat-completion calls. The remaining blocker is therefore not only final-instruction placement. The prompt still contains a large Hermes system scaffold and tool/call vocabulary in message text.
+
+Recommendation:
+
+Do not rerun `sample_prd.md` yet. The next bounded diagnostic should try `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab` for `sample_note.md`, or implement a stronger local summary prompt mode that preserves file-like context while stripping Hermes system/tool scaffold more aggressively. Keep cloud providers fail-closed and keep Hermes configuration isolated.

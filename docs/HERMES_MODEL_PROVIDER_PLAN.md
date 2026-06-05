@@ -697,3 +697,53 @@ Prompt modes:
 Recommendation:
 
 For the next live Hermes file-summary retry, use `instruction_context` with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. This is the safest first variant because it preserves file-like context while moving the concise final instruction ahead of Hermes' large system scaffold. Keep cloud providers fail-closed, keep the adapter localhost-only, and do not configure Hermes persistently.
+
+## Phase 5V Instruction-Context Live Retry
+
+Status: complete on 2026-06-05.
+
+One bounded Hermes `sample_note.md` file-summary retry was run with:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context
+```
+
+Hermes used an isolated temporary `HERMES_HOME` with only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. The adapter was started manually in the foreground on `127.0.0.1:8088` and stopped immediately after validation.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Hermes exit code | 0 |
+| Hermes elapsed time | 58.639s |
+| Stdout | 8 bytes: `(empty)` |
+| Stderr | 0 bytes |
+| Output usable | No |
+| `GET /v1/models` | 2 calls, both 200 |
+| `POST /v1/chat/completions` | 4 calls, all 200 with selected model `gemma4:26b` |
+| Unsupported discovery probes | 17 calls, all 404 |
+| Adapter shutdown | stopped; no `8088` listener remained |
+
+Prompt and response metadata:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `instruction_context` |
+| Compat mode | true |
+| Prompt chars | 5729 |
+| Message count | 2 |
+| Message char counts | `[5628, 83]` |
+| Final user content start index | 7 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Response content length | 0 for all four chat calls |
+
+Conclusion:
+
+`instruction_context` is mechanically correct but does not resolve the file-summary zero-content behavior. The next likely prompt issue is remaining Hermes tool/call vocabulary or agent scaffold text inside message content.
+
+Recommendation:
+
+The next live attempt, if approved, should be another single `sample_note.md` retry using `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`, or an implementation phase should add a stronger local summary prompt mode that extracts only the final instruction and file-like context while dropping Hermes tool scaffold. Do not run `sample_prd.md`, configure Hermes persistently, or broaden provider access until `sample_note.md` produces usable output.

@@ -170,3 +170,34 @@ MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=flattened|user_only|final_user|instructio
 Recommendation:
 
 Use `instruction_context` for the next bounded live sample-note retry. It keeps local Gemma non-tool-capable, keeps tool schemas out of the prompt, preserves the available file-like context, and moves the concise final user instruction before the large Hermes scaffold.
+
+## Phase 5V Instruction-Context Result
+
+Validation date: 2026-06-05.
+
+The bounded live `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context` confirmed that prompt reordering alone is insufficient.
+
+Observed metadata:
+
+| Field | Value |
+| --- | --- |
+| Chat-completion calls | 4 |
+| Status | 200 for all calls |
+| Selected model | `gemma4:26b` |
+| Prompt mode | `instruction_context` |
+| Compat mode | true |
+| Prompt chars | 5729 |
+| Message count | 2 |
+| Message char counts | `[5628, 83]` |
+| Final user content start index | 7 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Response content length | 0 for all calls |
+
+Conclusion:
+
+The adapter successfully moved the final instruction ahead of Hermes' large system context and continued to suppress tool schema forwarding, but Gemma still returned zero content. The remaining compatibility issue is likely tool/call vocabulary or broader Hermes system scaffold content inside the message text, not tool schema JSON or instruction order alone.
+
+Recommendation:
+
+Try `no_tool_vocab` next for one bounded `sample_note.md` retry, or implement a purpose-built local summary mode that extracts file-like context and the final instruction while dropping Hermes agent/tool scaffold text.
