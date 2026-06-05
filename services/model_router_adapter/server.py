@@ -17,6 +17,7 @@ from .schemas import (
     chat_completion_stream_chunks,
     error_response,
     has_nonempty_user_content,
+    local_summary_extraction,
     local_compat_prompt_from_messages,
     message_content_text,
     models_response,
@@ -104,6 +105,14 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                     self._write_json(status, error_response("local compatibility mode requires non-empty user content", "bad_request"))
                     self._log_request(started, status, selected_model)
                     return
+                if use_local_compat and config.gemma_prompt_mode == "local_summary":
+                    extraction = local_summary_extraction(messages)
+                    if not extraction["success"]:
+                        status = 400
+                        self._log_message_structure(payload, messages, streaming_requested, use_local_compat, "")
+                        self._write_json(status, error_response("local summary mode requires user instruction and file-like context", "bad_request"))
+                        self._log_request(started, status, selected_model)
+                        return
 
                 prompt = (
                     local_compat_prompt_from_messages(messages, config.gemma_prompt_mode)
@@ -252,6 +261,7 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 "flattened_prompt_chars": len(flattened_prompt) if compat_mode_enabled else 0,
                 "tool_schemas_present": bool(payload.get("tools")),
                 "tool_schemas_forwarded": False,
+                "dropped_tool_schema_count": len(payload.get("tools")) if isinstance(payload.get("tools"), list) else 0,
                 "gemma_prompt_mode": config.gemma_prompt_mode if compat_mode_enabled else "",
             }
             if compat_mode_enabled:

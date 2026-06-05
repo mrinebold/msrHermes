@@ -49,7 +49,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
                 "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES": "true",
                 "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE": "true",
                 "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE": "true",
-                "MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "instruction_context",
+                "MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "local_summary",
             }
         )
 
@@ -57,7 +57,7 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertTrue(config.log_response_shapes)
         self.assertTrue(config.log_message_structure)
         self.assertTrue(config.local_compat_mode)
-        self.assertEqual(config.gemma_prompt_mode, "instruction_context")
+        self.assertEqual(config.gemma_prompt_mode, "local_summary")
 
     def test_invalid_gemma_prompt_mode_defaults_to_flattened(self):
         config = AdapterConfig.from_env({"MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE": "unsafe"})
@@ -439,6 +439,115 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("call", prompt.lower())
         self.assertIn("FINAL_USER", prompt)
 
+    def test_gemma_prompt_mode_local_summary_extracts_user_instruction_and_context(self):
+        prompt = gemma_prompt_from_messages(
+            [
+                {"role": "system", "content": "HERMES_SYSTEM_SCAFFOLD tool schema call"},
+                {
+                    "role": "user",
+                    "content": (
+                        "Summarize in exactly five concise bullets.\n\n"
+                        "Source file: sandbox/input/sample_note.md\n"
+                        "# Sample Note\n"
+                        "SANITIZED_FILE_CONTEXT_LINE\n"
+                    ),
+                },
+            ],
+            "local_summary",
+        )
+
+        self.assertIn("You are summarizing a local sandbox document.", prompt)
+        self.assertLess(prompt.index("User instruction:"), prompt.index("Document/context:"))
+        self.assertIn("Summarize in exactly five concise bullets.", prompt)
+        self.assertIn("# Sample Note", prompt)
+        self.assertIn("SANITIZED_FILE_CONTEXT_LINE", prompt)
+        self.assertNotIn("HERMES_SYSTEM_SCAFFOLD", prompt)
+        self.assertNotIn("Source file:", prompt)
+
+    def test_gemma_prompt_mode_local_summary_uses_file_like_system_context_when_user_has_instruction(self):
+        prompt = gemma_prompt_from_messages(
+            [
+                {
+                    "role": "system",
+                    "content": "# Sample Note\nSANITIZED_CONTEXT_LINE\nSANITIZED_CONTEXT_LINE\nSANITIZED_CONTEXT_LINE",
+                },
+                {"role": "user", "content": "Summarize in exactly five concise bullets."},
+            ],
+            "local_summary",
+        )
+
+        self.assertIn("Summarize in exactly five concise bullets.", prompt)
+        self.assertIn("# Sample Note", prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", prompt)
+
+    def test_local_summary_prompt_mode_drops_hermes_scaffold_and_tool_schema(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+        payload = self._local_summary_payload()
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        self.assertIn("User instruction:", self.router.last_request.prompt)
+        self.assertIn("Document/context:", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", self.router.last_request.prompt)
+        self.assertNotIn("HERMES_SYSTEM_SCAFFOLD", self.router.last_request.prompt)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+        self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", self.router.last_request.prompt)
+        self.assertNotIn("[system]", self.router.last_request.prompt)
+        self.assertNotIn("[user]", self.router.last_request.prompt)
+
+    def test_local_summary_prompt_mode_fails_closed_without_context(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, payload = self._post(
+            "/v1/chat/completions",
+            {
+                "model": "gemma4:26b",
+                "messages": [
+                    {"role": "system", "content": "HERMES_SYSTEM_SCAFFOLD"},
+                    {"role": "user", "content": "Summarize this file."},
+                ],
+            },
+        )
+
+        self.assertEqual(status, 400)
+        self.assertEqual(payload["error"]["type"], "bad_request")
+        self.assertIn("local summary mode", payload["error"]["message"])
+        self.assertIsNone(self.router.last_request)
+
+    def test_local_summary_prompt_mode_streaming_still_returns_sse_chunks(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, headers, body = self._post_raw("/v1/chat/completions", self._local_summary_payload())
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["content-type"], "text/event-stream")
+        self.assertTrue(body.endswith("data: [DONE]\n\n"))
+        chunks = self._sse_json_chunks(body)
+        self.assertEqual(chunks[0]["choices"][0]["delta"]["content"], "Sandbox summary.")
+
     def test_local_compat_mode_uses_configured_gemma_prompt_mode(self):
         self.config = AdapterConfig(
             host="127.0.0.1",
@@ -614,6 +723,34 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertNotIn("safe_key", joined)
         self.assertNotIn("safe_value", joined)
 
+    def test_local_summary_metadata_log_redacts_instruction_and_context(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+            local_compat_mode=True,
+            gemma_prompt_mode="local_summary",
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw("/v1/chat/completions", self._local_summary_payload())
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertEqual(record.gemma_prompt_mode, "local_summary")
+        self.assertTrue(record.local_summary_extraction_success)
+        self.assertGreater(record.instruction_chars, 0)
+        self.assertGreater(record.context_chars, 0)
+        self.assertGreater(record.dropped_system_chars, 0)
+        self.assertEqual(record.dropped_tool_schema_count, 1)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("SANITIZED_SUMMARY_REQUEST", joined)
+        self.assertNotIn("SANITIZED_CONTEXT_LINE", joined)
+        self.assertNotIn("HERMES_SYSTEM_SCAFFOLD", joined)
+        self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", joined)
+
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})
 
@@ -707,6 +844,32 @@ class ModelRouterAdapterTest(unittest.TestCase):
                         "name": "read_sandbox_file",
                         "description": "SANITIZED_TOOL_DESCRIPTION",
                         "parameters": {"type": "object", "properties": {}},
+                    },
+                }
+            ],
+        }
+
+    def _local_summary_payload(self):
+        return {
+            "model": "gemma4:26b",
+            "stream": True,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "HERMES_SYSTEM_SCAFFOLD tool schema call\n"
+                        "# Sample Note\n"
+                        + "\n".join(["SANITIZED_CONTEXT_LINE"] * 4)
+                    ),
+                },
+                {"role": "user", "content": "SANITIZED_SUMMARY_REQUEST"},
+            ],
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "read_sandbox_file",
+                        "description": "SANITIZED_TOOL_DESCRIPTION",
                     },
                 }
             ],

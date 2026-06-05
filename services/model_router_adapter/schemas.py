@@ -11,6 +11,11 @@ ROLE_ORDER = {"system", "developer", "user", "assistant", "tool"}
 TOOL_VOCAB_PATTERN = re.compile(r"\b(tool|function|schema|call)\b", re.IGNORECASE)
 XML_OR_TOOL_TAG_PATTERN = re.compile(r"</?[\w:-]+(?:\s+[^>]*)?>")
 JSON_LIKE_BLOCK_PATTERN = re.compile(r"\{[^{}]*(?:\"[^\"]+\"\s*:)[^{}]*\}", re.DOTALL)
+FENCED_BLOCK_PATTERN = re.compile(r"```[^\n]*\n(.*?)```", re.DOTALL)
+MARKER_PATTERN = re.compile(
+    r"(?im)^(source file|file|document/context|document|context|content)\s*:\s*.*$"
+)
+MARKDOWN_START_PATTERN = re.compile(r"(?m)^(#\s+|---\s*$)")
 
 
 def prompt_from_messages(messages: list[dict[str, Any]]) -> str:
@@ -27,6 +32,8 @@ def local_compat_prompt_from_messages(messages: list[Any], mode: str = "flattene
 
 
 def gemma_prompt_from_messages(messages: list[Any], mode: str = "flattened") -> str:
+    if mode == "local_summary":
+        return local_summary_prompt_from_messages(messages)
     sections = _message_sections(messages)
     if mode == "user_only":
         return _join_sections(section for section in sections if section["role"] == "user")
@@ -41,6 +48,41 @@ def gemma_prompt_from_messages(messages: list[Any], mode: str = "flattened") -> 
     if mode == "no_tool_vocab":
         return TOOL_VOCAB_PATTERN.sub("", _join_sections(sections)).strip()
     return _join_sections(sections)
+
+
+def local_summary_prompt_from_messages(messages: list[Any]) -> str:
+    extraction = local_summary_extraction(messages)
+    if not extraction["success"]:
+        return ""
+    return (
+        "You are summarizing a local sandbox document.\n"
+        "Follow the user instruction exactly.\n\n"
+        "User instruction:\n"
+        f"{extraction['instruction']}\n\n"
+        "Document/context:\n"
+        f"{extraction['context']}\n\n"
+        "Return only the requested answer."
+    )
+
+
+def local_summary_extraction(messages: list[Any]) -> dict[str, Any]:
+    sections = _message_sections(messages)
+    latest_user = _final_user_section(sections)
+    instruction = latest_user["content"].strip() if latest_user else ""
+    user_context = _extract_context_from_text(instruction)
+    if user_context:
+        instruction = _instruction_before_context(instruction, user_context)
+    context = user_context or _largest_file_like_context(sections)
+    instruction = _clean_summary_text(instruction)
+    context = _clean_context_text(context)
+    return {
+        "success": bool(instruction and context),
+        "instruction": instruction,
+        "context": context,
+        "instruction_chars": len(instruction),
+        "context_chars": len(context),
+        "dropped_system_chars": sum(len(section["content"]) for section in sections if section["role"] in {"system", "developer"}),
+    }
 
 
 def _message_sections(messages: list[Any]) -> list[dict[str, str]]:
@@ -69,6 +111,79 @@ def _final_user_section(sections: list[dict[str, str]]) -> dict[str, str] | None
     return None
 
 
+def _extract_context_from_text(text: str) -> str:
+    stripped = text.strip()
+    if not stripped:
+        return ""
+    fenced = FENCED_BLOCK_PATTERN.findall(stripped)
+    if fenced:
+        return max((block.strip() for block in fenced), key=len, default="")
+    marker = MARKER_PATTERN.search(stripped)
+    if marker:
+        return stripped[marker.end() :].strip()
+    markdown_start = MARKDOWN_START_PATTERN.search(stripped)
+    if markdown_start:
+        return stripped[markdown_start.start() :].strip()
+    if _looks_like_context_text(stripped):
+        return stripped
+    return ""
+
+
+def _instruction_before_context(text: str, context: str) -> str:
+    context_start = text.find(context)
+    if context_start <= 0:
+        return text
+    return text[:context_start].strip()
+
+
+def _largest_file_like_context(sections: list[dict[str, str]]) -> str:
+    candidates = [
+        _extract_context_from_text(section["content"])
+        for section in sections
+        if section["role"] in {"user", "system", "developer"}
+    ]
+    return max((candidate for candidate in candidates if candidate), key=len, default="")
+
+
+def _looks_like_context_text(text: str) -> bool:
+    return text.startswith("# ") or "\n# " in text or text.count("\n") >= 3 or "---\n" in text
+
+
+def _clean_summary_text(text: str) -> str:
+    lines = []
+    for line in text.splitlines():
+        if _looks_like_tool_scaffold(line):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
+def _clean_context_text(text: str) -> str:
+    lines = []
+    for line in text.splitlines():
+        if _looks_like_tool_scaffold(line):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
+def _looks_like_tool_scaffold(line: str) -> bool:
+    lowered = line.strip().lower()
+    if not lowered:
+        return False
+    return (
+        lowered.startswith("```")
+        or lowered.startswith("[system]")
+        or lowered.startswith("[developer]")
+        or lowered.startswith("[tool]")
+        or MARKER_PATTERN.match(line) is not None
+        or "tool_choice" in lowered
+        or "tool schema" in lowered
+        or "function schema" in lowered
+        or "function call" in lowered
+    )
+
+
 def prompt_construction_metadata(messages: list[Any], prompt: str) -> dict[str, Any]:
     sections = _message_sections(messages)
     role_sections = [section["role"] for section in sections]
@@ -79,7 +194,7 @@ def prompt_construction_metadata(messages: list[Any], prompt: str) -> dict[str, 
     if final_user:
         final_user_start_index = prompt.find(final_user["content"])
     keyword_counts = _keyword_counts(prompt)
-    return {
+    metadata = {
         "prompt_total_chars": len(prompt),
         "prompt_role_sections": sorted(set(role_sections)),
         "prompt_section_order": role_sections,
@@ -101,6 +216,16 @@ def prompt_construction_metadata(messages: list[Any], prompt: str) -> dict[str, 
         "system_content_chars": system_chars,
         "user_content_dominates_system": user_chars > system_chars,
     }
+    extraction = local_summary_extraction(messages)
+    metadata.update(
+        {
+            "instruction_chars": extraction["instruction_chars"] if extraction["success"] else 0,
+            "context_chars": extraction["context_chars"] if extraction["success"] else 0,
+            "dropped_system_chars": extraction["dropped_system_chars"] if extraction["success"] else 0,
+            "local_summary_extraction_success": extraction["success"],
+        }
+    )
+    return metadata
 
 
 def _keyword_counts(prompt: str) -> dict[str, int]:

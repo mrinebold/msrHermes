@@ -233,3 +233,23 @@ The adapter removed the requested vocabulary and still suppressed tool schemas, 
 Recommendation:
 
 Implement a local summary prompt mode that extracts the final user instruction and file-like context into a compact Gemma prompt, omits tool vocabulary, and drops unrelated Hermes agent/system scaffold. Keep this opt-in, local-only, and covered by mocked tests before any additional live retry.
+
+## Phase 5X Local Summary Compatibility Mode
+
+Implementation date: 2026-06-05.
+
+Phase 5X implemented the recommended compact local summary prompt mode without running live Hermes prompts or live model calls.
+
+New mode:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+```
+
+The mode treats local Gemma as a non-tool-capable summarizer, not as a Hermes agent. It extracts the latest user task instruction and the file-like context, then routes only a compact summary prompt to `services/model_router`. Tool schema JSON, tool-choice semantics, and the role-labeled transcript are omitted.
+
+The mode fails closed if it cannot find both a user instruction and file-like context. This prevents another empty or scaffold-heavy prompt from being sent to Gemma.
+
+Recommendation:
+
+Run one bounded live `sample_note.md` validation with `local_summary`. If it succeeds, repeat with `sample_prd.md` in a later approved phase. If it still returns zero content, investigate DevMonster/Gemma behavior with the compact prompt shape rather than Hermes scaffold handling.

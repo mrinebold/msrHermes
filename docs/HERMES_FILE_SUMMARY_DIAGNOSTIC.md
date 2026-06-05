@@ -393,3 +393,56 @@ Conclusion:
 Recommendation:
 
 Stop one-off live retries against the current Hermes scaffold. The next implementation phase should add a stronger local summary prompt mode that combines the useful parts of prior diagnostics: remove tool vocabulary, put the final user instruction first, preserve file-like context, and drop or sharply demote Hermes agent/system scaffold that is not needed for summarization. Do not run `sample_prd.md` until `sample_note.md` can produce usable output.
+
+## Phase 5X Local Summary Prompt Mode
+
+Implementation date: 2026-06-05.
+
+Phase 5X added a purpose-built local Gemma prompt mode:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+```
+
+No live Hermes prompts were run and no live model calls were sent in Phase 5X.
+
+`local_summary` builds a compact prompt for Hermes file-summary requests:
+
+```text
+You are summarizing a local sandbox document.
+Follow the user instruction exactly.
+
+User instruction:
+<extracted latest user instruction>
+
+Document/context:
+<extracted file-like context>
+
+Return only the requested answer.
+```
+
+Behavior:
+
+- identifies the latest user message as the task instruction
+- extracts file-like context from the user message when present
+- falls back to file-like system/developer context when the user message contains only the task
+- handles markdown starts, fenced blocks, and `Source file:` / document/context markers
+- drops unrelated Hermes system/developer/tool scaffold from the routed prompt
+- does not include tool schemas or tool-choice semantics
+- does not include a role-labeled full transcript
+- fails closed with `400` when both a usable instruction and file-like context cannot be identified
+
+Metadata-only diagnostics now include:
+
+- `gemma_prompt_mode=local_summary`
+- `instruction_chars`
+- `context_chars`
+- `dropped_system_chars`
+- `dropped_tool_schema_count`
+- `local_summary_extraction_success`
+
+The adapter still does not log instruction text, prompt text, file contents, tool schema JSON, model output, API keys, OAuth tokens, Supabase keys, or other secrets by default.
+
+Recommendation:
+
+Phase 5Y should run exactly one bounded `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true` and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`. Keep `sample_prd.md` out of scope until `sample_note.md` produces usable output.

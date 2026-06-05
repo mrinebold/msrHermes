@@ -53,9 +53,25 @@ Set `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true` to treat local Gemma as non-to
 | `user_only` | Keep only user message sections. |
 | `final_user` | Keep only the final non-empty user message. |
 | `instruction_context` | Move the final non-empty user message first, then append prior context sections. |
+| `local_summary` | Build a compact summary prompt from the latest user instruction plus file-like context, while dropping unrelated Hermes scaffold. |
 | `no_tool_vocab` | Preserve flattened sections while removing plain `tool`, `function`, `schema`, and `call` vocabulary. |
 
-For the next bounded Hermes file-summary retry, prefer `instruction_context` because it preserves file-like context while putting the concise final instruction before Hermes' large system scaffold.
+`local_summary` is the preferred mode for Hermes file-summary validation. It produces a compact prompt shaped as:
+
+```text
+You are summarizing a local sandbox document.
+Follow the user instruction exactly.
+
+User instruction:
+...
+
+Document/context:
+...
+
+Return only the requested answer.
+```
+
+The mode extracts the latest user instruction, preserves file-like context from the user message or from file-like system/developer context when needed, drops tool schemas and tool-choice semantics, and fails closed with `400` if it cannot identify both a useful instruction and file-like context. Metadata logs include only character counts and extraction status, never instruction text or file contents.
 
 ## Endpoints
 

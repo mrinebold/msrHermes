@@ -798,3 +798,37 @@ Conclusion:
 Recommendation:
 
 Do not continue with more live one-toggle retries. The next phase should implement a purpose-built local summary prompt mode that extracts the final instruction and file-like context, puts the instruction first, removes tool vocabulary, and drops unrelated Hermes agent scaffold before routing to local Gemma. Keep the adapter localhost-only and keep cloud providers fail-closed.
+
+## Phase 5X Local Summary Prompt Mode
+
+Status: complete on 2026-06-05.
+
+Phase 5X added an opt-in compact prompt mode for local Gemma file-summary validation:
+
+```text
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+```
+
+No live Hermes prompt, live model call, cloud provider, real API key, persistent Hermes config, background service, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution was used.
+
+The mode builds a Gemma-facing prompt from:
+
+1. The latest user message as the explicit instruction.
+2. File-like context extracted from the user message if present.
+3. File-like system/developer context only when needed to preserve the document body.
+
+It omits:
+
+- tool schema JSON
+- tool-choice semantics
+- role-labeled full transcript
+- unrelated Hermes agent/system scaffold
+- hidden/system-like tool instructions
+
+It fails closed with `400` when no useful instruction and file-like context pair can be identified.
+
+Metadata-only logs include `instruction_chars`, `context_chars`, `dropped_system_chars`, `dropped_tool_schema_count`, and `local_summary_extraction_success`. They do not log actual instructions, file contents, prompt text, tool schemas, model output, or secrets.
+
+Recommendation:
+
+Phase 5Y should run one bounded live `sample_note.md` retry with local compat mode and `local_summary`. Do not run `sample_prd.md` until `sample_note.md` produces usable output.

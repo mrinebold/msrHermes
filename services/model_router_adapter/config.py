@@ -15,6 +15,7 @@ GEMMA_PROMPT_MODES = {
     "user_only",
     "final_user",
     "instruction_context",
+    "local_summary",
     "no_tool_vocab",
 }
 

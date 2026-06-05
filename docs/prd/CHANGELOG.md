@@ -2,6 +2,16 @@
 
 ## 2026-06-05
 
+- Completed Phase 5X local summary prompt mode implementation.
+- Added `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`.
+- Implemented a compact Gemma-facing summary prompt that places the latest user instruction first and document/context content after a clear delimiter.
+- Added extraction heuristics for markdown starts, fenced blocks, `Source file:` and document/context markers, long user content with instruction before body, and file-like system/developer context when the latest user message contains only the task.
+- Dropped unrelated Hermes scaffold from the routed prompt and continued omitting tool schemas, tool-choice semantics, role-labeled full transcripts, prompt text, file contents, and model output from logs.
+- Added fail-closed behavior for local summary mode when no useful instruction and file-like context pair can be identified.
+- Added metadata-only logging for `instruction_chars`, `context_chars`, `dropped_system_chars`, `dropped_tool_schema_count`, and `local_summary_extraction_success`.
+- Added mocked tests for local summary extraction, scaffold dropping, tool-schema exclusion, fail-closed behavior, SSE preservation, metadata-only logging, and existing prompt modes.
+- Ran no live Hermes prompts and sent no live model calls.
+- Recommended Phase 5Y as one bounded `sample_note.md` retry with local compat mode and `local_summary`.
 - Completed Phase 5W live Hermes file-summary retry using `no_tool_vocab` prompt mode.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`.
 - Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
