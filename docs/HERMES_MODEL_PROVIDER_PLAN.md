@@ -832,3 +832,52 @@ Metadata-only logs include `instruction_chars`, `context_chars`, `dropped_system
 Recommendation:
 
 Phase 5Y should run one bounded live `sample_note.md` retry with local compat mode and `local_summary`. Do not run `sample_prd.md` until `sample_note.md` produces usable output.
+
+## Phase 5Y Local Summary Live Validation
+
+Status: complete on 2026-06-05.
+
+One bounded Hermes `sample_note.md` retry was run with:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary
+```
+
+Hermes used an isolated temporary `HERMES_HOME` with only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. The adapter was started manually in the foreground on `127.0.0.1:8088` and stopped immediately after validation.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Hermes exit code | 0 |
+| Hermes elapsed time | 101.268s |
+| Stdout | 110 bytes; provider timeout diagnostic |
+| Stderr | 0 bytes |
+| Output usable | No |
+| `GET /v1/models` | 2 calls, both 200 |
+| `POST /v1/chat/completions` | 3 calls, all 502 with selected model `gemma4:26b` |
+| Unsupported discovery probes | 17 calls, all 404 |
+| Adapter shutdown | stopped; no `8088` listener remained |
+
+Prompt metadata:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `local_summary` |
+| Extraction success | true |
+| Prompt chars | 3139 |
+| Instruction chars | 83 |
+| Context chars | 2899 |
+| Dropped system chars | 5628 |
+| Dropped tool schema count | 26 |
+| Tool schemas forwarded | false |
+
+Conclusion:
+
+`local_summary` succeeded at prompt extraction and scaffold reduction, but DevMonster/Gemma timed out before returning content. The failure mode moved from zero-content successful responses to provider timeouts.
+
+Recommendation:
+
+Diagnose the router/provider timeout before another Hermes run. Candidate fixes are an approved longer Gemma timeout for local summary tasks, a smaller local-summary context budget, or both. Keep the adapter localhost-only, keep cloud providers fail-closed, and do not run `sample_prd.md` yet.

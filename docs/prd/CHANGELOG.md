@@ -2,6 +2,17 @@
 
 ## 2026-06-05
 
+- Completed Phase 5Y live Hermes file-summary validation using `local_summary` prompt mode.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`.
+- Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
+- Captured stdout to `sandbox/output/sample_note_phase5y_summary.md` and stderr to `sandbox/output/sample_note_phase5y_stderr.txt`.
+- Recorded exit code 0, elapsed time 101.268s, stdout 110 bytes, stderr 0 bytes, and no timeout under the 240s cap.
+- Confirmed stdout is not a usable summary; it contains a provider timeout diagnostic after three retries.
+- Confirmed adapter request metadata showed three `POST /v1/chat/completions` calls, all status 502 with selected model `gemma4:26b`; each timed out after about 30 seconds.
+- Confirmed `local_summary` prompt metadata showed extraction success, `prompt_total_chars=3139`, `instruction_chars=83`, `context_chars=2899`, `dropped_system_chars=5628`, `dropped_tool_schema_count=26`, and `tool_schemas_forwarded=false`.
+- Stopped the adapter immediately after inspection and confirmed no `8088` listener remained.
+- Recommended diagnosing router/provider timeout and context budgeting before another Hermes retry.
+- Confirmed no `sample_prd.md` run, prompt/file content logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5X local summary prompt mode implementation.
 - Added `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`.
 - Implemented a compact Gemma-facing summary prompt that places the latest user instruction first and document/context content after a clear delimiter.

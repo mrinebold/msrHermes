@@ -446,3 +446,64 @@ The adapter still does not log instruction text, prompt text, file contents, too
 Recommendation:
 
 Phase 5Y should run exactly one bounded `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true` and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`. Keep `sample_prd.md` out of scope until `sample_note.md` produces usable output.
+
+## Phase 5Y Local Summary Live Validation
+
+Validation date: 2026-06-05.
+
+One bounded Hermes file-summary test was run against `sandbox/input/sample_note.md` only. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`. Hermes used a temporary isolated `HERMES_HOME` with only the localhost adapter, `gemma4:26b`, and a dummy local API key. The adapter was stopped immediately after the run.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Exit code | 0 |
+| Elapsed time | 101.268s |
+| Stdout file | `sandbox/output/sample_note_phase5y_summary.md` |
+| Stdout byte count | 110 |
+| Stderr file | `sandbox/output/sample_note_phase5y_stderr.txt` |
+| Stderr byte count | 0 |
+| Output usable | No; stdout contains a provider timeout diagnostic |
+| Adapter shutdown | Stopped immediately; no listener remained on `8088` |
+
+Stdout contained:
+
+```text
+API call failed after 3 retries: HTTP 502: Timed out after 30.0s for http://100.93.120.124:11434/api/generate
+```
+
+Adapter metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 3 | 502, selected `gemma4:26b` |
+| Unsupported discovery probes | 17 | 404 |
+
+Chat-completion elapsed times were 30.011s, 30.052s, and 30.015s. No response-shape records were emitted because no chat-completion call returned a successful model response.
+
+Prompt-construction metadata was identical for all three chat-completion attempts:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `local_summary` |
+| Compat mode | true |
+| Extraction success | true |
+| Message count | 2 |
+| Message character counts | `[5628, 83]` |
+| Prompt characters | 3139 |
+| Instruction chars | 83 |
+| Context chars | 2899 |
+| Dropped system chars | 5628 |
+| Dropped tool schema count | 26 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+
+Conclusion:
+
+`local_summary` worked mechanically and changed the failure mode. It successfully extracted a compact Gemma-facing prompt and dropped a large amount of Hermes scaffold, reducing the routed prompt from the prior 5,689-5,729 character range to 3,139 characters. Unlike previous modes, the adapter did not receive zero-content 200 responses; instead, DevMonster/Gemma timed out at the router/provider layer after 30 seconds on each retry.
+
+Recommendation:
+
+The next phase should not rerun Hermes unchanged. Diagnose the local router/provider timeout for compact summary prompts first. Likely options are increasing the approved Gemma generation timeout for this task, reducing `local_summary` context further, or adding a shorter local-summary context budget. Keep `sample_prd.md` out of scope until `sample_note.md` returns usable output.

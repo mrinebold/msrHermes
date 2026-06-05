@@ -253,3 +253,33 @@ The mode fails closed if it cannot find both a user instruction and file-like co
 Recommendation:
 
 Run one bounded live `sample_note.md` validation with `local_summary`. If it succeeds, repeat with `sample_prd.md` in a later approved phase. If it still returns zero content, investigate DevMonster/Gemma behavior with the compact prompt shape rather than Hermes scaffold handling.
+
+## Phase 5Y Local Summary Result
+
+Validation date: 2026-06-05.
+
+The bounded live `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary` changed the failure mode.
+
+Observed metadata:
+
+| Field | Value |
+| --- | --- |
+| Chat-completion calls | 3 |
+| Status | 502 for all calls |
+| Selected model | `gemma4:26b` |
+| Prompt mode | `local_summary` |
+| Extraction success | true |
+| Prompt chars | 3139 |
+| Instruction chars | 83 |
+| Context chars | 2899 |
+| Dropped system chars | 5628 |
+| Dropped tool schema count | 26 |
+| Tool schemas forwarded | false |
+
+Conclusion:
+
+The compact prompt mode successfully removed the unrelated Hermes scaffold and extracted the intended instruction/context pair. Gemma did not return zero-content 200 responses; instead, each provider attempt timed out after 30 seconds and surfaced as HTTP 502.
+
+Recommendation:
+
+Treat the next blocker as a local router/provider timeout issue for compact summary prompts, not a Hermes tool-schema compatibility issue. Do not run more live retries until timeout/context-budget behavior is adjusted or diagnosed.
