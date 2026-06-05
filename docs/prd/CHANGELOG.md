@@ -2,6 +2,16 @@
 
 ## 2026-06-05
 
+- Completed Phase DESKTOP-5 Hermes Desktop bootstrap/openability diagnostic.
+- Confirmed no Desktop launch was attempted, no credentials or permissions were added, no background services were started, no Hermes CLI config was modified, and no external services were connected.
+- Inspected `/Applications/Hermes.app` and confirmed it is a minimal `com.nousresearch.hermes.setup` bundle with executable `Hermes-Setup`, version `0.0.1`, arm64 Mach-O executable, 12M bundle size, and only `Info.plist`, executable, icon, and code-signing resources.
+- Confirmed the installed app is best classified as a bootstrap installer app, not the final Desktop runtime.
+- Recorded signature findings: `codesign --display` showed Team ID `T2F6S8MF7C`, hardened runtime, and stapled notarization ticket, but `codesign --verify --strict` failed for both app and executable with `invalid signature`.
+- Recorded `spctl` returned internal Code Signing subsystem errors in the Codex environment.
+- Confirmed extended attributes included `com.apple.provenance` and `com.apple.macl` but no `com.apple.quarantine`, so quarantine does not appear to be the blocker.
+- Confirmed the only Desktop-created log remains `~/.hermes/logs/bootstrap-installer.log`, containing `Hermes installer starting mode=Install force_setup=false`.
+- Confirmed no Hermes app running state, launchctl entry, LaunchAgent, background-task match, Application Support artifact, Preferences artifact, or new `~/.hermes` modification was found during the diagnostic.
+- Recommended Phase DESKTOP-6 as an offline install-source and bundle-integrity investigation: compare the mounted DMG bundle to `/Applications/Hermes.app`, verify signature before and after copy, and determine whether a secondary bootstrap install path exists before another launch attempt.
 - Completed Phase DESKTOP-4 guarded Hermes Desktop first-launch validation.
 - Confirmed pre-launch baseline: `/Applications/Hermes.app` existed, no Hermes/Nous user LaunchAgent existed, no Hermes/Nous launchctl entry was present, and no Hermes/Nous background-task match was visible.
 - Ran one guarded `open -a /Applications/Hermes.app` attempt.

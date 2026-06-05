@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-3 completed a controlled Mac mini install. Hermes Desktop was downloaded from the official Nous Research source and copied to `/Applications`, but it was not launched, configured, signed in, granted permissions, or connected to external services.
+Phase DESKTOP-5 completed a bootstrap/openability diagnostic. Hermes Desktop remains fail-closed: the installed `/Applications/Hermes.app` bundle appears to be a minimal bootstrap installer app, not the final Desktop runtime, and it currently fails code-signing/openability checks.
 
 ## Scope
 
@@ -34,6 +34,7 @@ Current Mac mini CLI state:
 - Install path: `~/.hermes/hermes-agent`
 - Phase 5AA confirmed usable `sample_note.md` summary output through the localhost MSR Model Router adapter.
 - Phase DESKTOP-3 installed Hermes Desktop at `/Applications/Hermes.app` without launching it.
+- Phase DESKTOP-5 diagnosed `/Applications/Hermes.app` as a bootstrap installer bundle with unresolved signature/openability issues.
 
 ## Install Timing
 
@@ -251,6 +252,70 @@ Post-launch shutdown and safety checks:
 Conclusion:
 
 DESKTOP-4 failed closed before usable first-run UI validation. The installed app appears to be a bootstrap installer bundle rather than the final Desktop runtime. Before another Desktop launch attempt, inspect the official DMG install flow from an unsandboxed Terminal or Finder, resolve the app bundle signature/openability issue, and confirm whether a completed bootstrap install creates a different signed Desktop app bundle.
+
+## Phase DESKTOP-5 Bootstrap/Openability Diagnostic
+
+Status: complete on 2026-06-05.
+
+Scope:
+
+- No Desktop launch was attempted.
+- No Nous Portal sign-in was attempted.
+- No credentials, permissions, integrations, background services, or launch/login items were added.
+- Hermes CLI config and the localhost model adapter path were not modified.
+
+Installed bundle findings:
+
+| Check | Result |
+| --- | --- |
+| App path | `/Applications/Hermes.app` |
+| Bundle name | `Hermes` |
+| Bundle identifier | `com.nousresearch.hermes.setup` |
+| Bundle version | `0.0.1` |
+| Executable | `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup` |
+| Executable file type | Mach-O 64-bit executable arm64 |
+| Bundle size | 12M |
+| File count | Minimal: `Info.plist`, `Hermes-Setup`, `icon.icns`, and code-signing resources |
+| App type assessment | Bootstrap installer app, not the final Desktop runtime |
+
+Signature and openability findings:
+
+- `codesign --display --verbose=4` reported Team ID `T2F6S8MF7C`, hardened runtime, and a stapled notarization ticket.
+- `codesign --verify --strict --verbose=4 /Applications/Hermes.app` failed with `invalid signature (code or signature have been modified)`.
+- Direct executable verification also failed with `invalid signature (code or signature have been modified)`.
+- `spctl --assess --type execute` and `spctl --assess --type open` returned an internal Code Signing subsystem error in the Codex environment.
+- `xattr -lr /Applications/Hermes.app` showed `com.apple.provenance` and `com.apple.macl`, but no `com.apple.quarantine`.
+- The sealed resource manifest covered `Resources/icon.icns`; its SHA-1 and SHA-256 matched the manifest values.
+- The current blocker does not appear to be quarantine. The blocker is signature/openability plus the fact that the installed app is a bootstrap installer bundle.
+
+Log findings:
+
+- `~/.hermes/logs/bootstrap-installer.log` contains a single bootstrap line:
+
+```text
+2026-06-05T16:51:43.309535Z  INFO hermes_bootstrap_lib: Hermes installer starting mode=Install force_setup=false
+```
+
+- No additional Hermes Desktop logs were found under `~/.hermes/logs`.
+- `agent.log` and `errors.log` existed from earlier Hermes CLI work and remained empty.
+- macOS `log show` exposed no useful Hermes Desktop entries without elevated access.
+
+Process, launch, and persistence findings:
+
+- AppleScript reported `application "Hermes" is running` as `false`.
+- No Hermes/Nous entry was present in `launchctl print gui/$(id -u)`.
+- No Hermes/Nous user LaunchAgent was found in `~/Library/LaunchAgents`.
+- No Hermes/Nous background-task match was visible through `sfltool dumpbtm`.
+- No Hermes/Nous files were found under user `Application Support`, `Preferences`, or `Logs` during this diagnostic.
+- No new `~/.hermes` files were modified during this diagnostic.
+
+Conclusion:
+
+The installed `/Applications/Hermes.app` is best classified as a bootstrap installer app with a damaged or invalid current code-signing/openability state. It is not yet a validated final Desktop runtime. The first-run bootstrap likely requires a secondary install step, but that step must not be attempted again until the signature/openability problem is resolved.
+
+Recommended next action:
+
+Start Phase DESKTOP-6 as an offline install-source and bundle-integrity investigation only. Re-mount the official DMG from an unsandboxed Terminal or Finder, compare the mounted app bundle to `/Applications/Hermes.app`, verify signature before and after copy, and determine whether the app must be run from the mounted DMG to complete a secondary install. Do not launch the app or remove quarantine/signature controls until that phase explicitly approves the exact next step.
 
 ## Safety Requirements
 
