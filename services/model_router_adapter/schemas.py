@@ -6,6 +6,9 @@ import time
 from typing import Any
 
 
+ROLE_ORDER = {"system", "developer", "user", "assistant", "tool"}
+
+
 def prompt_from_messages(messages: list[dict[str, Any]]) -> str:
     parts: list[str] = []
     for message in messages:
@@ -15,6 +18,32 @@ def prompt_from_messages(messages: list[dict[str, Any]]) -> str:
     return "\n".join(parts).strip()
 
 
+def local_compat_prompt_from_messages(messages: list[Any]) -> str:
+    parts: list[str] = []
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        role = str(message.get("role", "user")).strip().lower() or "user"
+        if role not in ROLE_ORDER:
+            role = "user"
+        content = message_content_text(message.get("content", "")).strip()
+        if not content:
+            continue
+        parts.append(f"[{role}]\n{content}")
+    return "\n\n".join(parts).strip()
+
+
+def has_nonempty_user_content(messages: list[Any]) -> bool:
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        if str(message.get("role", "user")).strip().lower() != "user":
+            continue
+        if message_content_text(message.get("content", "")).strip():
+            return True
+    return False
+
+
 def message_content_text(content: Any) -> str:
     if isinstance(content, str):
         return content
@@ -22,7 +51,8 @@ def message_content_text(content: Any) -> str:
         parts: list[str] = []
         for item in content:
             if isinstance(item, dict):
-                parts.append(str(item.get("text", "")))
+                if "text" in item:
+                    parts.append(str(item.get("text", "")))
             else:
                 parts.append(str(item))
         return " ".join(parts)

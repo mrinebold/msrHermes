@@ -20,6 +20,7 @@ Environment overrides:
 - `MODEL_ROUTER_ADAPTER_LOG_REQUESTS`
 - `MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES`
 - `MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE`
+- `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE`
 
 For Phase 5G, `MODEL_ROUTER_ADAPTER_HOST` must remain `127.0.0.1`.
 
@@ -37,7 +38,9 @@ Hermes' default chat-completions path prefers streaming, including in quiet one-
 
 The adapter keeps non-streaming JSON for requests without `stream=true` and returns `text/event-stream` for requests with `stream=true`. The first streaming implementation waits for `services/model_router` to return the full response, then emits one content delta chunk, one finish chunk, and `data: [DONE]`.
 
-For the current DevMonster Gemma route, Hermes tool schemas are diagnostic metadata only. The adapter does not execute tools, does not forward tool schemas to `services/model_router`, and should treat local Gemma as non-tool-capable until a real tool execution contract exists. Phase 5R recommends a future compatibility mode that strips tool semantics and flattens Hermes multi-message payloads into a single Gemma-friendly prompt before routing.
+For the current DevMonster Gemma route, Hermes tool schemas are diagnostic metadata only. The adapter does not execute tools and does not forward tool schemas to `services/model_router`.
+
+Set `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true` to treat local Gemma as non-tool-capable. In this mode, Gemma requests are flattened into a single prompt with role-labeled blocks like `[system]`, `[user]`, and `[assistant]`; only message text is included, tool schemas and `tool_choice` are ignored for routing, non-text structured parts are omitted, and requests without non-empty user content fail closed with an adapter `400`.
 
 ## Endpoints
 

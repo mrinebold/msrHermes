@@ -76,4 +76,43 @@ Preserve the current OpenAI-compatible request surface for future providers, but
 
 Recommended next phase:
 
-Phase 5S: implement local Gemma prompt compatibility in `services/model_router_adapter`, guarded as the default behavior for the current DevMonster route. Add tests for tool-present Hermes payloads, system/developer/user flattening, final-user prioritization, and metadata-only logging. Do not run Hermes live prompts in the implementation phase unless separately approved.
+Phase 5S: implement local Gemma prompt compatibility in `services/model_router_adapter`, guarded by an explicit adapter flag for the current DevMonster route. Add tests for tool-present Hermes payloads, system/developer/user flattening, final-user handling, and metadata-only logging. Do not run Hermes live prompts in the implementation phase unless separately approved.
+
+## Phase 5S Implementation
+
+Implementation date: 2026-06-05.
+
+Phase 5S implemented opt-in local Gemma compatibility behind:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+```
+
+When compatibility mode is enabled for local Gemma requests, the adapter:
+
+- treats DevMonster Gemma as non-tool-capable
+- ignores `tools` and `tool_choice` for routing
+- flattens message content into one prompt with role-labeled blocks such as `[system]`, `[user]`, and `[assistant]`
+- includes only extracted message text, not tool schema JSON
+- extracts text from structured content parts and omits non-text parts
+- fails closed with an adapter `400` when no non-empty user content is available
+- preserves existing streaming SSE response behavior
+- logs only metadata when diagnostics are enabled
+
+Metadata-only compatibility logging includes:
+
+- `compat_mode_enabled`
+- `flattened_message_count`
+- `flattened_prompt_chars`
+- `tool_schemas_present`
+- `tool_schemas_forwarded=false`
+
+The adapter never logs the flattened prompt text by default.
+
+Mocked tests cover tool-present flattening, tool-schema exclusion, role labels, structured text extraction, empty-user fail-closed behavior, legacy behavior when compat mode is disabled, SSE preservation, and log redaction.
+
+No live Hermes prompts, live model calls, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
+
+Recommended next phase:
+
+Phase 5T should run one bounded Hermes `sample_note.md` file-summary retry with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`, request logging, response-shape logging, and message-structure logging enabled. Keep the adapter foreground-only, keep `HERMES_HOME` isolated, and do not run `sample_prd.md` until `sample_note.md` produces usable output or a new blocker is diagnosed.

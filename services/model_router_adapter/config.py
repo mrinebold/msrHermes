@@ -19,6 +19,7 @@ class AdapterConfig:
     log_requests: bool = False
     log_response_shapes: bool = False
     log_message_structure: bool = False
+    local_compat_mode: bool = False
 
     @classmethod
     def from_env(cls, env: dict[str, str] | None = None) -> "AdapterConfig":
@@ -30,6 +31,7 @@ class AdapterConfig:
             log_requests=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_REQUESTS", False),
             log_response_shapes=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES", False),
             log_message_structure=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE", False),
+            local_compat_mode=_bool_env(values, "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE", False),
         )
 
 

@@ -47,12 +47,14 @@ class ModelRouterAdapterTest(unittest.TestCase):
                 "MODEL_ROUTER_ADAPTER_LOG_REQUESTS": "true",
                 "MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES": "true",
                 "MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE": "true",
+                "MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE": "true",
             }
         )
 
         self.assertTrue(config.log_requests)
         self.assertTrue(config.log_response_shapes)
         self.assertTrue(config.log_message_structure)
+        self.assertTrue(config.local_compat_mode)
 
     def test_health(self):
         status, payload = self._get("/health")
@@ -372,6 +374,123 @@ class ModelRouterAdapterTest(unittest.TestCase):
         self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
         self.assertNotIn("system: ", self.router.last_request.prompt)
         self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+
+    def test_local_compat_mode_flattens_tool_present_multi_message_payload(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, _, _ = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        self.assertIn("[system]\n", self.router.last_request.prompt)
+        self.assertIn("[user]\n", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_CONTEXT_LINE", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_SUMMARY_REQUEST", self.router.last_request.prompt)
+        self.assertNotIn("system: ", self.router.last_request.prompt)
+        self.assertNotIn("user: ", self.router.last_request.prompt)
+
+    def test_local_compat_mode_excludes_tool_schema_from_flattened_prompt(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, _, _ = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+        self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", self.router.last_request.prompt)
+        self.assertNotIn("parameters", self.router.last_request.prompt)
+
+    def test_local_compat_mode_extracts_safe_text_parts_only(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
+        self.handler_cls = make_handler(self.router, self.config)
+        payload = {
+            "model": "gemma4:26b",
+            "messages": [
+                {"role": "system", "content": [{"type": "text", "text": "SANITIZED_SYSTEM_TEXT"}, {"type": "image_url", "image_url": {"url": "data"}}]},
+                {"role": "user", "content": [{"type": "text", "text": "SANITIZED_USER_TEXT"}, {"type": "input_audio", "audio": "data"}]},
+            ],
+            "tools": [{"type": "function", "function": {"name": "read_sandbox_file"}}],
+        }
+
+        status, _, _ = self._post_raw("/v1/chat/completions", payload)
+
+        self.assertEqual(status, 200)
+        self.assertIn("SANITIZED_SYSTEM_TEXT", self.router.last_request.prompt)
+        self.assertIn("SANITIZED_USER_TEXT", self.router.last_request.prompt)
+        self.assertNotIn("image_url", self.router.last_request.prompt)
+        self.assertNotIn("input_audio", self.router.last_request.prompt)
+        self.assertNotIn("read_sandbox_file", self.router.last_request.prompt)
+
+    def test_local_compat_mode_empty_user_content_fails_closed(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, payload = self._post(
+            "/v1/chat/completions",
+            {
+                "model": "gemma4:26b",
+                "messages": [
+                    {"role": "system", "content": "SANITIZED_CONTEXT_LINE"},
+                    {"role": "assistant", "content": "SANITIZED_ASSISTANT_TEXT"},
+                ],
+                "tools": [{"type": "function", "function": {"name": "read_sandbox_file"}}],
+            },
+        )
+
+        self.assertEqual(status, 400)
+        self.assertEqual(payload["error"]["type"], "bad_request")
+        self.assertIn("non-empty user content", payload["error"]["message"])
+        self.assertIsNone(self.router.last_request)
+
+    def test_local_compat_disabled_preserves_existing_prompt_shape(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=False)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, _, _ = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        self.assertIn("system: ", self.router.last_request.prompt)
+        self.assertIn("user: ", self.router.last_request.prompt)
+        self.assertNotIn("[system]", self.router.last_request.prompt)
+        self.assertNotIn("[user]", self.router.last_request.prompt)
+
+    def test_local_compat_mode_streaming_still_returns_sse_chunks(self):
+        self.config = AdapterConfig(host="127.0.0.1", port=8088, default_task_type="summary", local_compat_mode=True)
+        self.handler_cls = make_handler(self.router, self.config)
+
+        status, headers, body = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["content-type"], "text/event-stream")
+        self.assertTrue(body.endswith("data: [DONE]\n\n"))
+        chunks = self._sse_json_chunks(body)
+        self.assertEqual(chunks[0]["choices"][0]["delta"]["content"], "Sandbox summary.")
+
+    def test_local_compat_metadata_log_redacts_prompt_and_file_content(self):
+        self.config = AdapterConfig(
+            host="127.0.0.1",
+            port=8088,
+            default_task_type="summary",
+            log_message_structure=True,
+            local_compat_mode=True,
+        )
+        self.handler_cls = make_handler(self.router, self.config)
+
+        with self.assertLogs("services.model_router_adapter.server", level="INFO") as logs:
+            status, _, _ = self._post_raw("/v1/chat/completions", self._phase5q_payload())
+
+        self.assertEqual(status, 200)
+        record = self._message_structure_log_record(logs.records)
+        self.assertTrue(record.compat_mode_enabled)
+        self.assertEqual(record.flattened_message_count, 2)
+        self.assertGreater(record.flattened_prompt_chars, 0)
+        self.assertTrue(record.tool_schemas_present)
+        self.assertFalse(record.tool_schemas_forwarded)
+        joined = "\n".join(log.getMessage() for log in logs.records)
+        self.assertNotIn("SANITIZED_CONTEXT_LINE", joined)
+        self.assertNotIn("SANITIZED_SUMMARY_REQUEST", joined)
+        self.assertNotIn("SANITIZED_TOOL_DESCRIPTION", joined)
+        self.assertNotIn("read_sandbox_file", joined)
 
     def test_refuses_unknown_post_endpoint(self):
         status, payload = self._post("/v1/responses", {"input": "not allowed"})

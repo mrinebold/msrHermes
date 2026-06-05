@@ -161,3 +161,17 @@ Tool stripping alone is not sufficient because the adapter already omits tool sc
 Recommendation:
 
 Phase 5S should implement local Gemma prompt compatibility in the adapter: ignore `tools` and `tool_choice`, flatten system/developer/user context into a single Gemma-friendly prompt, preserve file-like context without logging it, and keep SSE behavior unchanged. Preserve room for future tool-capable providers, but do not pass Hermes tool semantics to DevMonster until a real tool execution contract exists.
+
+## Phase 5S Local Gemma Compatibility
+
+Implementation date: 2026-06-05.
+
+Phase 5S implemented `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. With this opt-in mode enabled for local Gemma requests, Hermes multi-message payloads are converted into one role-labeled plain prompt using blocks like `[system]`, `[user]`, and `[assistant]`. Tool schemas and `tool_choice` are ignored for routing, structured content is reduced to safe text parts only, and requests with no non-empty user content fail closed.
+
+The compatibility mode preserves streaming SSE behavior and adds metadata-only diagnostics for whether compat mode was enabled, how many messages were flattened, flattened prompt character count, whether tool schemas were present, and the invariant `tool_schemas_forwarded=false`.
+
+No live Hermes prompt or live model call was run in Phase 5S.
+
+Recommended next phase:
+
+Phase 5T should run one bounded `sample_note.md` Hermes file-summary retry through the adapter with local compat mode enabled, using the same isolated-home and metadata-only logging constraints from Phase 5Q.

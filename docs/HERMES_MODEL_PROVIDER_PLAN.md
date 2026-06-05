@@ -577,3 +577,31 @@ For the DevMonster Gemma route, implement a local compatibility mode that strips
 Next recommended phase:
 
 Phase 5S should implement the compatibility mode with mocked tests only. Do not run Hermes live prompts until the adapter behavior is implemented and reviewed.
+
+## Phase 5S Local Gemma Compatibility Implementation
+
+Status: complete on 2026-06-05.
+
+The localhost adapter now has an opt-in local compatibility mode:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+```
+
+For local Gemma requests, compatibility mode:
+
+- ignores `tools` and `tool_choice` for routing
+- flattens Hermes multi-message payloads into one role-labeled prompt
+- preserves plain role labels as `[system]`, `[developer]`, `[user]`, `[assistant]`, or `[tool]`
+- extracts safe text from structured content parts and omits non-text parts
+- fails closed when no non-empty user content is available
+- preserves streaming SSE behavior
+- emits metadata-only prompt-flattening diagnostics when message-structure logging is enabled
+
+Existing behavior remains unchanged when compatibility mode is disabled.
+
+No live Hermes prompts, live model calls, provider installs, persistent Hermes config changes, cloud credentials, or external integrations were used.
+
+Next recommended phase:
+
+Phase 5T should validate one bounded Hermes `sample_note.md` file-summary retry with local compat mode enabled. Keep `sample_prd.md` out of scope until the sample-note result is usable or a new local blocker is documented.

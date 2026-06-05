@@ -1,5 +1,20 @@
 # PRD Changelog
 
+## 2026-06-05
+
+- Completed Phase 5S local Gemma compatibility prompt flattening.
+- Added `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
+- When enabled for local Gemma requests, the adapter ignores `tools` and `tool_choice` for routing.
+- Flattened Hermes multi-message payloads into role-labeled blocks such as `[system]`, `[user]`, and `[assistant]`.
+- Preserved message text while excluding tool schema JSON from the flattened prompt.
+- Extracted safe text from structured content parts and omitted non-text parts.
+- Added fail-closed behavior for compat-mode requests without non-empty user content.
+- Preserved existing behavior when compat mode is disabled.
+- Preserved streaming SSE behavior.
+- Added metadata-only flattening diagnostics: `compat_mode_enabled`, `flattened_message_count`, `flattened_prompt_chars`, `tool_schemas_present`, and `tool_schemas_forwarded=false`.
+- Added mocked tests for tool-present flattening, tool-schema exclusion, role labels, structured text extraction, empty-user fail-closed behavior, legacy behavior when disabled, SSE preservation, and log redaction.
+- Confirmed no live Hermes prompts, live model calls, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
+
 ## 2026-06-04
 
 - Completed Phase 5R Hermes tool-present prompt-shape isolation at the adapter/router boundary.

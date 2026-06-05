@@ -16,6 +16,8 @@ from .schemas import (
     chat_completion_response,
     chat_completion_stream_chunks,
     error_response,
+    has_nonempty_user_content,
+    local_compat_prompt_from_messages,
     message_content_text,
     models_response,
     normalize_models,
@@ -93,8 +95,17 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 model = str(payload.get("model") or "")
                 selected_model = model
                 task_type = str(payload.get("task_type") or config.default_task_type)
-                self._log_message_structure(payload, messages, streaming_requested)
-                prompt = prompt_from_messages(messages)
+                use_local_compat = _uses_local_compat(config, model)
+                if use_local_compat and not has_nonempty_user_content(messages):
+                    status = 400
+                    prompt = local_compat_prompt_from_messages(messages)
+                    self._log_message_structure(payload, messages, streaming_requested, use_local_compat, prompt)
+                    self._write_json(status, error_response("local compatibility mode requires non-empty user content", "bad_request"))
+                    self._log_request(started, status, selected_model)
+                    return
+
+                prompt = local_compat_prompt_from_messages(messages) if use_local_compat else prompt_from_messages(messages)
+                self._log_message_structure(payload, messages, streaming_requested, use_local_compat, prompt)
                 route_response = router.generate(RouteRequest(task_type=task_type, prompt=prompt, model=model or None))
                 selected_model = str(getattr(route_response, "model", model) or model)
                 status = 200
@@ -192,6 +203,8 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
             payload: dict[str, Any],
             messages: list[Any],
             streaming_requested: bool,
+            compat_mode_enabled: bool,
+            flattened_prompt: str,
         ) -> None:
             if not config.log_message_structure:
                 return
@@ -229,6 +242,11 @@ def make_handler(router: Any, config: AdapterConfig) -> type[BaseHTTPRequestHand
                 "temperature_present": "temperature" in payload,
                 "stream_present": "stream" in payload,
                 "streaming_requested": streaming_requested,
+                "compat_mode_enabled": compat_mode_enabled,
+                "flattened_message_count": _flattened_message_count(messages) if compat_mode_enabled else 0,
+                "flattened_prompt_chars": len(flattened_prompt) if compat_mode_enabled else 0,
+                "tool_schemas_present": bool(payload.get("tools")),
+                "tool_schemas_forwarded": False,
             }
             LOGGER.info(json.dumps(metadata, sort_keys=True), extra=metadata)
 
@@ -246,6 +264,23 @@ def _looks_like_file_content(text: str) -> bool:
         or text.count("\n") >= 3
         or "---\n" in text
     )
+
+
+def _uses_local_compat(config: AdapterConfig, model: str) -> bool:
+    if not config.local_compat_mode:
+        return False
+    normalized = model.strip().lower()
+    return not normalized or "gemma" in normalized
+
+
+def _flattened_message_count(messages: list[Any]) -> int:
+    count = 0
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        if message_content_text(message.get("content", "")).strip():
+            count += 1
+    return count
 
 
 def main() -> None:
