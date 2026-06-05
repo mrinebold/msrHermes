@@ -2,6 +2,18 @@
 
 ## 2026-06-05
 
+- Completed Phase 5T live Hermes file-summary test with local Gemma compatibility mode.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, and `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
+- Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
+- Captured stdout to `sandbox/output/sample_note_phase5t_summary.md` and stderr to `sandbox/output/sample_note_phase5t_stderr.txt`.
+- Recorded exit code 0, elapsed time 52.126s, stdout 8 bytes, stderr 0 bytes, and no timeout under the 240s cap.
+- Confirmed the output is not usable as an exactly five-bullet summary.
+- Confirmed adapter request metadata showed four successful `POST /v1/chat/completions` calls, all status 200 with selected model `gemma4:26b`; chat elapsed times were 29.388s, 6.618s, 5.464s, and 6.715s.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0` for all four chat-completion calls.
+- Confirmed compat metadata showed `compat_mode_enabled=true`, `flattened_message_count=2`, `flattened_prompt_chars=5724`, `tool_schemas_present=true`, and `tool_schemas_forwarded=false`.
+- Stopped the adapter immediately after inspection and confirmed no `8088` listener remained.
+- Recommended Phase 5U as local Gemma prompt-variant isolation before another Hermes retry.
+- Confirmed no `sample_prd.md` run, prompt/file content logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5S local Gemma compatibility prompt flattening.
 - Added `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
 - When enabled for local Gemma requests, the adapter ignores `tools` and `tool_choice` for routing.

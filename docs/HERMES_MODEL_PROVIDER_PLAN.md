@@ -605,3 +605,35 @@ No live Hermes prompts, live model calls, provider installs, persistent Hermes c
 Next recommended phase:
 
 Phase 5T should validate one bounded Hermes `sample_note.md` file-summary retry with local compat mode enabled. Keep `sample_prd.md` out of scope until the sample-note result is usable or a new local blocker is documented.
+
+## Phase 5T Live File Summary Retry
+
+Status: complete on 2026-06-05.
+
+Hermes was run exactly once against `sandbox/input/sample_note.md` using an isolated temporary `HERMES_HOME`, localhost adapter configuration, `gemma4:26b`, a dummy local API key, and `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Exit code | 0 |
+| Elapsed time | 52.126s |
+| Timeout | 240s cap; no timeout |
+| Stdout bytes | 8 |
+| Stderr bytes | 0 |
+| Output usable | No |
+
+Adapter evidence:
+
+- Hermes made four `POST /v1/chat/completions` calls.
+- All four calls returned 200 with selected model `gemma4:26b`.
+- All four response-shape records had `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`.
+- All four compat metadata records had `compat_mode_enabled=true`, `flattened_message_count=2`, `flattened_prompt_chars=5724`, `tool_schemas_present=true`, and `tool_schemas_forwarded=false`.
+
+Conclusion:
+
+The local Gemma compatibility mode activated correctly and prevented tool schemas from reaching the router prompt, but the file-summary output remained unusable. The next issue is likely the Gemma-facing prompt content or ordering rather than adapter transport or tool-schema forwarding.
+
+Next recommended phase:
+
+Phase 5U should isolate prompt variants before another Hermes retry. Prefer adapter-level or direct-router diagnostics using synthetic sandbox content: final-user-first ordering, system scaffold demotion/truncation, and a dedicated file-summary prompt shape.

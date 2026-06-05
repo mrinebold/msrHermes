@@ -175,3 +175,59 @@ No live Hermes prompt or live model call was run in Phase 5S.
 Recommended next phase:
 
 Phase 5T should run one bounded `sample_note.md` Hermes file-summary retry through the adapter with local compat mode enabled, using the same isolated-home and metadata-only logging constraints from Phase 5Q.
+
+## Phase 5T Live Retry With Local Compat Mode
+
+Validation date: 2026-06-05.
+
+One bounded Hermes file-summary test was run against `sandbox/input/sample_note.md` only. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, and local compat mode enabled. It was stopped immediately after inspection, and no listener remained on `8088`.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Exit code | 0 |
+| Elapsed time | 52.126s |
+| Stdout file | `sandbox/output/sample_note_phase5t_summary.md` |
+| Stdout byte count | 8 |
+| Stderr file | `sandbox/output/sample_note_phase5t_stderr.txt` |
+| Stderr byte count | 0 |
+| Output usable | No; it contains only the empty-response sentinel |
+
+Adapter metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 4 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 16 | 404 |
+
+Chat-completion elapsed times were 29.388s, 6.618s, 5.464s, and 6.715s.
+
+Response-shape metadata:
+
+| Chat call count | Streaming requested | Choices | Finish reason | Content length |
+| ---: | --- | ---: | --- | ---: |
+| 4 | true | 1 each | `stop` | 0 each |
+
+Compat metadata was identical for all four chat-completion calls:
+
+| Field | Value |
+| --- | --- |
+| `compat_mode_enabled` | true |
+| `flattened_message_count` | 2 |
+| `flattened_prompt_chars` | 5724 |
+| `tool_schemas_present` | true |
+| `tool_schemas_forwarded` | false |
+| Message roles | `system`, `user` |
+| Message character counts | `[5628, 78]` |
+| Final user message empty | false |
+
+Conclusion:
+
+Phase 5T proves local compat mode activated and tool schemas were not forwarded, but it did not fix the Hermes file-summary path. The remaining blocker is likely not transport, missing file-like context, or tool-schema forwarding. It is more likely the content/shape of Hermes' large system prompt as flattened for Gemma, DevMonster Gemma behavior with that prompt size/instruction mix, or a need for a purpose-built summarization prompt that bypasses Hermes' agent scaffold for local file summaries.
+
+Recommended next phase:
+
+Phase 5U should avoid another Hermes retry at first. Use mocked or direct adapter-level diagnostics to compare local Gemma prompt variants without Hermes agent scaffolding: final-user-first prompt ordering, system-context truncation or demotion, and a purpose-built summary prompt containing only sandbox file text plus the five-bullet instruction. Do not run `sample_prd.md` until `sample_note.md` can produce usable output.

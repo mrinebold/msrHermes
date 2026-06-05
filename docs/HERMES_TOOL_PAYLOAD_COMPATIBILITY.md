@@ -116,3 +116,34 @@ No live Hermes prompts, live model calls, cloud providers, real API keys, persis
 Recommended next phase:
 
 Phase 5T should run one bounded Hermes `sample_note.md` file-summary retry with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`, request logging, response-shape logging, and message-structure logging enabled. Keep the adapter foreground-only, keep `HERMES_HOME` isolated, and do not run `sample_prd.md` until `sample_note.md` produces usable output or a new blocker is diagnosed.
+
+## Phase 5T Validation Result
+
+Validation date: 2026-06-05.
+
+One bounded Hermes `sample_note.md` file-summary retry was run with `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
+
+Result:
+
+| Check | Result |
+| --- | --- |
+| Exit code | 0 |
+| Elapsed time | 52.126s |
+| Timeout | 240s cap; no timeout |
+| Stdout bytes | 8 |
+| Stderr bytes | 0 |
+| Output usable | No |
+
+Compatibility metadata confirmed the intended adapter behavior:
+
+- `compat_mode_enabled=true`
+- `flattened_message_count=2`
+- `flattened_prompt_chars=5724`
+- `tool_schemas_present=true`
+- `tool_schemas_forwarded=false`
+
+All four chat-completion calls returned 200 with selected model `gemma4:26b`, but every response-shape record still had `content_length=0`.
+
+Conclusion:
+
+Local compat mode works mechanically, but it is insufficient for Hermes file summaries. Tool-schema forwarding is no longer a plausible root cause. The next fix should focus on the Gemma-facing prompt itself: prompt ordering, reducing or demoting Hermes' system scaffold, or a dedicated local summarization prompt shape that gives Gemma only the sandbox file text and the summary instruction.
