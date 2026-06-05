@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5T complete. One bounded Hermes sample-note retry ran with local Gemma compatibility mode enabled, but the output remained the empty-response sentinel.
+Phase DESKTOP-1 complete. Hermes Desktop is now on the roadmap as a planning-only future install after CLI/local adapter sandbox output is useful.
 
-Local repository status: complete work through Phase 5S has been published. Phase 5T is local until the next approved push.
+Local repository status: complete work through Phase 5S has been published. Phase 5T and DESKTOP-1 are local until the next approved push.
 
 ## Architecture Decision
 
@@ -42,6 +42,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5R | Complete | Diagnosed tool-present payload compatibility offline and recommended local Gemma prompt flattening plus tool semantic stripping. |
 | Phase 5S | Complete | Added opt-in local Gemma compatibility mode that flattens Hermes multi-message payloads and ignores tool schemas for routing. |
 | Phase 5T | Complete | Ran one bounded sample-note retry with compat mode enabled; compat metadata was correct but Gemma still returned zero content. |
+| Phase DESKTOP-1 | Complete | Added planning-only Hermes Desktop install roadmap and safety gates; Desktop was not downloaded or installed. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -89,10 +90,12 @@ Completed and committed locally:
 - Phase 5R tool-payload compatibility: no live Hermes prompts or live model calls were run. Local Hermes source inspection confirmed `hermes -z` includes tools because it constructs a normal `AIAgent`, uses configured CLI toolsets when no explicit toolsets are passed, and forwards `agent.tools` into chat-completion kwargs. Mocked adapter tests showed `tools` present and `tools` stripped produce the same router prompt because the adapter already excludes tool schemas; the safer local Gemma fix must also flatten Hermes multi-message payloads into a single Gemma-friendly prompt.
 - Phase 5S local Gemma compatibility: added `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`. When enabled for local Gemma requests, the adapter ignores `tools` and `tool_choice`, flattens message content into role-labeled `[system]`, `[developer]`, `[user]`, `[assistant]`, and `[tool]` blocks, extracts only safe text from structured content parts, fails closed when no non-empty user content exists, preserves SSE behavior, and emits metadata-only flattening diagnostics without logging prompt text or file contents.
 - Phase 5T live compat-mode retry: one bounded `sample_note.md` Hermes file-summary test completed in 52.126s with exit code 0, stdout 8 bytes, and stderr 0 bytes. The output remained unusable. Adapter metadata showed four successful chat-completion calls, all `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`. Compat metadata confirmed `compat_mode_enabled=true`, `flattened_message_count=2`, `flattened_prompt_chars=5724`, `tool_schemas_present=true`, and `tool_schemas_forwarded=false`.
+- Phase DESKTOP-1 planning: added the official Nous Research Hermes Desktop roadmap. Desktop is deferred until Hermes CLI can produce useful sandbox output through the localhost adapter. Desktop must be installed before resident/background operation and before durable credentials are granted, but only after explicit approval. Safety gates require official download source, macOS identity verification if possible, no Nous Portal login, no cloud credentials, no broad filesystem grants, no background operation, no Google/Supabase/Home Assistant/Helio/Agent Bus connection, and localhost adapter use if configurable.
 
 Not completed or not approved:
 
 - Hermes is installed as a local client only.
+- Hermes Desktop is not installed.
 - Autonomous execution is not enabled.
 - Hermes setup was not run.
 - Hermes model configuration was not enabled.
@@ -130,7 +133,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5U should isolate local Gemma prompt variants before another Hermes retry. Prefer adapter-level or direct-router diagnostics using synthetic sandbox content: final-user-first ordering, system scaffold demotion or truncation, and a dedicated file-summary prompt shape. Keep `sample_prd.md` out of scope until `sample_note.md` can produce usable output. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5U should isolate local Gemma prompt variants before another Hermes retry. Prefer adapter-level or direct-router diagnostics using synthetic sandbox content: final-user-first ordering, system scaffold demotion or truncation, and a dedicated file-summary prompt shape. Keep `sample_prd.md` out of scope until `sample_note.md` can produce usable output. Hermes Desktop must remain planning-only until the CLI/local adapter path produces useful sandbox output and a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -171,6 +174,8 @@ Phase 5R showed the adapter already omits tool schemas from the router prompt, s
 Phase 5S implemented that compatibility prompt behind an explicit flag. It was verified with mocked tests only; no Hermes live prompt or live model call was run.
 
 Phase 5T confirmed the compatibility flag activates during a live Hermes sample-note run and that tool schemas are not forwarded, but Gemma still returns zero content. The remaining blocker is likely the Gemma-facing prompt content/order or Hermes system scaffold, not tool-schema forwarding.
+
+Phase DESKTOP-1 added Hermes Desktop to the roadmap as a future official Nous Research install only. Desktop is gated after useful CLI/local-adapter sandbox output and before resident/background operation or durable credentials.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

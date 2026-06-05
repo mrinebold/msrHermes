@@ -267,6 +267,29 @@ Default macOS plist path for the default profile:
 ~/Library/LaunchAgents/ai.hermes.gateway.plist
 ```
 
+## Hermes Desktop Policy
+
+Phase DESKTOP-1 is planning only. Hermes Desktop must not be downloaded, installed, opened, signed into, or granted permissions until a later phase explicitly approves Desktop installation.
+
+Future Desktop validation must follow these minimum rules:
+
+- download only from the official Nous Research Desktop page
+- verify macOS package/app identity if possible
+- do not sign into Nous Portal until explicitly approved
+- do not add cloud provider credentials
+- do not grant broad filesystem permissions on first launch
+- do not connect Google, Supabase, Home Assistant, Helio, or Agent Bus
+- do not enable background/resident operation
+- keep Desktop pointed at the localhost model adapter if configurable
+- confirm whether Desktop shares `~/.hermes` with CLI before adding any durable credentials
+- confirm whether Desktop starts background services, launch items, login items, or helper processes
+
+Desktop rollback must remove the app and Desktop-specific launch/login items while leaving CLI state intact unless a separate phase approves CLI rollback.
+
+Reference:
+
+- [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
+
 ## Audit Requirements
 
 Every governed action should log:

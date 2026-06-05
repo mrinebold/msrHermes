@@ -2,6 +2,14 @@
 
 ## 2026-06-05
 
+- Completed Phase DESKTOP-1 Hermes Desktop install planning only.
+- Added `docs/HERMES_DESKTOP_INSTALL_PLAN.md`.
+- Verified the official Nous Research Hermes Desktop page lists macOS 12+ and Hermes Agent v0.15.2.
+- Added install timing: after CLI/local adapter sandbox output is useful, before resident/background Hermes operation, and before Google/Supabase/Home Assistant/Helio/Desktop receives durable credentials.
+- Added safety requirements: official download source only, verify macOS package/app identity if possible, no Nous Portal sign-in until approval, no cloud credentials, no background operation, no broad filesystem permission grant, no Google/Supabase/Home Assistant/Helio connection, and localhost adapter use if configurable.
+- Added validation checklist for future install/open approval: confirm version, shared `~/.hermes` behavior, existing config reads, background services, portal/browser login attempts, localhost adapter support, and disabled external integrations.
+- Added rollback plan: remove Desktop app and Desktop-specific launch/login items while leaving CLI install intact unless separately approved.
+- Confirmed Hermes Desktop was not downloaded, installed, opened, configured, or connected to external services.
 - Completed Phase 5T live Hermes file-summary test with local Gemma compatibility mode.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, and `MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true`.
 - Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.

@@ -707,3 +707,44 @@ Hermes plugin discovery registered provider plugins and logged lazy dependency b
 ## Phase 5F Direction
 
 Phase 5F should configure Hermes to use the existing local model router and/or the approved DevMonster Gemma endpoint. It should not configure OpenAI, Anthropic/Claude, OpenRouter, Google, Supabase, Home Assistant, Helio dispatch, or any cloud provider credentials.
+
+## Phase DESKTOP-1 Hermes Desktop Roadmap
+
+Status: planning only on 2026-06-05.
+
+Hermes Desktop is now tracked as a future install candidate, but Desktop must not be downloaded, installed, opened, configured, or granted permissions until a later phase explicitly approves it.
+
+Official source:
+
+- https://hermes-agent.nousresearch.com/desktop
+
+Observed source facts:
+
+- macOS 12+ is listed for the macOS Desktop build.
+- Hermes Agent v0.15.2 is shown on the official Desktop page.
+- The current local CLI install is Hermes Agent v0.15.2 / 2026.5.29.2.
+
+Install timing:
+
+- after the CLI/local adapter path can produce useful sandbox output through the localhost adapter
+- before resident/background Hermes operation
+- before Google, Supabase, Home Assistant, Helio, or Hermes Desktop receives durable credentials
+
+Desktop safety requirements:
+
+- download only from the official Nous Research Desktop page
+- verify macOS package/app identity if possible
+- do not sign into Nous Portal until explicitly approved
+- do not add cloud provider credentials
+- do not enable background or resident operation
+- do not grant broad filesystem permissions on first launch
+- do not connect Google, Supabase, Home Assistant, Helio, or Agent Bus
+- keep Desktop pointed at the localhost model adapter if configurable
+
+Future Desktop validation must confirm version, whether Desktop shares `~/.hermes` with CLI, whether it reads existing Hermes config, whether it starts background services, whether it attempts browser or portal login, whether it can use the localhost adapter, and whether any external integration is enabled.
+
+Rollback should remove the Desktop app and any Desktop-specific launch/login items while leaving the CLI install intact unless a separate rollback phase approves CLI removal.
+
+Reference:
+
+- [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)

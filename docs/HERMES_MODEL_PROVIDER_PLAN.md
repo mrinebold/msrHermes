@@ -637,3 +637,22 @@ The local Gemma compatibility mode activated correctly and prevented tool schema
 Next recommended phase:
 
 Phase 5U should isolate prompt variants before another Hermes retry. Prefer adapter-level or direct-router diagnostics using synthetic sandbox content: final-user-first ordering, system scaffold demotion/truncation, and a dedicated file-summary prompt shape.
+
+## Phase DESKTOP-1 Desktop Provider Timing
+
+Status: planning only on 2026-06-05.
+
+Hermes Desktop should not be installed until the CLI path can produce useful sandbox output through the localhost MSR Model Router adapter. Desktop should inherit the same local-first model policy:
+
+- local adapter first
+- `http://127.0.0.1:8088/v1` if Desktop supports a custom OpenAI-compatible endpoint
+- `gemma4:26b` through `services/model_router`
+- cloud providers fail-closed
+- no real provider API keys
+- no Nous Portal login until explicitly approved
+
+Desktop must not become an alternate route around the MSR model router. If Desktop cannot use the localhost adapter without cloud login or durable credentials, Desktop validation should stop and record the blocker.
+
+Reference:
+
+- [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
