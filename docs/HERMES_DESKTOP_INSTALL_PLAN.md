@@ -189,7 +189,68 @@ Post-install safety checks:
 - Process-list checks from the Codex sandbox were blocked by macOS sandbox permissions, so absence of a running Desktop process is based on the user not launching the app plus no launchd/LaunchAgent evidence.
 - Login item inspection from the Codex sandbox returned macOS error `-10827`; re-check from an unsandboxed Terminal before first launch if needed.
 
-DESKTOP-3 does not approve first launch. A later phase must explicitly approve opening Desktop and must preserve the guardrails below.
+DESKTOP-3 did not approve first launch. Phase DESKTOP-4 approved one guarded first-launch validation only.
+
+## Phase DESKTOP-4 First-Launch Validation Result
+
+Status: complete on 2026-06-05.
+
+Pre-launch baseline:
+
+- `/Applications/Hermes.app` existed.
+- Bundle metadata still reported name `Hermes`, identifier `com.nousresearch.hermes.setup`, and version `0.0.1`.
+- No Hermes/Nous user LaunchAgent was found in `~/Library/LaunchAgents`.
+- No Hermes/Nous `launchctl print gui/$(id -u)` entry was present before launch.
+- No Hermes/Nous background-task match was visible through `sfltool dumpbtm`.
+
+Launch attempt:
+
+- `open -a /Applications/Hermes.app` returned exit code 0 on the first attempt.
+- No visible first-run screen could be captured from the Codex sandbox; `screencapture` returned `could not create image from display`.
+- AppleScript and LaunchServices UI metadata could not expose a window title or first-screen text from the sandbox.
+- A later `open /Applications/Hermes.app` attempt returned `kLSNoExecutableErr`, even though `Contents/MacOS/Hermes-Setup` exists.
+- `codesign --verify --deep --strict --verbose=4 /Applications/Hermes.app` reported `invalid signature (code or signature have been modified)` for arm64.
+- `launchctl` showed a transient submitted UI job for `application.com.nousresearch.hermes.setup...` running `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup`.
+- The launch created `~/.hermes/logs/bootstrap-installer.log` with one line: `Hermes installer starting mode=Install force_setup=false`.
+
+Observed first-run behavior:
+
+| Question | Result |
+| --- | --- |
+| First screen visible | No observable UI from the Codex sandbox |
+| Nous Portal sign-in prompt | Not observed |
+| Browser login prompt | Not observed |
+| Model/provider credential prompt | Not observed |
+| Filesystem permission prompt | Not observed |
+| Accessibility permission prompt | Not observed |
+| Screen Recording permission prompt | Not observed |
+| Automation permission prompt | Not observed |
+| Launch/login item prompt | Not observed |
+| App version visible in UI | Not observed; bundle version remained `0.0.1` |
+| Shares `~/.hermes` with CLI | Inconclusive; only `~/.hermes/logs/bootstrap-installer.log` was written |
+| Reads existing Hermes config | Inconclusive; no UI/config state was observed |
+| Localhost adapter configurable | Not observed |
+
+Post-launch shutdown and safety checks:
+
+- The transient LaunchServices job did not stop from inside the Codex sandbox with `launchctl kill`, `launchctl bootout`, or `kill -9`.
+- The user killed the process from an unsandboxed Terminal.
+- After user kill, `launchctl print gui/$(id -u)/application.com.nousresearch.hermes.setup...` returned service not found.
+- AppleScript reported `application "Hermes" is running` as `false`.
+- No Hermes/Nous `launchctl print gui/$(id -u)` entries remained.
+- No Hermes/Nous user LaunchAgent was found.
+- No Hermes/Nous background-task match was visible through `sfltool dumpbtm`.
+- No Hermes/Nous user Application Support or Preferences files were found during verification.
+- No cloud provider credentials were added.
+- No Nous Portal sign-in was performed.
+- No broad filesystem, Accessibility, Screen Recording, Automation, or Full Disk Access permission was granted.
+- No Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus connection was configured.
+- Existing Hermes CLI config was not intentionally modified.
+- The model router adapter was not started.
+
+Conclusion:
+
+DESKTOP-4 failed closed before usable first-run UI validation. The installed app appears to be a bootstrap installer bundle rather than the final Desktop runtime. Before another Desktop launch attempt, inspect the official DMG install flow from an unsandboxed Terminal or Finder, resolve the app bundle signature/openability issue, and confirm whether a completed bootstrap install creates a different signed Desktop app bundle.
 
 ## Safety Requirements
 

@@ -2,6 +2,16 @@
 
 ## 2026-06-05
 
+- Completed Phase DESKTOP-4 guarded Hermes Desktop first-launch validation.
+- Confirmed pre-launch baseline: `/Applications/Hermes.app` existed, no Hermes/Nous user LaunchAgent existed, no Hermes/Nous launchctl entry was present, and no Hermes/Nous background-task match was visible.
+- Ran one guarded `open -a /Applications/Hermes.app` attempt.
+- Recorded that no visible first-run screen could be captured from the Codex sandbox and no UI metadata exposed sign-in, credential, permission, provider, or localhost-adapter configuration screens.
+- Recorded that a later open attempt returned `kLSNoExecutableErr`, while `codesign --verify --deep --strict` reported an invalid arm64 signature.
+- Recorded that a transient LaunchServices job ran `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup` and wrote `~/.hermes/logs/bootstrap-installer.log` with `Hermes installer starting mode=Install force_setup=false`.
+- Confirmed the process could not be stopped from inside the Codex sandbox; the user killed it from Terminal.
+- Confirmed post-kill state: no Hermes app running state, launchctl entry, LaunchAgent, background-task match, Application Support artifact, or Preferences artifact remained.
+- Confirmed no Nous Portal sign-in, browser login, credentials, broad filesystem permissions, Accessibility, Screen Recording, Automation, Full Disk Access, external integrations, model-router adapter start, background/resident operation, or Hermes CLI config changes occurred.
+- Marked Desktop first-launch validation as fail-closed pending a later phase to resolve the bootstrap/signature/openability issue.
 - Completed Phase DESKTOP-3 controlled Hermes Desktop install on the Mac mini.
 - Downloaded the official macOS DMG from `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg`.
 - Recorded SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4` and confirmed `hdiutil verify` reported the DMG checksum as valid.
