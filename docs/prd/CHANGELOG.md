@@ -2,6 +2,18 @@
 
 ## 2026-06-05
 
+- Completed Phase 5W live Hermes file-summary retry using `no_tool_vocab` prompt mode.
+- Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`.
+- Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.
+- Captured stdout to `sandbox/output/sample_note_phase5w_summary.md` and stderr to `sandbox/output/sample_note_phase5w_stderr.txt`.
+- Recorded exit code 0, elapsed time 39.471s, stdout 8 bytes, stderr 0 bytes, and no timeout under the 240s cap.
+- Confirmed the output is not usable as an exactly five-bullet summary.
+- Confirmed adapter request metadata showed four successful `POST /v1/chat/completions` calls, all status 200 with selected model `gemma4:26b`; chat elapsed times were 16.647s, 4.226s, 7.283s, and 7.804s.
+- Confirmed response-shape metadata showed `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0` for all four chat-completion calls.
+- Confirmed prompt construction metadata showed `gemma_prompt_mode=no_tool_vocab`, `compat_mode_enabled=true`, `prompt_total_chars=5689`, `message_count=2`, `tool_schemas_present=true`, `tool_schemas_forwarded=false`, final user content starting at index 5606, and tool/function/schema/call keyword counts all zero.
+- Stopped the adapter immediately after inspection and confirmed no `8088` listener remained.
+- Recommended stopping one-toggle live retries and implementing a purpose-built local summary prompt mode that puts the instruction first, preserves file-like context, removes tool vocabulary, and drops unrelated Hermes scaffold.
+- Confirmed no `sample_prd.md` run, prompt/file content logging, cloud providers, real API keys, persistent Hermes config, background services, Google, Supabase, Home Assistant, Helio, Agent Bus access, or autonomous execution were used.
 - Completed Phase 5V live Hermes file-summary retry using `instruction_context` prompt mode.
 - Started the adapter manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context`.
 - Ran exactly one bounded `hermes -z` summary test against `sandbox/input/sample_note.md` only, using an isolated temporary `HERMES_HOME`, localhost adapter config, `gemma4:26b`, and a dummy local API key.

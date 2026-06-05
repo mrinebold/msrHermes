@@ -330,3 +330,66 @@ Conclusion:
 Recommendation:
 
 Do not rerun `sample_prd.md` yet. The next bounded diagnostic should try `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab` for `sample_note.md`, or implement a stronger local summary prompt mode that preserves file-like context while stripping Hermes system/tool scaffold more aggressively. Keep cloud providers fail-closed and keep Hermes configuration isolated.
+
+## Phase 5W No-Tool-Vocabulary Live Retry
+
+Validation date: 2026-06-05.
+
+One bounded Hermes file-summary test was run against `sandbox/input/sample_note.md` only. The adapter was started manually in the foreground on `127.0.0.1:8088` with request logging, response-shape logging, message-structure logging, local compat mode, and `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`. Hermes used a temporary isolated `HERMES_HOME` with only the localhost adapter, `gemma4:26b`, and a dummy local API key. The adapter was stopped immediately after the run.
+
+Run result:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Exit code | 0 |
+| Elapsed time | 39.471s |
+| Stdout file | `sandbox/output/sample_note_phase5w_summary.md` |
+| Stdout byte count | 8 |
+| Stderr file | `sandbox/output/sample_note_phase5w_stderr.txt` |
+| Stderr byte count | 0 |
+| Output usable | No; it contains only the empty-response sentinel |
+| Adapter shutdown | Stopped immediately; no listener remained on `8088` |
+
+Adapter metadata:
+
+| Request class | Count | Result |
+| --- | ---: | --- |
+| `GET /v1/models` | 2 | 200 |
+| `POST /v1/chat/completions` | 4 | 200, selected `gemma4:26b` |
+| Unsupported discovery probes | 17 | 404 |
+
+Chat-completion elapsed times were 16.647s, 4.226s, 7.283s, and 7.804s.
+
+Response-shape metadata:
+
+| Chat call count | Streaming requested | Choices | Finish reason | Content length |
+| ---: | --- | ---: | --- | ---: |
+| 4 | true | 1 each | `stop` | 0 each |
+
+Prompt-construction metadata was identical for all four chat-completion calls:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `no_tool_vocab` |
+| Compat mode | true |
+| Message count | 2 |
+| Message character counts | `[5628, 83]` |
+| Prompt characters | 5689 |
+| Final user content start index | 5606 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Content length | 0 |
+| User content dominates system content | false |
+| Tool/function/schema/call keyword counts | all 0 |
+| XML/tool-like tag count | 1 |
+| Markdown fence count | 0 |
+| JSON-looking block count | 0 |
+
+Conclusion:
+
+`no_tool_vocab` worked mechanically: the plain `tool`, `function`, `schema`, and `call` keyword counts dropped to zero while tool schemas still were not forwarded. However, Gemma still returned zero visible content for all four chat-completion calls. Because `no_tool_vocab` preserves flattened ordering, the final user instruction remained late in the prompt at index 5606, after the large Hermes system scaffold.
+
+Recommendation:
+
+Stop one-off live retries against the current Hermes scaffold. The next implementation phase should add a stronger local summary prompt mode that combines the useful parts of prior diagnostics: remove tool vocabulary, put the final user instruction first, preserve file-like context, and drop or sharply demote Hermes agent/system scaffold that is not needed for summarization. Do not run `sample_prd.md` until `sample_note.md` can produce usable output.

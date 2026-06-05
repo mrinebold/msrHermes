@@ -201,3 +201,35 @@ The adapter successfully moved the final instruction ahead of Hermes' large syst
 Recommendation:
 
 Try `no_tool_vocab` next for one bounded `sample_note.md` retry, or implement a purpose-built local summary mode that extracts file-like context and the final instruction while dropping Hermes agent/tool scaffold text.
+
+## Phase 5W No-Tool-Vocabulary Result
+
+Validation date: 2026-06-05.
+
+The bounded live `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab` confirmed that removing plain tool/function vocabulary alone is insufficient.
+
+Observed metadata:
+
+| Field | Value |
+| --- | --- |
+| Chat-completion calls | 4 |
+| Status | 200 for all calls |
+| Selected model | `gemma4:26b` |
+| Prompt mode | `no_tool_vocab` |
+| Compat mode | true |
+| Prompt chars | 5689 |
+| Message count | 2 |
+| Message char counts | `[5628, 83]` |
+| Final user content start index | 5606 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Tool/function/schema/call keyword counts | all 0 |
+| Response content length | 0 for all calls |
+
+Conclusion:
+
+The adapter removed the requested vocabulary and still suppressed tool schemas, but Gemma returned zero content. Since `no_tool_vocab` keeps flattened ordering, the final user task stayed after the large Hermes system scaffold. The remaining fix should not be another single toggle; it should be a purpose-built local summary prompt that combines instruction-first ordering with scaffold reduction.
+
+Recommendation:
+
+Implement a local summary prompt mode that extracts the final user instruction and file-like context into a compact Gemma prompt, omits tool vocabulary, and drops unrelated Hermes agent/system scaffold. Keep this opt-in, local-only, and covered by mocked tests before any additional live retry.

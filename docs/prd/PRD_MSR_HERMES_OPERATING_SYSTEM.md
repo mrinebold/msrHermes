@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 5V complete. The instruction-context live retry moved the final instruction ahead of Hermes' large system scaffold, but Gemma still returned zero visible content.
+Phase 5W complete. The no-tool-vocabulary live retry removed tool/function/schema/call vocabulary, but Gemma still returned zero visible content.
 
-Local repository status: complete work through Phase 5U has been published. Phase 5V is local until the next approved push.
+Local repository status: complete work through Phase 5U has been published. Phase 5V and 5W are local until the next approved push.
 
 ## Architecture Decision
 
@@ -44,6 +44,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase 5T | Complete | Ran one bounded sample-note retry with compat mode enabled; compat metadata was correct but Gemma still returned zero content. |
 | Phase 5U | Complete | Added metadata-only prompt-construction diagnostics and offline Gemma prompt modes; recommended `instruction_context` for the next live retry. |
 | Phase 5V | Complete | Ran one bounded sample-note retry with `instruction_context`; prompt reordering worked, but Gemma still returned zero content. |
+| Phase 5W | Complete | Ran one bounded sample-note retry with `no_tool_vocab`; tool vocabulary removal worked, but Gemma still returned zero content. |
 | Phase DESKTOP-1 | Complete | Added planning-only Hermes Desktop install roadmap and safety gates; Desktop was not downloaded or installed. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
@@ -94,6 +95,7 @@ Completed and committed locally:
 - Phase 5T live compat-mode retry: one bounded `sample_note.md` Hermes file-summary test completed in 52.126s with exit code 0, stdout 8 bytes, and stderr 0 bytes. The output remained unusable. Adapter metadata showed four successful chat-completion calls, all `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`. Compat metadata confirmed `compat_mode_enabled=true`, `flattened_message_count=2`, `flattened_prompt_chars=5724`, `tool_schemas_present=true`, and `tool_schemas_forwarded=false`.
 - Phase 5U Gemma prompt construction diagnosis: no live Hermes prompts or live model calls were run. Added metadata-only diagnostics for flattened prompt character count, role sections, section order, markdown fence count, XML/tool-like tag count, JSON-looking block count, tool/function/schema/call keyword counts, final user content start index, and user/system character counts. Added `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE` with `flattened`, `user_only`, `final_user`, `instruction_context`, and `no_tool_vocab`; default behavior remains `flattened`.
 - Phase 5V instruction-context retry: one bounded `sample_note.md` Hermes file-summary test completed in 58.639s with exit code 0, stdout 8 bytes, and stderr 0 bytes. The output remained unusable. Adapter metadata showed four successful chat-completion calls, all `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`. Prompt metadata confirmed `gemma_prompt_mode=instruction_context`, `compat_mode_enabled=true`, `prompt_total_chars=5729`, `message_count=2`, `tool_schemas_present=true`, `tool_schemas_forwarded=false`, and final user content starting at index 7.
+- Phase 5W no-tool-vocabulary retry: one bounded `sample_note.md` Hermes file-summary test completed in 39.471s with exit code 0, stdout 8 bytes, and stderr 0 bytes. The output remained unusable. Adapter metadata showed four successful chat-completion calls, all `streaming_requested=true`, `choices_count=1`, `finish_reason=stop`, and `content_length=0`. Prompt metadata confirmed `gemma_prompt_mode=no_tool_vocab`, `compat_mode_enabled=true`, `prompt_total_chars=5689`, `message_count=2`, `tool_schemas_present=true`, `tool_schemas_forwarded=false`, final user content starting at index 5606, and tool/function/schema/call keyword counts all zero.
 - Phase DESKTOP-1 planning: added the official Nous Research Hermes Desktop roadmap. Desktop is deferred until Hermes CLI can produce useful sandbox output through the localhost adapter. Desktop must be installed before resident/background operation and before durable credentials are granted, but only after explicit approval. Safety gates require official download source, macOS identity verification if possible, no Nous Portal login, no cloud credentials, no broad filesystem grants, no background operation, no Google/Supabase/Home Assistant/Helio/Agent Bus connection, and localhost adapter use if configurable.
 
 Not completed or not approved:
@@ -137,7 +139,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5W should either run one bounded `sample_note.md` retry with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`, or first implement a stronger local summary prompt mode that drops Hermes agent/tool scaffold while preserving file-like context. Keep `sample_prd.md` out of scope until `sample_note.md` can produce usable output. Hermes Desktop must remain planning-only until the CLI/local adapter path produces useful sandbox output and a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5X should implement a purpose-built local summary prompt mode that combines the useful lessons from 5V and 5W: instruction first, file-like context preserved, tool vocabulary removed, and unrelated Hermes agent/system scaffold dropped or sharply demoted. Keep `sample_prd.md` out of scope until `sample_note.md` can produce usable output. Hermes Desktop must remain planning-only until the CLI/local adapter path produces useful sandbox output and a later phase explicitly approves Desktop install/open. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -182,6 +184,8 @@ Phase 5T confirmed the compatibility flag activates during a live Hermes sample-
 Phase 5U added prompt-construction diagnostics and tested prompt construction modes offline. The recommended next live mode is `instruction_context`, because it preserves the available file-like context while moving the final user instruction ahead of Hermes' large system scaffold.
 
 Phase 5V confirmed `instruction_context` changes prompt ordering as intended, but Gemma still returns zero content. The remaining blocker is likely remaining Hermes tool/call vocabulary or agent scaffold text inside message content.
+
+Phase 5W confirmed `no_tool_vocab` removes plain tool/function/schema/call vocabulary as intended, but Gemma still returns zero content. The remaining blocker is likely the large Hermes scaffold itself and the lack of a compact local summary prompt.
 
 Phase DESKTOP-1 added Hermes Desktop to the roadmap as a future official Nous Research install only. Desktop is gated after useful CLI/local-adapter sandbox output and before resident/background operation or durable credentials.
 

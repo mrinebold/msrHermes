@@ -747,3 +747,54 @@ Conclusion:
 Recommendation:
 
 The next live attempt, if approved, should be another single `sample_note.md` retry using `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab`, or an implementation phase should add a stronger local summary prompt mode that extracts only the final instruction and file-like context while dropping Hermes tool scaffold. Do not run `sample_prd.md`, configure Hermes persistently, or broaden provider access until `sample_note.md` produces usable output.
+
+## Phase 5W No-Tool-Vocabulary Live Retry
+
+Status: complete on 2026-06-05.
+
+One bounded Hermes `sample_note.md` file-summary retry was run with:
+
+```text
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=no_tool_vocab
+```
+
+Hermes used an isolated temporary `HERMES_HOME` with only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, and a dummy local API key. The adapter was started manually in the foreground on `127.0.0.1:8088` and stopped immediately after validation.
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Timeout | 240s cap; no timeout |
+| Hermes exit code | 0 |
+| Hermes elapsed time | 39.471s |
+| Stdout | 8 bytes: `(empty)` |
+| Stderr | 0 bytes |
+| Output usable | No |
+| `GET /v1/models` | 2 calls, both 200 |
+| `POST /v1/chat/completions` | 4 calls, all 200 with selected model `gemma4:26b` |
+| Unsupported discovery probes | 17 calls, all 404 |
+| Adapter shutdown | stopped; no `8088` listener remained |
+
+Prompt and response metadata:
+
+| Field | Value |
+| --- | --- |
+| Prompt mode | `no_tool_vocab` |
+| Compat mode | true |
+| Prompt chars | 5689 |
+| Message count | 2 |
+| Message char counts | `[5628, 83]` |
+| Final user content start index | 5606 |
+| Tool schemas present | true |
+| Tool schemas forwarded | false |
+| Tool/function/schema/call keyword counts | all 0 |
+| Response content length | 0 for all four chat calls |
+
+Conclusion:
+
+`no_tool_vocab` is mechanically correct but does not resolve the file-summary zero-content behavior. The result rules out plain tool/function/schema/call vocabulary as the sole cause. The final user instruction also remained after the large Hermes system scaffold because this mode preserves flattened ordering.
+
+Recommendation:
+
+Do not continue with more live one-toggle retries. The next phase should implement a purpose-built local summary prompt mode that extracts the final instruction and file-like context, puts the instruction first, removes tool vocabulary, and drops unrelated Hermes agent scaffold before routing to local Gemma. Keep the adapter localhost-only and keep cloud providers fail-closed.
