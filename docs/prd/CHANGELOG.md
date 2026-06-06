@@ -2,6 +2,18 @@
 
 ## 2026-06-06
 
+- Completed Phase DESKTOP-7A installed Hermes Desktop bundle-state clarification using local Mac mini diagnostics only.
+- Confirmed `/Applications/Hermes.app` remains a minimal `com.nousresearch.hermes.setup` bundle with executable `Hermes-Setup`, version `0.0.1`, and only `Info.plist`, executable, icon, and code-signing resources.
+- Reconfirmed signing display metadata: Team ID `T2F6S8MF7C`, hardened runtime, and stapled notarization ticket.
+- Reconfirmed strict code-signature verification fails with `invalid signature (code or signature have been modified)` for arm64.
+- Reconfirmed `spctl` execution assessment fails with an internal Code Signing subsystem error rather than an acceptance result.
+- Reconfirmed recursive xattrs show provenance/MACL and no observed `com.apple.quarantine` marker.
+- Found a pre-existing `Hermes-Setup` process: PID `18152`, parent PID `1`, started `Sat Jun 6 13:49:34 2026`; did not kill it because DESKTOP-7A did not approve Desktop state changes.
+- Confirmed no Hermes launch agent or daemon file was found in user/system LaunchAgents or LaunchDaemons paths checked.
+- Recorded that login/background item inspection remains partly blocked without macOS authorization: System Events returned `-10827` and `sfltool dumpbtm` requested admin authorization.
+- Recorded Hermes CLI guardrail hashes for `~/.hermes/config.yaml`, `~/.hermes/.env`, `~/.hermes/.install_method`, and `~/.local/bin/hermes`; no CLI config edits were made.
+- Classified the installed app as bootstrap/setup, possibly incomplete or damaged, blocked by signature/Gatekeeper assessment rather than quarantine, and unclear enough to require official artifact comparison or reacquisition planning.
+- Recommended Phase DESKTOP-8 as official Hermes Desktop artifact reacquisition planning only before any download, reinstall, launch retry, recopy, quarantine removal, sign-in, permission grant, integration connection, or Hermes CLI config change.
 - Completed Phase DESKTOP-6 Hermes Desktop DMG versus installed-app comparison within Codex sandbox limits.
 - Found two candidate official DMGs under `/private/tmp`; both were 6.4M, had SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`, and passed `hdiutil verify`.
 - Confirmed no Hermes Desktop DMG was already mounted.

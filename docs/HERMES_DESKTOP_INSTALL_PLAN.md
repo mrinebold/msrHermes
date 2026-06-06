@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-6 attempted the offline DMG-to-installed-app comparison. Hermes Desktop remains fail-closed: the Codex sandbox could not mount the APFS DMG, so the mounted bundle could not be compared directly to `/Applications/Hermes.app`.
+Phase DESKTOP-7A clarified the installed bundle state with local Mac mini diagnostics only. Hermes Desktop remains fail-closed: `/Applications/Hermes.app` still appears to be a bootstrap/setup bundle with invalid strict code signature, Gatekeeper assessment does not return an acceptance result, and a pre-existing `Hermes-Setup` process is running.
 
 ## Scope
 
@@ -36,6 +36,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-3 installed Hermes Desktop at `/Applications/Hermes.app` without launching it.
 - Phase DESKTOP-5 diagnosed `/Applications/Hermes.app` as a bootstrap installer bundle with unresolved signature/openability issues.
 - Phase DESKTOP-6 confirmed the official DMG copies are valid and identical, but mounted-bundle comparison requires an unsandboxed Terminal or Finder because `hdiutil attach` fails inside Codex.
+- Phase DESKTOP-7A reconfirmed the installed bundle state and found a pre-existing `Hermes-Setup` process; no launch/configuration changes were made.
 
 ## Install Timing
 
@@ -391,6 +392,101 @@ Phase DESKTOP-6 did not prove whether `/Applications/Hermes.app` is identical to
 Recommended next action:
 
 Run Phase DESKTOP-7 from an unsandboxed Terminal or Finder: mount the official DMG, inspect the mounted `.app` before copying, compare file hashes and `codesign --verify --strict` results against `/Applications/Hermes.app`, then unmount. Do not launch, recopy, remove quarantine, or complete any bootstrap install unless a later phase explicitly approves those actions.
+
+## Phase DESKTOP-7A Installed Bundle State Clarification
+
+Status: complete on 2026-06-06.
+
+Scope:
+
+- No Desktop launch was attempted.
+- No DMG redownload, app reinstall, recopy, quarantine removal, signing change, credential setup, permission grant, or integration connection was performed.
+- Hermes CLI config and the localhost model adapter path were not modified.
+- The observed running process was not killed because this phase did not approve Desktop state changes.
+
+Installed bundle findings:
+
+| Check | Result |
+| --- | --- |
+| App path | `/Applications/Hermes.app` |
+| Bundle directory | Present, `drwxr-xr-x@`, owner `michaelrinebold`, group `staff` |
+| Bundle identifier | `com.nousresearch.hermes.setup` |
+| Bundle name/display name | `Hermes` |
+| Bundle short version | `0.0.1` |
+| Bundle version | `0.0.1` |
+| Executable | `Contents/MacOS/Hermes-Setup` |
+| Executable type | Mach-O thin arm64 |
+| Major directories | `Contents`, `Contents/MacOS`, `Contents/Resources`, `Contents/_CodeSignature` |
+| Files | `CodeResources`, `Info.plist`, `Hermes-Setup`, `icon.icns`, `_CodeSignature/CodeResources` |
+| App type assessment | Bootstrap/setup app bundle, not validated final Desktop runtime |
+
+Info.plist fields:
+
+| Field | Value |
+| --- | --- |
+| `CFBundleIdentifier` | `com.nousresearch.hermes.setup` |
+| `CFBundleName` | `Hermes` |
+| `CFBundleShortVersionString` | `0.0.1` |
+| `CFBundleVersion` | `0.0.1` |
+| `CFBundleExecutable` | `Hermes-Setup` |
+
+Signature, Gatekeeper, and quarantine findings:
+
+- `codesign -dv --verbose=4 /Applications/Hermes.app` reported Team ID `T2F6S8MF7C`, hardened runtime, and a stapled notarization ticket.
+- `codesign --verify --deep --strict --verbose=4 /Applications/Hermes.app` failed with `invalid signature (code or signature have been modified)` for arm64.
+- `spctl -a -vvv --type execute /Applications/Hermes.app` failed with `internal error in Code Signing subsystem`.
+- Recursive xattrs showed `com.apple.provenance` across the bundle and `com.apple.macl` on `/Applications/Hermes.app`.
+- No `com.apple.quarantine` xattr was observed in the recursive xattr listing.
+
+Installed file hashes:
+
+```text
+a7bd62cf64666394b1f9d24459c9214c79c36beff25d23119eef05d27bf7d9ca  /Applications/Hermes.app/Contents/MacOS/Hermes-Setup
+2d31360e01a075058a8e1713c7efd7b8175b44f5f7e243985cc920a3ec0ccab0  /Applications/Hermes.app/Contents/Info.plist
+56c39b613d61d13671e49bf7e32fb8e80f705b9c50d8bed1c18a505f0b12be89  /Applications/Hermes.app/Contents/Resources/icon.icns
+```
+
+Process, launch, and persistence findings:
+
+- `pgrep -fl Hermes` found a pre-existing Desktop process:
+  - PID `18152`
+  - command `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup`
+  - parent PID `1`
+  - started `Sat Jun 6 13:49:34 2026`
+- No matching Hermes launch agent or daemon files were found in:
+  - `/Users/michaelrinebold/Library/LaunchAgents`
+  - `/Library/LaunchAgents`
+  - `/Library/LaunchDaemons`
+- Login/background item inspection was not fully checkable without authorization:
+  - `osascript` against System Events returned error `-10827`.
+  - `sfltool dumpbtm` requested admin authorization and failed without it.
+
+Hermes CLI config guardrail:
+
+No Hermes CLI commands were run and no Hermes CLI config files were edited. Reference hashes recorded during this phase:
+
+| Path | SHA-256 |
+| --- | --- |
+| `/Users/michaelrinebold/.hermes/config.yaml` | `6d1df617b9de6fa0f66c0accc125622d5f2dcd15b98ea0373b453f51c4c9da00` |
+| `/Users/michaelrinebold/.hermes/.env` | `be9e3b0d38b6203033ac78a120f85601720e9c3f65225b6528974e2c33cc0ef1` |
+| `/Users/michaelrinebold/.hermes/.install_method` | `d21cc3b88a7ca1bbfadb85771a66eab1a8015a493ca21b4653e05cd4f9934f4a` |
+| `/Users/michaelrinebold/.local/bin/hermes` | `273cbb766b7a79a5840b33498bb03288e66c9cc9353163e791ef9f43c2ebab02` |
+
+Conclusion:
+
+`/Applications/Hermes.app` appears to be a bootstrap/setup app bundle rather than a validated final Desktop runtime. It is not healthy enough for a controlled launch retry because strict code-signature verification fails, Gatekeeper assessment does not produce an acceptance result, and a `Hermes-Setup` process is already resident.
+
+Current classification:
+
+- Normal app bundle: no.
+- Bootstrap installer bundle: yes, based on `com.nousresearch.hermes.setup` and executable `Hermes-Setup`.
+- Incomplete/damaged: possible, because strict code-signature verification reports modified code/signature.
+- Blocked by signature/notarization/quarantine: blocked by signature/Gatekeeper assessment; not blocked by observed quarantine xattr.
+- Unclear requiring official artifact comparison or reacquisition plan: yes.
+
+Recommended next action:
+
+Proceed with Phase DESKTOP-8: official Hermes Desktop artifact reacquisition plan only. Do not download, install, launch Desktop, remove quarantine, recopy, sign in, grant permissions, connect integrations, or modify Hermes CLI config until a later phase explicitly approves those actions.
 
 ## Safety Requirements
 
