@@ -2,6 +2,18 @@
 
 ## 2026-06-06
 
+- Completed Phase DESKTOP-8 official Hermes Desktop artifact reacquisition plan only.
+- Documented that the original installer artifact is missing from normal user locations checked earlier and that existing `/Applications/Hermes.app` is not trusted as a final Desktop runtime.
+- Rechecked the official Nous Research Desktop page and observed macOS 12+, Hermes Agent v0.16.0, and a macOS download link under `hermes-assets.nousresearch.com`; no artifact was downloaded.
+- Planned the safe future download location as `~/Downloads/hermes-desktop-official/`.
+- Defined expected artifact types for future reacquisition: `.dmg`, `.zip`, `.pkg`, and `.app` bundle.
+- Defined pre-install verification steps: file type, file size, checksum capture and published checksum comparison if available, quarantine xattrs, image/package/archive metadata, bundle Info.plist metadata, codesign verification, and spctl assessment.
+- Defined comparison steps against `/Applications/Hermes.app`: bundle identifiers, names, versions, executable names, architectures, bundle sizes, major directories, file inventories, signature metadata, spctl results, and xattr differences.
+- Defined rollback-before-replacement requirements: quit any Hermes Desktop or `Hermes-Setup` process only with separate user approval, copy existing `/Applications/Hermes.app` to a timestamped backup, and retain the backup until a replacement is verified.
+- Defined replacement plan as future-only: remove or replace `/Applications/Hermes.app` only after separate explicit approval, copy the verified official app bundle to `/Applications`, and rerun signature/spctl/xattr/metadata checks after copy.
+- Defined first-launch guardrails after any future replacement: no Nous Portal sign-in, no credentials, no broad permissions, no background/resident operation, no Google/Supabase/Home Assistant/GitHub/Helio/Agent Bus/cloud provider connection, no Hermes CLI config modification, and no localhost adapter start unless separately approved.
+- Confirmed DESKTOP-8 did not download, install, launch, remove quarantine, replace/delete `/Applications/Hermes.app`, kill `Hermes-Setup`, sign in, grant permissions, modify Hermes CLI config, or connect external services.
+- Recommended the next Desktop phase as download/verification-only for the official artifact, or a narrower unsandboxed manual comparison phase if the existing DMG can be mounted outside Codex.
 - Completed Phase DESKTOP-7A installed Hermes Desktop bundle-state clarification using local Mac mini diagnostics only.
 - Confirmed `/Applications/Hermes.app` remains a minimal `com.nousresearch.hermes.setup` bundle with executable `Hermes-Setup`, version `0.0.1`, and only `Info.plist`, executable, icon, and code-signing resources.
 - Reconfirmed signing display metadata: Team ID `T2F6S8MF7C`, hardened runtime, and stapled notarization ticket.

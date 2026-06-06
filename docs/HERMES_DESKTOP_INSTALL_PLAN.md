@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-7A clarified the installed bundle state with local Mac mini diagnostics only. Hermes Desktop remains fail-closed: `/Applications/Hermes.app` still appears to be a bootstrap/setup bundle with invalid strict code signature, Gatekeeper assessment does not return an acceptance result, and a pre-existing `Hermes-Setup` process is running.
+Phase DESKTOP-8 planned official artifact reacquisition only. Hermes Desktop remains fail-closed: `/Applications/Hermes.app` is not trusted as a final Desktop runtime, and no new download, install, launch, replacement, quarantine change, permission grant, credential setup, or external connection has been approved.
 
 ## Scope
 
@@ -27,6 +27,13 @@ Observed on 2026-06-05:
 - The page links Nous Portal, so portal login behavior must be treated as a validation item, not assumed safe.
 - The rendered official page does not publish a checksum, detached signature, notarization ticket, installer identifier, or admin privilege requirement.
 
+Observed on 2026-06-06 during DESKTOP-8 planning:
+
+- The official page still lists macOS 12+ for Mac OS.
+- The page now shows Hermes Agent v0.16.0.
+- The macOS download link is under `hermes-assets.nousresearch.com`; one observed target shape was `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=c37c6eaf296a`.
+- No artifact was downloaded in DESKTOP-8.
+
 Current Mac mini CLI state:
 
 - Hermes Agent v0.15.2 / 2026.5.29.2
@@ -37,6 +44,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-5 diagnosed `/Applications/Hermes.app` as a bootstrap installer bundle with unresolved signature/openability issues.
 - Phase DESKTOP-6 confirmed the official DMG copies are valid and identical, but mounted-bundle comparison requires an unsandboxed Terminal or Finder because `hdiutil attach` fails inside Codex.
 - Phase DESKTOP-7A reconfirmed the installed bundle state and found a pre-existing `Hermes-Setup` process; no launch/configuration changes were made.
+- Phase DESKTOP-8 planned official artifact reacquisition and later comparison/replacement safeguards only; no download or replacement was performed.
 
 ## Install Timing
 
@@ -487,6 +495,226 @@ Current classification:
 Recommended next action:
 
 Proceed with Phase DESKTOP-8: official Hermes Desktop artifact reacquisition plan only. Do not download, install, launch Desktop, remove quarantine, recopy, sign in, grant permissions, connect integrations, or modify Hermes CLI config until a later phase explicitly approves those actions.
+
+## Phase DESKTOP-8 Official Artifact Reacquisition Plan
+
+Status: complete as planning only on 2026-06-06.
+
+Scope:
+
+- No Hermes Desktop artifact was downloaded.
+- `/Applications/Hermes.app` was not replaced, deleted, recopied, relaunched, or modified.
+- No quarantine attributes were removed.
+- The pre-existing `Hermes-Setup` process was not killed.
+- Hermes CLI config and the localhost model adapter path were not modified.
+- No credentials, permissions, sign-in, background/resident operation, or external service connections were added.
+
+### Current Trust State
+
+- The original installer artifact is missing from the normal user download locations checked earlier: Downloads, Desktop, and Documents.
+- Existing `/Applications/Hermes.app` is not trusted as the final Desktop runtime.
+- Current app classification from DESKTOP-7A:
+  - bootstrap/setup bundle: yes
+  - normal final runtime bundle: not validated
+  - strict code signing: fails
+  - Gatekeeper/spctl acceptance: not recorded as passing
+  - quarantine marker: not observed
+  - existing resident process: `Hermes-Setup` PID `18152`
+
+### Safest Official Reacquisition Workflow
+
+Future reacquisition must be manual and source-controlled by the user:
+
+1. Open the official Nous Research Desktop page manually in a browser:
+   - `https://hermes-agent.nousresearch.com/desktop`
+2. Use only the macOS download link exposed by that official page.
+3. Save the artifact to:
+   - `~/Downloads/hermes-desktop-official/`
+4. Do not open, launch, mount for install, or run the artifact immediately after download.
+5. Record the exact final browser-downloaded filename and URL, including any query string such as a `build=` parameter.
+6. Keep the downloaded artifact untouched until verification is complete.
+
+Expected possible artifact types:
+
+| Artifact type | Expected handling |
+| --- | --- |
+| `.dmg` | Verify image metadata, checksum, quarantine, mounted bundle metadata, signature, and spctl before any copy. |
+| `.zip` | Verify archive metadata, checksum, quarantine, extracted bundle metadata, signature, and spctl before any copy. |
+| `.pkg` | Verify package metadata, installer signature, checksum, quarantine, and spctl before any install. |
+| `.app` bundle | Verify bundle metadata, executable, signature, spctl, quarantine, and directory structure before any copy or launch. |
+
+### Verification Before Any Install Or Replacement
+
+Run only after a later phase explicitly approves download/inspection. Do not launch during verification.
+
+Suggested artifact capture:
+
+```sh
+mkdir -p "$HOME/Downloads/hermes-desktop-official"
+ls -lah "$HOME/Downloads/hermes-desktop-official"
+find "$HOME/Downloads/hermes-desktop-official" -maxdepth 1 -print
+```
+
+Verify file type and size:
+
+```sh
+ARTIFACT="$HOME/Downloads/hermes-desktop-official/<downloaded artifact>"
+file "$ARTIFACT"
+stat -f '%N %z bytes mtime=%Sm' "$ARTIFACT"
+```
+
+Record checksum:
+
+```sh
+shasum -a 256 "$ARTIFACT"
+```
+
+If the official page publishes a checksum later, compare against that published value before any mount, extraction, install, or copy. If no checksum is published, record the local checksum and treat it as a provenance note, not as authenticity proof.
+
+Inspect quarantine and other xattrs:
+
+```sh
+xattr -l "$ARTIFACT" || true
+```
+
+For a DMG:
+
+```sh
+hdiutil imageinfo "$ARTIFACT"
+hdiutil verify "$ARTIFACT"
+spctl --assess --type open --verbose=4 "$ARTIFACT"
+MOUNT_DIR="$(mktemp -d /tmp/hermes-desktop-official.XXXXXX)"
+hdiutil attach -readonly -nobrowse -mountpoint "$MOUNT_DIR" "$ARTIFACT"
+find "$MOUNT_DIR" -maxdepth 3 -print
+find "$MOUNT_DIR" -maxdepth 2 -name "*.app" -print
+```
+
+For a ZIP:
+
+```sh
+ditto -x -k "$ARTIFACT" "$HOME/Downloads/hermes-desktop-official/extracted"
+find "$HOME/Downloads/hermes-desktop-official/extracted" -maxdepth 3 -print
+find "$HOME/Downloads/hermes-desktop-official/extracted" -maxdepth 2 -name "*.app" -print
+```
+
+For a PKG:
+
+```sh
+pkgutil --check-signature "$ARTIFACT"
+pkgutil --payload-files "$ARTIFACT" | head -100
+spctl --assess --type install --verbose=4 "$ARTIFACT"
+```
+
+For an app bundle found in a mounted/extracted artifact:
+
+```sh
+DOWNLOADED_APP="<path to downloaded, mounted, or extracted .app>"
+plutil -p "$DOWNLOADED_APP/Contents/Info.plist"
+du -sh "$DOWNLOADED_APP"
+find "$DOWNLOADED_APP" -maxdepth 3 -print
+codesign -dv --verbose=4 "$DOWNLOADED_APP"
+codesign --verify --deep --strict --verbose=4 "$DOWNLOADED_APP"
+spctl --assess --type execute --verbose=4 "$DOWNLOADED_APP"
+xattr -lr "$DOWNLOADED_APP" || true
+```
+
+### Comparison Against Existing `/Applications/Hermes.app`
+
+Compare before any replacement:
+
+```sh
+INSTALLED_APP="/Applications/Hermes.app"
+DOWNLOADED_APP="<path to downloaded, mounted, or extracted .app>"
+
+plutil -extract CFBundleIdentifier raw "$DOWNLOADED_APP/Contents/Info.plist"
+plutil -extract CFBundleIdentifier raw "$INSTALLED_APP/Contents/Info.plist"
+plutil -extract CFBundleShortVersionString raw "$DOWNLOADED_APP/Contents/Info.plist"
+plutil -extract CFBundleShortVersionString raw "$INSTALLED_APP/Contents/Info.plist"
+plutil -extract CFBundleVersion raw "$DOWNLOADED_APP/Contents/Info.plist"
+plutil -extract CFBundleVersion raw "$INSTALLED_APP/Contents/Info.plist"
+plutil -extract CFBundleExecutable raw "$DOWNLOADED_APP/Contents/Info.plist"
+plutil -extract CFBundleExecutable raw "$INSTALLED_APP/Contents/Info.plist"
+
+du -sh "$DOWNLOADED_APP" "$INSTALLED_APP"
+find "$DOWNLOADED_APP" -maxdepth 2 -type d -print
+find "$INSTALLED_APP" -maxdepth 2 -type d -print
+find "$DOWNLOADED_APP" -maxdepth 3 -type f -print | sort
+find "$INSTALLED_APP" -maxdepth 3 -type f -print | sort
+```
+
+Required comparison points:
+
+- bundle identifier
+- bundle name/display name
+- short version and build version
+- executable name
+- executable architecture and file type
+- bundle size
+- major directories
+- file inventory shape
+- signature display metadata
+- strict signature verification result
+- spctl assessment result
+- quarantine/xattr differences
+
+The downloaded/mounted app must not be considered safer merely because it is newer. It must pass signature and Gatekeeper checks before any replacement is proposed.
+
+### Rollback Plan Before Any Future Replacement
+
+Run only after a later phase explicitly approves replacement preparation.
+
+1. If any `Hermes-Setup` or Hermes Desktop process is running, ask the user for explicit approval to quit it.
+2. Quit gently first if approved; use force only after separate approval if the process does not exit.
+3. Copy the existing installed app to a timestamped backup before replacement:
+
+```sh
+BACKUP_DIR="$HOME/Downloads/hermes-desktop-official/backups/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+ditto "/Applications/Hermes.app" "$BACKUP_DIR/Hermes.app"
+du -sh "$BACKUP_DIR/Hermes.app"
+codesign --verify --deep --strict --verbose=4 "$BACKUP_DIR/Hermes.app" || true
+```
+
+4. Do not delete the backup until the replacement app is verified, launched under a later approved first-launch phase, and confirmed not to break Hermes CLI state.
+5. Preserve `~/.local/bin/hermes`, `~/.hermes/hermes-agent`, `~/.hermes/config.yaml`, and the localhost model adapter path unless a separate phase explicitly approves CLI state changes.
+
+### Future Replacement Plan
+
+This phase does not approve replacement. Replacement may be proposed only after a later phase approves it and after the official artifact is verified.
+
+Future replacement sequence:
+
+1. Confirm user approval to replace `/Applications/Hermes.app`.
+2. Confirm no unapproved Hermes Desktop process is running.
+3. Confirm timestamped backup exists.
+4. Remove or replace `/Applications/Hermes.app` only after explicit approval.
+5. Copy the verified official app bundle to `/Applications`.
+6. Re-run:
+   - `plutil` Info.plist metadata checks
+   - `du -sh`
+   - `codesign -dv --verbose=4`
+   - `codesign --verify --deep --strict --verbose=4`
+   - `spctl --assess --type execute --verbose=4`
+   - `xattr -lr`
+7. Stop if strict signature verification or spctl assessment fails.
+
+### First-Launch Guardrails After Future Replacement
+
+First launch remains a separate phase. Even after a verified replacement:
+
+- Do not sign into Nous Portal unless explicitly approved.
+- Do not add OpenAI, Anthropic, OpenRouter, Google, Supabase, GitHub, Home Assistant, Helio, or cloud provider credentials.
+- Do not grant broad filesystem permissions.
+- Do not grant Accessibility, Screen Recording, Automation, or Full Disk Access without explicit approval.
+- Do not enable background/resident operation.
+- Do not connect Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, or cloud providers.
+- Do not modify Hermes CLI config.
+- Do not start the localhost model adapter unless separately approved.
+- Quit Desktop after observation unless a later phase explicitly approves resident operation.
+
+Recommended next action:
+
+Phase DESKTOP-9 should be a download/verification-only phase for the official artifact, or a narrower unsandboxed manual comparison phase if the already-downloaded DMG can be mounted by the user outside Codex. It must still stop before install, replacement, launch, sign-in, permission grants, credentials, integrations, and Hermes CLI config changes.
 
 ## Safety Requirements
 
