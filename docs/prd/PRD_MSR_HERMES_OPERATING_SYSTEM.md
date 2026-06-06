@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase DESKTOP-5 bootstrap/openability diagnostic complete. Hermes Desktop remains fail-closed because `/Applications/Hermes.app` appears to be a bootstrap installer bundle with unresolved signature/openability issues.
+Phase DESKTOP-6 DMG comparison attempted. Hermes Desktop remains fail-closed because Codex could not mount the official APFS DMG, so the mounted bundle still must be compared from an unsandboxed Terminal or Finder.
 
-Repository status is maintained by git; this PRD records Phase DESKTOP-5 as diagnostic-only and complete.
+Repository status is maintained by git; this PRD records Phase DESKTOP-6 as diagnostic-only and complete within sandbox limits.
 
 ## Architecture Decision
 
@@ -54,6 +54,7 @@ Hermes may request work from Helio/ANO, but it does not own or command the ANO. 
 | Phase DESKTOP-3 | Complete | Installed Hermes Desktop on the Mac mini at `/Applications/Hermes.app`; Desktop was not launched or configured. |
 | Phase DESKTOP-4 | Complete | Attempted one guarded first launch; bootstrap job/log appeared, no usable UI was observed, and the process was killed with no integrations or permissions granted. |
 | Phase DESKTOP-5 | Complete | Diagnosed the installed app as a bootstrap installer bundle with invalid signature/openability state; no launch or config changes were made. |
+| Phase DESKTOP-6 | Complete | Verified DMG copies and installed app metadata; mounted-bundle comparison was blocked by sandboxed `hdiutil attach`. |
 | Phase 6A | Complete | Discovered the Supabase Agent Bus source family and designed the Hermes-through-Helio bus plan. |
 | Phase 6B | Complete | Elevated `packages/ano-messaging` as the primary canonical message bus source candidate and defined the Hermes-facing Agent Bus contract. |
 | Phase 6C | Complete | Designed the Helio-facing adapter scaffold proposal with read-only-first mode, fail-closed rules, and mocked test strategy. |
@@ -113,6 +114,7 @@ Completed and committed locally:
 - Phase DESKTOP-3 controlled install: downloaded the official macOS DMG, verified SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`, confirmed `hdiutil verify` passed, and installed the app at `/Applications/Hermes.app` from Terminal because the Codex sandbox could not mount the DMG. Installed bundle metadata: name `Hermes`, identifier `com.nousresearch.hermes.setup`, version `0.0.1`, arm64 executable `Hermes-Setup`, Team ID `T2F6S8MF7C`, hardened runtime present, stapled notarization ticket present. Desktop was not launched or configured. No Hermes/Nous user LaunchAgent, Application Support, Preferences, or launchctl entry was found, and no `~/.hermes` files were modified during verification. Process-list and login-item checks were partly blocked by macOS sandbox permissions.
 - Phase DESKTOP-4 first-launch validation: one guarded `open -a /Applications/Hermes.app` attempt was made. No observable first-run UI or screen capture was available from the Codex sandbox. A transient LaunchServices job ran `/Applications/Hermes.app/Contents/MacOS/Hermes-Setup` and wrote `~/.hermes/logs/bootstrap-installer.log` with `Hermes installer starting mode=Install force_setup=false`. A later open attempt returned `kLSNoExecutableErr`, while `codesign --verify --deep --strict` reported an invalid arm64 signature. The process could not be stopped from inside the sandbox, so the user killed it from Terminal. Afterward no Hermes app running state, launchctl entry, LaunchAgent, background-task match, Application Support artifact, or Preferences artifact remained. No Nous Portal sign-in, browser login, credentials, permission grants, external integrations, adapter start, background/resident operation, or CLI config changes occurred.
 - Phase DESKTOP-5 bootstrap/openability diagnostic: no launch was attempted. `/Applications/Hermes.app` was confirmed as a minimal `com.nousresearch.hermes.setup` bundle with executable `Hermes-Setup`, version `0.0.1`, 12M size, and only `Info.plist`, executable, icon, and code-signing resources. `codesign --display` showed Team ID `T2F6S8MF7C`, hardened runtime, and stapled notarization ticket, but `codesign --verify --strict` failed for both the app and executable with `invalid signature`. `spctl` returned internal Code Signing subsystem errors. Extended attributes showed provenance/MACL but no quarantine. The bootstrap log remained the only Desktop-created artifact. No process, launchctl entry, LaunchAgent, background task, Application Support file, Preferences file, or new `~/.hermes` modification was found.
+- Phase DESKTOP-6 DMG comparison: found two candidate official DMGs under `/private/tmp`, both 6.4M with SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`, and both passed `hdiutil verify`. No Hermes DMG was already mounted. `hdiutil attach -readonly` failed inside Codex with `Device not configured`, including after additional file permissions were granted, and archive extraction was not possible. The mounted bundle could not be compared. Installed app metadata and hashes were recorded; `/Applications/Hermes.app` still has no quarantine marker, still fails signature verification, and no process, LaunchAgent, background-task, Application Support, or Preferences artifact was present.
 
 Not completed or not approved:
 
@@ -155,7 +157,7 @@ Phase 6B reference:
 
 ## Next Recommended Work
 
-Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain fail-closed until a later phase resolves the Desktop bootstrap/signature/openability issue and explicitly approves another launch/configuration attempt. Recommended Desktop follow-up is Phase DESKTOP-6: offline install-source and bundle-integrity investigation from an unsandboxed Terminal or Finder. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
+Phase 5AB should run one bounded `sample_prd.md` retry with the validated tuned local-summary settings. Hermes Desktop must remain fail-closed until a later phase resolves the Desktop bootstrap/signature/openability issue and explicitly approves another launch/configuration attempt. Recommended Desktop follow-up is Phase DESKTOP-7: unsandboxed Terminal/Finder DMG mount and bundle-integrity comparison before any launch or recopy. Do not start background services, expose the adapter externally, use cloud providers, or send sensitive prompts without a new explicit phase approval. Also confirm or explicitly defer exposed credential rotation before any additional live Agent Bus reads or writes.
 
 Security reference:
 
@@ -220,6 +222,8 @@ Phase DESKTOP-3 installed Hermes Desktop from the official DMG at `/Applications
 Phase DESKTOP-4 attempted one guarded first launch and failed closed before usable UI validation. The app behaved like a bootstrap installer bundle, wrote only a bootstrap log under `~/.hermes/logs`, and exposed a signature/openability issue that should be resolved before another Desktop launch attempt.
 
 Phase DESKTOP-5 confirmed the Desktop blocker is not quarantine and not a persistent background-service issue. The installed bundle appears to be a minimal bootstrap installer app with an invalid current signature/openability state. The next Desktop phase should compare the mounted DMG bundle to the installed bundle and verify signature before/after copy without launching.
+
+Phase DESKTOP-6 confirmed the downloaded DMGs are valid and identical, but Codex cannot mount the APFS DMG for mounted-bundle comparison. The next Desktop phase should run the same comparison from an unsandboxed Terminal or Finder.
 
 Phase 6I remains the next architecture investigation after rotation: determine whether empty Agent Bus metadata results mean the `msr` Agent Bus config has not been seeded, the anon key is constrained to empty scoped visibility, or Helio should expose an explicit read-only gateway/view.
 

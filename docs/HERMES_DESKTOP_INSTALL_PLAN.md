@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-5 completed a bootstrap/openability diagnostic. Hermes Desktop remains fail-closed: the installed `/Applications/Hermes.app` bundle appears to be a minimal bootstrap installer app, not the final Desktop runtime, and it currently fails code-signing/openability checks.
+Phase DESKTOP-6 attempted the offline DMG-to-installed-app comparison. Hermes Desktop remains fail-closed: the Codex sandbox could not mount the APFS DMG, so the mounted bundle could not be compared directly to `/Applications/Hermes.app`.
 
 ## Scope
 
@@ -35,6 +35,7 @@ Current Mac mini CLI state:
 - Phase 5AA confirmed usable `sample_note.md` summary output through the localhost MSR Model Router adapter.
 - Phase DESKTOP-3 installed Hermes Desktop at `/Applications/Hermes.app` without launching it.
 - Phase DESKTOP-5 diagnosed `/Applications/Hermes.app` as a bootstrap installer bundle with unresolved signature/openability issues.
+- Phase DESKTOP-6 confirmed the official DMG copies are valid and identical, but mounted-bundle comparison requires an unsandboxed Terminal or Finder because `hdiutil attach` fails inside Codex.
 
 ## Install Timing
 
@@ -316,6 +317,80 @@ The installed `/Applications/Hermes.app` is best classified as a bootstrap insta
 Recommended next action:
 
 Start Phase DESKTOP-6 as an offline install-source and bundle-integrity investigation only. Re-mount the official DMG from an unsandboxed Terminal or Finder, compare the mounted app bundle to `/Applications/Hermes.app`, verify signature before and after copy, and determine whether the app must be run from the mounted DMG to complete a secondary install. Do not launch the app or remove quarantine/signature controls until that phase explicitly approves the exact next step.
+
+## Phase DESKTOP-6 DMG vs Installed App Comparison
+
+Status: complete as far as the Codex sandbox allowed on 2026-06-06.
+
+Scope:
+
+- No Desktop launch was attempted.
+- No quarantine attributes were removed.
+- No app reinstall, recopy, or mutation was performed.
+- No credentials, permissions, integrations, background services, or launch/login items were added.
+- Hermes CLI config and the localhost model adapter path were not modified.
+
+DMG source findings:
+
+| Check | Result |
+| --- | --- |
+| Candidate DMGs found | `/private/tmp/hermes-desktop-install.6u5AY2/Hermes-Setup.dmg`, `/private/tmp/hermes-desktop-install.p4dE54/Hermes-Setup.dmg` |
+| DMG file size | 6.4M each |
+| DMG SHA-256 | `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4` for both |
+| DMG verification | `hdiutil verify` reported checksum valid for both |
+| DMG file type | `file` reported `zlib compressed data`; `hdiutil verify` identified it as a valid disk image |
+| DMG quarantine | No `com.apple.quarantine` observed |
+| DMG xattrs | one copy had `com.apple.provenance`; one had `com.apple.diskimages.recentcksum` |
+
+Mount result:
+
+- No Hermes Desktop DMG was already mounted.
+- `hdiutil attach -readonly -nobrowse -mountpoint ... /private/tmp/hermes-desktop-install.6u5AY2/Hermes-Setup.dmg` failed inside Codex with `Device not configured`.
+- A retry after additional file permissions were granted still failed with `Device not configured`, confirming the blocker is the Codex app sandbox rather than ordinary file read access.
+- Converting the DMG to CDR succeeded, but `bsdtar` could not list either the DMG or CDR because they are not archive formats.
+- Therefore the mounted app bundle inside the DMG could not be inspected from this sandbox.
+- No DMG was mounted by this phase, so there was nothing to unmount.
+
+Installed app comparison facts:
+
+| Check | `/Applications/Hermes.app` |
+| --- | --- |
+| Bundle identifier | `com.nousresearch.hermes.setup` |
+| Bundle name/display name | `Hermes` |
+| Bundle version | `0.0.1` |
+| Executable | `Contents/MacOS/Hermes-Setup` |
+| Executable type | Mach-O 64-bit executable arm64 |
+| Major directories | `Contents`, `Contents/MacOS`, `Contents/Resources`, `Contents/_CodeSignature` |
+| Files | `CodeResources`, `Info.plist`, `Hermes-Setup`, `icon.icns`, `_CodeSignature/CodeResources` |
+| App signature display | Team ID `T2F6S8MF7C`, hardened runtime, stapled notarization ticket |
+| App signature verification | failed with `invalid signature (code or signature have been modified)` |
+| Executable signature verification | failed with `invalid signature (code or signature have been modified)` |
+| `spctl` assessment | internal Code Signing subsystem error |
+| Installed app xattrs | `com.apple.provenance`, `com.apple.macl`; no `com.apple.quarantine` |
+
+Installed file hashes:
+
+```text
+a7bd62cf64666394b1f9d24459c9214c79c36beff25d23119eef05d27bf7d9ca  /Applications/Hermes.app/Contents/MacOS/Hermes-Setup
+2d31360e01a075058a8e1713c7efd7b8175b44f5f7e243985cc920a3ec0ccab0  /Applications/Hermes.app/Contents/Info.plist
+56c39b613d61d13671e49bf7e32fb8e80f705b9c50d8bed1c18a505f0b12be89  /Applications/Hermes.app/Contents/Resources/icon.icns
+```
+
+Process, launch, and persistence findings:
+
+- AppleScript reported `application "Hermes" is running` as `false`.
+- No Hermes/Nous entry was present in `launchctl print gui/$(id -u)`.
+- No Hermes/Nous user LaunchAgent was found in `~/Library/LaunchAgents`.
+- No Hermes/Nous background-task match was visible through `sfltool dumpbtm`.
+- No Hermes/Nous user Application Support or Preferences files were found.
+
+Conclusion:
+
+Phase DESKTOP-6 did not prove whether `/Applications/Hermes.app` is identical to the mounted DMG bundle because the sandbox could not mount the APFS DMG. It did prove the downloaded DMG copies are valid and identical, and it reconfirmed the installed app remains a minimal bootstrap installer bundle with invalid signature/openability state and no quarantine marker.
+
+Recommended next action:
+
+Run Phase DESKTOP-7 from an unsandboxed Terminal or Finder: mount the official DMG, inspect the mounted `.app` before copying, compare file hashes and `codesign --verify --strict` results against `/Applications/Hermes.app`, then unmount. Do not launch, recopy, remove quarantine, or complete any bootstrap install unless a later phase explicitly approves those actions.
 
 ## Safety Requirements
 

@@ -1,5 +1,19 @@
 # PRD Changelog
 
+## 2026-06-06
+
+- Completed Phase DESKTOP-6 Hermes Desktop DMG versus installed-app comparison within Codex sandbox limits.
+- Found two candidate official DMGs under `/private/tmp`; both were 6.4M, had SHA-256 `be2bb2fa9b405f62ea8d5f11327c6384f979e0589ecf4caea45ebcb909c662d4`, and passed `hdiutil verify`.
+- Confirmed no Hermes Desktop DMG was already mounted.
+- Attempted read-only mount with `hdiutil attach -readonly -nobrowse`; Codex sandbox returned `Device not configured`.
+- Retried after additional file permissions were granted; `hdiutil attach` still returned `Device not configured`.
+- Converted the DMG to CDR successfully, but `bsdtar` could not list either the DMG or CDR because they are not archive formats.
+- Recorded that the mounted app bundle could not be inspected or compared from the Codex sandbox.
+- Reconfirmed `/Applications/Hermes.app` metadata: `com.nousresearch.hermes.setup`, name `Hermes`, version `0.0.1`, executable `Contents/MacOS/Hermes-Setup`, minimal bundle files, and no quarantine xattr.
+- Reconfirmed installed app and executable signature verification fail with `invalid signature`, while `spctl` returns internal Code Signing subsystem errors.
+- Confirmed no Hermes app running state, launchctl entry, LaunchAgent, background-task match, Application Support artifact, or Preferences artifact was present.
+- Recommended Phase DESKTOP-7 as an unsandboxed Terminal/Finder DMG mount and bundle-integrity comparison before any launch, recopy, quarantine change, or bootstrap install.
+
 ## 2026-06-05
 
 - Completed Phase DESKTOP-5 Hermes Desktop bootstrap/openability diagnostic.
