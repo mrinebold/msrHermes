@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-8 planned official artifact reacquisition only. Hermes Desktop remains fail-closed: `/Applications/Hermes.app` is not trusted as a final Desktop runtime, and no new download, install, launch, replacement, quarantine change, permission grant, credential setup, or external connection has been approved.
+Phase DESKTOP-9 downloaded and verified the official Hermes Desktop macOS artifact only. Hermes Desktop remains fail-closed: the reacquired DMG mounted successfully, but the mounted `Hermes.app` is still a setup/bootstrap bundle and fails strict code-signature verification plus Gatekeeper assessment. No install, launch, replacement, quarantine change, permission grant, credential setup, CLI config change, or external connection was performed.
 
 ## Scope
 
@@ -45,6 +45,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-6 confirmed the official DMG copies are valid and identical, but mounted-bundle comparison requires an unsandboxed Terminal or Finder because `hdiutil attach` fails inside Codex.
 - Phase DESKTOP-7A reconfirmed the installed bundle state and found a pre-existing `Hermes-Setup` process; no launch/configuration changes were made.
 - Phase DESKTOP-8 planned official artifact reacquisition and later comparison/replacement safeguards only; no download or replacement was performed.
+- Phase DESKTOP-9 downloaded the official macOS DMG into `~/Downloads/hermes-desktop-official/`, verified and mounted it read-only, compared mounted metadata to `/Applications/Hermes.app`, then unmounted it; no install, launch, or replacement was performed.
 
 ## Install Timing
 
@@ -715,6 +716,115 @@ First launch remains a separate phase. Even after a verified replacement:
 Recommended next action:
 
 Phase DESKTOP-9 should be a download/verification-only phase for the official artifact, or a narrower unsandboxed manual comparison phase if the already-downloaded DMG can be mounted by the user outside Codex. It must still stop before install, replacement, launch, sign-in, permission grants, credentials, integrations, and Hermes CLI config changes.
+
+## Phase DESKTOP-9 Official Artifact Download And Verification
+
+Status: complete on 2026-06-07.
+
+Scope:
+
+- The official macOS artifact was downloaded to the approved controlled folder only.
+- The artifact was verified and mounted read-only for inspection.
+- The mounted app was compared against `/Applications/Hermes.app` by metadata, signature result, spctl result, size, structure, and selected file hashes.
+- The DMG was unmounted after verification.
+- No install, launch, replacement, deletion, quarantine removal, process kill, credential setup, permission grant, background service, Hermes CLI config change, localhost adapter change, or external service connection was performed.
+
+Official page observation:
+
+| Check | Result |
+| --- | --- |
+| Official source page | `https://hermes-agent.nousresearch.com/desktop` |
+| Page observation date | 2026-06-07 |
+| macOS support text | macOS 12+ |
+| Visible version text | Hermes Agent v0.16.0 |
+| Download link used | `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=44c0c2d4ac05` |
+
+Downloaded artifact:
+
+| Check | Result |
+| --- | --- |
+| Folder | `/Users/michaelrinebold/Downloads/hermes-desktop-official/` |
+| File name | `Hermes-Setup.dmg` |
+| File type | `zlib compressed data` from `file`; `UDIF read-only compressed (zlib)` / `UDZO` from `hdiutil imageinfo` |
+| File size | `6752854` bytes |
+| SHA-256 | `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5` |
+| xattrs | `com.apple.provenance`; no `com.apple.quarantine` observed |
+| `hdiutil verify` | valid checksum, CRC32 `$9DB5F445` |
+| `hdiutil imageinfo` | APFS partition inside GUID image, not encrypted, checksummed, compressed |
+| `spctl --assess --type open` | internal Code Signing subsystem error |
+
+Mounted DMG:
+
+| Check | Result |
+| --- | --- |
+| Mount command | `hdiutil attach -readonly -nobrowse` |
+| Mount point | `/private/tmp/hermes-desktop-official-mount` |
+| App bundle found | `/private/tmp/hermes-desktop-official-mount/Hermes.app` |
+| Other mounted item | `/private/tmp/hermes-desktop-official-mount/Applications` |
+| Unmount result | `hdiutil detach /private/tmp/hermes-desktop-official-mount` succeeded and ejected `disk8` |
+
+Mounted app metadata:
+
+| Field | Mounted app value |
+| --- | --- |
+| `CFBundleIdentifier` | `com.nousresearch.hermes.setup` |
+| `CFBundleName` / display name | `Hermes` |
+| `CFBundleShortVersionString` | `0.0.1` |
+| `CFBundleVersion` | `0.0.1` |
+| `CFBundleExecutable` | `Hermes-Setup` |
+| Minimum system version | `11.0` |
+| Bundle size | `12M` |
+| Bundle structure | minimal: `Info.plist`, `Hermes-Setup`, `icon.icns`, code-signing resources |
+
+Mounted app signing and xattrs:
+
+| Check | Result |
+| --- | --- |
+| `codesign -dv --verbose=4` | Team ID `T2F6S8MF7C`, hardened runtime, stapled notarization ticket |
+| Mounted app CDHash | `834657a498023c95ef9c48ced4ab525e1271216d` |
+| `codesign --verify --deep --strict` | failed: `invalid signature (code or signature have been modified)` for arm64 |
+| `spctl --assess --type execute` | internal Code Signing subsystem error |
+| xattrs | `com.apple.provenance`; no `com.apple.quarantine` observed on mounted app |
+
+Metadata-only comparison against `/Applications/Hermes.app`:
+
+| Check | Mounted app | Installed app |
+| --- | --- | --- |
+| Bundle identifier | `com.nousresearch.hermes.setup` | `com.nousresearch.hermes.setup` |
+| App name | `Hermes` | `Hermes` |
+| Version | `0.0.1` | `0.0.1` |
+| Executable | `Hermes-Setup` | `Hermes-Setup` |
+| Bundle size | `12M` | `12M` |
+| Major structure | minimal setup bundle | minimal setup bundle |
+| Strict codesign | fails invalid signature | fails invalid signature |
+| spctl execute assessment | internal Code Signing subsystem error | internal Code Signing subsystem error |
+
+Selected file hashes:
+
+| File | Mounted app SHA-256 | Installed app SHA-256 |
+| --- | --- | --- |
+| `Contents/MacOS/Hermes-Setup` | `77bc5f19ca5bb53442524b2f400a42032e2a0effa27d34b5453654fb9e53e261` | `a7bd62cf64666394b1f9d24459c9214c79c36beff25d23119eef05d27bf7d9ca` |
+| `Contents/Info.plist` | `2d31360e01a075058a8e1713c7efd7b8175b44f5f7e243985cc920a3ec0ccab0` | `2d31360e01a075058a8e1713c7efd7b8175b44f5f7e243985cc920a3ec0ccab0` |
+| `Contents/Resources/icon.icns` | `56c39b613d61d13671e49bf7e32fb8e80f705b9c50d8bed1c18a505f0b12be89` | `56c39b613d61d13671e49bf7e32fb8e80f705b9c50d8bed1c18a505f0b12be89` |
+
+Hermes CLI guardrail:
+
+Reference hashes remained unchanged from DESKTOP-7A:
+
+| Path | SHA-256 |
+| --- | --- |
+| `/Users/michaelrinebold/.hermes/config.yaml` | `6d1df617b9de6fa0f66c0accc125622d5f2dcd15b98ea0373b453f51c4c9da00` |
+| `/Users/michaelrinebold/.hermes/.env` | `be9e3b0d38b6203033ac78a120f85601720e9c3f65225b6528974e2c33cc0ef1` |
+| `/Users/michaelrinebold/.hermes/.install_method` | `d21cc3b88a7ca1bbfadb85771a66eab1a8015a493ca21b4653e05cd4f9934f4a` |
+| `/Users/michaelrinebold/.local/bin/hermes` | `273cbb766b7a79a5840b33498bb03288e66c9cc9353163e791ef9f43c2ebab02` |
+
+Conclusion:
+
+The reacquired official macOS artifact is a valid checksummed DMG and can be mounted read-only, but the mounted app is still a `com.nousresearch.hermes.setup` bootstrap/setup bundle with executable `Hermes-Setup`, version `0.0.1`, and invalid strict code-signature verification. It is not a trusted final Desktop runtime and is not a safe replacement candidate for `/Applications/Hermes.app`.
+
+Recommended next action:
+
+Phase DESKTOP-10 should be an official artifact integrity escalation and support/release-channel clarification phase. Do not replace `/Applications/Hermes.app`, launch the mounted app, complete bootstrap installation, remove quarantine, sign in, grant permissions, kill `Hermes-Setup`, modify Hermes CLI config, or connect external services unless a later phase explicitly approves a bounded action.
 
 ## Safety Requirements
 

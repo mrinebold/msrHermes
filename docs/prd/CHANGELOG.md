@@ -1,5 +1,22 @@
 # PRD Changelog
 
+## 2026-06-07
+
+- Completed Phase DESKTOP-9 official Hermes Desktop artifact download and verification only.
+- Downloaded the current official macOS artifact from the Nous Research Desktop page link to `/Users/michaelrinebold/Downloads/hermes-desktop-official/Hermes-Setup.dmg`.
+- Recorded source URL `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=44c0c2d4ac05`, file size `6752854` bytes, and SHA-256 `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`.
+- Confirmed artifact xattrs showed `com.apple.provenance` and no observed `com.apple.quarantine`.
+- Confirmed `hdiutil verify` passed and `hdiutil imageinfo` reported a UDIF read-only compressed zlib / UDZO disk image with an APFS partition.
+- Recorded `spctl --assess --type open` on the DMG returned an internal Code Signing subsystem error.
+- Mounted the DMG read-only at `/private/tmp/hermes-desktop-official-mount`, identified `/private/tmp/hermes-desktop-official-mount/Hermes.app`, inspected metadata, then unmounted successfully.
+- Recorded mounted app metadata: `com.nousresearch.hermes.setup`, app name `Hermes`, version `0.0.1`, executable `Hermes-Setup`, bundle size `12M`, and minimal setup-bundle structure.
+- Recorded mounted app signing display metadata: Team ID `T2F6S8MF7C`, hardened runtime, stapled notarization ticket, CDHash `834657a498023c95ef9c48ced4ab525e1271216d`.
+- Recorded mounted app strict code-signature verification failed with `invalid signature (code or signature have been modified)` for arm64, and `spctl --assess --type execute` returned an internal Code Signing subsystem error.
+- Compared mounted app to installed `/Applications/Hermes.app`: bundle identifier, name, version, executable, bundle size, major structure, codesign failure, and spctl failure matched; mounted executable SHA-256 `77bc5f19ca5bb53442524b2f400a42032e2a0effa27d34b5453654fb9e53e261` differed from installed executable SHA-256 `a7bd62cf64666394b1f9d24459c9214c79c36beff25d23119eef05d27bf7d9ca`.
+- Confirmed Hermes CLI guardrail hashes remained unchanged from DESKTOP-7A.
+- Confirmed DESKTOP-9 did not install, launch, replace/delete `/Applications/Hermes.app`, remove quarantine, kill `Hermes-Setup`, sign in, add credentials, grant permissions, modify Hermes CLI config, connect external services, or enable background services.
+- Recommended Phase DESKTOP-10 as official artifact integrity escalation and support/release-channel clarification before any replacement or launch retry.
+
 ## 2026-06-06
 
 - Completed Phase DESKTOP-8 official Hermes Desktop artifact reacquisition plan only.
