@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-9 downloaded and verified the official Hermes Desktop macOS artifact only. Hermes Desktop remains fail-closed: the reacquired DMG mounted successfully, but the mounted `Hermes.app` is still a setup/bootstrap bundle and fails strict code-signature verification plus Gatekeeper assessment. No install, launch, replacement, quarantine change, permission grant, credential setup, CLI config change, or external connection was performed.
+Phase DESKTOP-10 documented artifact integrity escalation and release-channel clarification. Hermes Desktop remains fail-closed: the official DMG verifies as a disk image, but the mounted app remains a setup/bootstrap bundle with invalid strict code-signature behavior and no confirmed trusted final Desktop runtime path.
 
 ## Scope
 
@@ -46,6 +46,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-7A reconfirmed the installed bundle state and found a pre-existing `Hermes-Setup` process; no launch/configuration changes were made.
 - Phase DESKTOP-8 planned official artifact reacquisition and later comparison/replacement safeguards only; no download or replacement was performed.
 - Phase DESKTOP-9 downloaded the official macOS DMG into `~/Downloads/hermes-desktop-official/`, verified and mounted it read-only, compared mounted metadata to `/Applications/Hermes.app`, then unmounted it; no install, launch, or replacement was performed.
+- Phase DESKTOP-10 created the artifact integrity escalation record and draft support message; no message was sent and no Desktop state was changed.
 
 ## Install Timing
 
@@ -825,6 +826,36 @@ The reacquired official macOS artifact is a valid checksummed DMG and can be mou
 Recommended next action:
 
 Phase DESKTOP-10 should be an official artifact integrity escalation and support/release-channel clarification phase. Do not replace `/Applications/Hermes.app`, launch the mounted app, complete bootstrap installation, remove quarantine, sign in, grant permissions, kill `Hermes-Setup`, modify Hermes CLI config, or connect external services unless a later phase explicitly approves a bounded action.
+
+## Phase DESKTOP-10 Artifact Integrity Escalation
+
+Status: complete as documentation only on 2026-06-07.
+
+Reference:
+
+- [Hermes Desktop Artifact Integrity Escalation](HERMES_DESKTOP_ARTIFACT_ESCALATION.md)
+
+DESKTOP-10 documented:
+
+- official artifact URL
+- SHA-256
+- file size
+- mounted app identifier
+- mounted app version
+- executable name
+- `hdiutil` result
+- `codesign` result
+- `spctl` result
+- comparison to `/Applications/Hermes.app`
+- why Desktop remains fail-closed
+- release-channel questions for Nous Research or official release materials
+- draft support/escalation message for later review
+
+No escalation message was sent. No Desktop launch, replacement, reinstall, recopy, quarantine removal, process kill, sign-in, credential setup, permission grant, Hermes CLI config modification, external service connection, or background-service change was performed.
+
+Recommended next action:
+
+Wait for official clarification or explicitly approve a bounded support-contact phase. Do not launch or replace Desktop until Nous Research clarifies whether the current macOS artifact's setup bundle and strict signature failure are expected, and until a trusted final Desktop runtime path is confirmed.
 
 ## Safety Requirements
 

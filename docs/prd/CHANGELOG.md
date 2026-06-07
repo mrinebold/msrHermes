@@ -2,6 +2,18 @@
 
 ## 2026-06-07
 
+- Completed Phase DESKTOP-10 Hermes Desktop artifact integrity escalation and release-channel clarification as documentation only.
+- Created `docs/HERMES_DESKTOP_ARTIFACT_ESCALATION.md`.
+- Documented official artifact URL `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=44c0c2d4ac05`, local artifact path, file size `6752854` bytes, SHA-256 `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`, and `hdiutil verify` success.
+- Documented mounted app metadata: `com.nousresearch.hermes.setup`, version `0.0.1`, executable `Hermes-Setup`, minimal setup/bootstrap structure, Team ID `T2F6S8MF7C`, hardened runtime, and stapled notarization ticket.
+- Documented mounted app strict `codesign --verify --deep --strict` failure and `spctl` internal Code Signing subsystem error.
+- Documented comparison to `/Applications/Hermes.app`, including matching metadata/signature failure pattern and differing `Hermes-Setup` executable hash.
+- Documented why Desktop remains fail-closed pending official clarification.
+- Defined release-channel questions for Nous Research covering bootstrap intent, expected bundle identifier/version/executable, strict codesign behavior, notarized artifact availability, published checksums/signatures, stable release channel, `~/.hermes` sharing, localhost endpoint support without sign-in, and first-run bootstrap expectations.
+- Drafted a short support/escalation message for future review.
+- Confirmed the escalation message was not sent.
+- Confirmed DESKTOP-10 did not launch Desktop, replace/delete `/Applications/Hermes.app`, remove quarantine, reinstall/recopy, sign in, grant permissions, kill `Hermes-Setup`, modify Hermes CLI config, connect external services, or enable background services.
+- Recommended waiting for official clarification or explicitly approving a bounded support-contact phase before any launch or replacement retry.
 - Completed Phase DESKTOP-9 official Hermes Desktop artifact download and verification only.
 - Downloaded the current official macOS artifact from the Nous Research Desktop page link to `/Users/michaelrinebold/Downloads/hermes-desktop-official/Hermes-Setup.dmg`.
 - Recorded source URL `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=44c0c2d4ac05`, file size `6752854` bytes, and SHA-256 `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`.
