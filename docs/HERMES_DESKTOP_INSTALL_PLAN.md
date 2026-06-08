@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-11 used Hermes itself, through the local MSR Model Router adapter and DevMonster Gemma, to reason about the Desktop install blocker. Hermes produced a usable fail-closed forensic-verification strategy only after Codex switched the adapter prompt mode from file-summary-only `local_summary` to `instruction_context` and disabled CLI toolsets inside an isolated temporary `HERMES_HOME`. Hermes Desktop remains fail-closed: the official DMG verifies as a disk image, but the mounted app remains a setup/bootstrap bundle with invalid strict code-signature behavior and no confirmed trusted final Desktop runtime path.
+Phase DESKTOP-12 prepared a concise, evidence-backed support/release-channel clarification package for Nous Research without sending it. Hermes Desktop remains fail-closed: the official DMG verifies as a disk image, but the mounted app remains a setup/bootstrap bundle with invalid strict code-signature behavior and no confirmed trusted final Desktop runtime path.
 
 ## Scope
 
@@ -48,6 +48,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-9 downloaded the official macOS DMG into `~/Downloads/hermes-desktop-official/`, verified and mounted it read-only, compared mounted metadata to `/Applications/Hermes.app`, then unmounted it; no install, launch, or replacement was performed.
 - Phase DESKTOP-10 created the artifact integrity escalation record and draft support message; no message was sent and no Desktop state was changed.
 - Phase DESKTOP-11 got Hermes to produce a local-model Desktop install strategy through the localhost adapter after using an isolated no-tool Hermes config and `instruction_context`; no Desktop state was changed.
+- Phase DESKTOP-12 prepared a concise support clarification package with environment, artifact, signing, Gatekeeper, and exact release-channel questions; it was not sent.
 
 ## Install Timing
 
@@ -907,6 +908,34 @@ No Desktop launch, install, replacement, deletion, recopy, quarantine removal, p
 Recommended next action:
 
 Use the Hermes strategy as supporting evidence only. The practical next step remains a bounded official support/release-channel clarification or a separately approved local static-inspection phase. Do not launch or replace Desktop until the official artifact's bootstrap/signature state is clarified or a notarized/signature-clean artifact is available.
+
+## Phase DESKTOP-12 Support Clarification Package
+
+Status: complete as documentation only on 2026-06-08.
+
+Reference:
+
+- [Hermes Desktop Support Clarification Package](HERMES_DESKTOP_SUPPORT_CLARIFICATION.md)
+
+DESKTOP-12 prepared a support/release-channel clarification package for Nous Research. The package includes:
+
+- brief summary of the macOS Desktop artifact issue
+- local environment: macOS `26.5.1` build `25F80`, `arm64`, Hermes CLI `v0.15.2 (2026.5.29.2)`
+- official source page and download URL
+- local artifact path, file size, SHA-256, and `hdiutil verify` result
+- mounted and installed app metadata
+- code-signing and Gatekeeper results
+- exact clarification questions
+- attachable evidence list
+- draft GitHub issue text
+- draft email text
+- draft Discord/forum/support-channel text
+
+No support message was sent. No GitHub issue was opened. No email or support-channel post was made. No Desktop launch, install, replacement, deletion, recopy, quarantine removal, sign-in, credential setup, permission grant, persistent Hermes CLI config modification, external service connection, or background-service enablement was performed.
+
+Recommended next action:
+
+Send the prepared support clarification only after a separate explicit approval. Until then, keep Desktop fail-closed and do not launch or replace `/Applications/Hermes.app`.
 
 ## Safety Requirements
 

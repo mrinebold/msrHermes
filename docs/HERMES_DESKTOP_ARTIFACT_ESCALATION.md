@@ -1,7 +1,7 @@
 # Hermes Desktop Artifact Integrity Escalation
 
-Phase: DESKTOP-10, updated by DESKTOP-11
-Date: 2026-06-07; DESKTOP-11 update 2026-06-08
+Phase: DESKTOP-10, updated by DESKTOP-11 and DESKTOP-12
+Date: 2026-06-07; DESKTOP-11 and DESKTOP-12 updates 2026-06-08
 Status: planning/documentation only
 
 ## Scope
@@ -22,6 +22,12 @@ DESKTOP-10 does not approve:
 - sending the escalation message below
 
 DESKTOP-11 additionally used Hermes itself, through the isolated local model path, to reason about the Desktop blocker. Hermes also recommended keeping Desktop fail-closed unless integrity, code-signature, Gatekeeper, and static bundle checks pass.
+
+DESKTOP-12 prepared a concise support/release-channel clarification package for Nous Research. It was not sent.
+
+Reference:
+
+- [Hermes Desktop Support Clarification Package](HERMES_DESKTOP_SUPPORT_CLARIFICATION.md)
 
 ## Artifact Under Review
 
@@ -131,6 +137,23 @@ Codex safety review:
 - Hermes' mention of manual extraction to `/Applications` is a future replacement/install action requiring separate explicit approval and must not be performed in this phase.
 
 DESKTOP-11 does not change the escalation conclusion: Desktop remains fail-closed pending official release-channel clarification or a separately approved static-inspection/support-contact phase.
+
+## DESKTOP-12 Support Clarification Package
+
+On 2026-06-08, DESKTOP-12 prepared `docs/HERMES_DESKTOP_SUPPORT_CLARIFICATION.md` as a concise, evidence-backed package suitable for a GitHub issue, email, Discord/forum, or support-channel clarification request.
+
+The package includes:
+
+- brief issue summary
+- local environment: macOS `26.5.1` build `25F80`, `arm64`, Hermes CLI `v0.15.2 (2026.5.29.2)`
+- artifact URL, local path, file size, SHA-256, and `hdiutil verify` result
+- app metadata: `com.nousresearch.hermes.setup`, version `0.0.1`, executable `Hermes-Setup`
+- signing and Gatekeeper evidence snippets
+- exact release-channel and expected-behavior questions
+- attachable evidence list
+- draft GitHub issue, email, and Discord/forum/support message
+
+The package was not sent, no issue was opened, and no email/support-channel message was posted. No Desktop state or persistent Hermes CLI config was changed.
 
 ## Release-Channel Questions
 

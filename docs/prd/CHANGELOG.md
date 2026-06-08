@@ -2,6 +2,16 @@
 
 ## 2026-06-08
 
+- Completed Phase DESKTOP-12 Hermes Desktop support clarification package.
+- Created `docs/HERMES_DESKTOP_SUPPORT_CLARIFICATION.md`.
+- Captured local environment for support context: macOS `26.5.1` build `25F80`, Apple Silicon / `arm64`, and Hermes CLI `v0.15.2 (2026.5.29.2)`.
+- Reconfirmed artifact evidence: official source page `https://hermes-agent.nousresearch.com/desktop`, download URL `https://hermes-assets.nousresearch.com/Hermes-Setup.dmg?build=44c0c2d4ac05`, local path `/Users/michaelrinebold/Downloads/hermes-desktop-official/Hermes-Setup.dmg`, file size `6752854` bytes, SHA-256 `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`, and `hdiutil verify` success.
+- Reconfirmed installed/mounted app metadata for the support package: `com.nousresearch.hermes.setup`, version `0.0.1`, executable `Hermes-Setup`, setup/bootstrap classification, and installed app matching the official artifact failure pattern.
+- Reconfirmed signing/Gatekeeper evidence: `codesign --display` shows Team ID `T2F6S8MF7C` and stapled notarization ticket, strict `codesign --verify --deep --strict` fails with invalid signature for `arm64`, and `spctl --assess --type execute` returns an internal Code Signing subsystem error.
+- Added exact clarification questions covering bootstrap intent, expected bundle identifier/version/executable, strict codesign behavior, `spctl` behavior, notarized artifact availability, checksum/signature publication, `~/.hermes` sharing, and localhost OpenAI-compatible endpoint support without portal sign-in.
+- Added an attachable evidence list and draft messages suitable for GitHub issue, email, and Discord/forum/support channel use.
+- Confirmed DESKTOP-12 did not send the message, open an issue, email Nous Research, launch Desktop, replace/delete `/Applications/Hermes.app`, remove quarantine, grant permissions, add credentials, modify persistent Hermes CLI config, connect external services, or enable background services.
+- Recommended next action: explicitly approve sending the prepared support clarification, or continue to keep Desktop fail-closed pending official clarification/static inspection.
 - Completed Phase DESKTOP-11 Hermes-assisted Desktop install strategy.
 - Started the localhost model router adapter manually in the foreground on `127.0.0.1:8088` with DevMonster Gemma and stopped it immediately after validation.
 - Confirmed the initially requested `local_summary` prompt mode was the wrong adapter mode for the Desktop strategy prompt because it requires file-like context and returns `400` for ordinary diagnostic prompts.
