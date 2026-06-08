@@ -1,7 +1,7 @@
 # Hermes Desktop Artifact Integrity Escalation
 
-Phase: DESKTOP-10
-Date: 2026-06-07
+Phase: DESKTOP-10, updated by DESKTOP-11
+Date: 2026-06-07; DESKTOP-11 update 2026-06-08
 Status: planning/documentation only
 
 ## Scope
@@ -20,6 +20,8 @@ DESKTOP-10 does not approve:
 - modifying Hermes CLI config
 - connecting Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud providers, or any other external service
 - sending the escalation message below
+
+DESKTOP-11 additionally used Hermes itself, through the isolated local model path, to reason about the Desktop blocker. Hermes also recommended keeping Desktop fail-closed unless integrity, code-signature, Gatekeeper, and static bundle checks pass.
 
 ## Artifact Under Review
 
@@ -91,6 +93,44 @@ Hermes Desktop remains fail-closed because:
 7. No official checksum, detached signature, release note, or Desktop-specific release channel has been confirmed locally.
 
 Until Nous Research clarifies whether this behavior is expected and provides a trusted Desktop release path, replacing or launching Desktop would create avoidable integrity and support risk.
+
+## DESKTOP-11 Hermes-Assisted Review
+
+On 2026-06-08, Hermes was asked to reason about the Desktop install strategy through the local MSR Model Router adapter and DevMonster Gemma, with Codex retaining execution control.
+
+Successful invocation constraints:
+
+- isolated temporary `HERMES_HOME=/private/tmp/hermes-desktop11-home`
+- custom provider endpoint `http://127.0.0.1:8088/v1`
+- model `gemma4:26b`
+- dummy local API key only
+- isolated `platform_toolsets.cli: []`
+- adapter bound only to `127.0.0.1:8088`
+- adapter prompt mode `instruction_context`
+- adapter stopped immediately after the run
+
+The first requested `local_summary` adapter mode was not suitable for the Desktop strategy prompt because that mode requires file-like context and returned `400` for ordinary diagnostic prompts. Hermes' default CLI toolset payload also caused DevMonster timeouts. Disabling toolsets only inside the isolated temporary Hermes home removed tool schemas without modifying persistent `~/.hermes`.
+
+Hermes output is stored at:
+
+- [`sandbox/output/hermes_desktop_self_install_strategy.md`](../sandbox/output/hermes_desktop_self_install_strategy.md)
+
+Hermes recommended a fail-closed forensic verification strategy:
+
+- validate DMG integrity and compare against any official checksum if published
+- audit the code-signature chain without launching the app
+- assess Gatekeeper/notarization status
+- inspect bundle metadata and static contents for unexpected launch/background artifacts
+- abort on invalid signature, missing trusted notarization, or non-accepted Gatekeeper result
+
+Codex safety review:
+
+- Hermes recognized the setup/signing risk and did not recommend bypassing macOS security controls.
+- Hermes did not recommend sign-in, credential entry, broad permissions, background services, external integrations, or persistent Hermes CLI config changes.
+- Hermes' mention of `xcrun notarytool verify` may require Apple Developer credentials/session and must remain out of scope unless separately approved.
+- Hermes' mention of manual extraction to `/Applications` is a future replacement/install action requiring separate explicit approval and must not be performed in this phase.
+
+DESKTOP-11 does not change the escalation conclusion: Desktop remains fail-closed pending official release-channel clarification or a separately approved static-inspection/support-contact phase.
 
 ## Release-Channel Questions
 

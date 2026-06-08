@@ -1,5 +1,22 @@
 # PRD Changelog
 
+## 2026-06-08
+
+- Completed Phase DESKTOP-11 Hermes-assisted Desktop install strategy.
+- Started the localhost model router adapter manually in the foreground on `127.0.0.1:8088` with DevMonster Gemma and stopped it immediately after validation.
+- Confirmed the initially requested `local_summary` prompt mode was the wrong adapter mode for the Desktop strategy prompt because it requires file-like context and returns `400` for ordinary diagnostic prompts.
+- Confirmed sandboxed Hermes CLI invocations could not reach the localhost adapter; the successful Hermes invocation required approved localhost network access outside the Codex sandbox.
+- Confirmed the default Hermes one-shot request included tool schemas and a larger system scaffold, causing DevMonster timeouts through the adapter.
+- Added `platform_toolsets.cli: []` only to the isolated temporary Hermes home at `/private/tmp/hermes-desktop11-home`, preserving persistent `~/.hermes` config.
+- Switched the adapter prompt mode to `instruction_context` for the Desktop strategy prompt and got Hermes to produce usable stdout through `gemma4:26b`.
+- Captured Hermes output to `sandbox/output/hermes_desktop_self_install_strategy.md`.
+- Documented that Hermes recognized the signing/bootstrap risk and recommended fail-closed forensic verification: checksum/integrity validation, code-signature auditing, Gatekeeper/notarization assessment, static bundle inspection, and aborting on invalid signature or non-accepted Gatekeeper status.
+- Documented Codex safety review: Hermes did not recommend sign-in, credentials, permission grants, background/resident operation, external integrations, or persistent Hermes CLI config changes.
+- Noted that Hermes' mentions of `xcrun notarytool verify` and manual extraction to `/Applications` require separate explicit approval if pursued.
+- Confirmed the adapter was stopped and `curl http://127.0.0.1:8088/health` failed to connect afterward.
+- Confirmed DESKTOP-11 did not launch, install, replace, delete, recopy, or modify `/Applications/Hermes.app`; did not remove quarantine; did not kill `Hermes-Setup`; did not sign in; did not add credentials; did not grant permissions; did not modify persistent Hermes CLI config; did not connect external services; did not send the escalation message; and did not enable background services.
+- Recommended next action: use the Hermes strategy as supporting evidence only, then either pursue official support/release-channel clarification or approve a separate local static-inspection phase before any launch or replacement retry.
+
 ## 2026-06-07
 
 - Completed Phase DESKTOP-10 Hermes Desktop artifact integrity escalation and release-channel clarification as documentation only.

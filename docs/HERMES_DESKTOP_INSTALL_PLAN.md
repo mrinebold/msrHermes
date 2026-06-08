@@ -2,7 +2,7 @@
 
 Planning date: 2026-06-05.
 
-Phase DESKTOP-10 documented artifact integrity escalation and release-channel clarification. Hermes Desktop remains fail-closed: the official DMG verifies as a disk image, but the mounted app remains a setup/bootstrap bundle with invalid strict code-signature behavior and no confirmed trusted final Desktop runtime path.
+Phase DESKTOP-11 used Hermes itself, through the local MSR Model Router adapter and DevMonster Gemma, to reason about the Desktop install blocker. Hermes produced a usable fail-closed forensic-verification strategy only after Codex switched the adapter prompt mode from file-summary-only `local_summary` to `instruction_context` and disabled CLI toolsets inside an isolated temporary `HERMES_HOME`. Hermes Desktop remains fail-closed: the official DMG verifies as a disk image, but the mounted app remains a setup/bootstrap bundle with invalid strict code-signature behavior and no confirmed trusted final Desktop runtime path.
 
 ## Scope
 
@@ -47,6 +47,7 @@ Current Mac mini CLI state:
 - Phase DESKTOP-8 planned official artifact reacquisition and later comparison/replacement safeguards only; no download or replacement was performed.
 - Phase DESKTOP-9 downloaded the official macOS DMG into `~/Downloads/hermes-desktop-official/`, verified and mounted it read-only, compared mounted metadata to `/Applications/Hermes.app`, then unmounted it; no install, launch, or replacement was performed.
 - Phase DESKTOP-10 created the artifact integrity escalation record and draft support message; no message was sent and no Desktop state was changed.
+- Phase DESKTOP-11 got Hermes to produce a local-model Desktop install strategy through the localhost adapter after using an isolated no-tool Hermes config and `instruction_context`; no Desktop state was changed.
 
 ## Install Timing
 
@@ -856,6 +857,56 @@ No escalation message was sent. No Desktop launch, replacement, reinstall, recop
 Recommended next action:
 
 Wait for official clarification or explicitly approve a bounded support-contact phase. Do not launch or replace Desktop until Nous Research clarifies whether the current macOS artifact's setup bundle and strict signature failure are expected, and until a trusted final Desktop runtime path is confirmed.
+
+## Phase DESKTOP-11 Hermes-Assisted Desktop Install Strategy
+
+Status: complete on 2026-06-08.
+
+Output:
+
+- [Hermes Desktop Self-Install Strategy Output](../sandbox/output/hermes_desktop_self_install_strategy.md)
+
+DESKTOP-11 used Hermes as a reasoning assistant only after Codex retained execution and verification control. The successful path was:
+
+```text
+HERMES_HOME=/private/tmp/hermes-desktop11-home
+model.provider=custom
+model.default=gemma4:26b
+model.base_url=http://127.0.0.1:8088/v1
+model.api_key=dummy-local-adapter-key
+platform_toolsets.cli=[]
+MODEL_ROUTER_ADAPTER_HOST=127.0.0.1
+MODEL_ROUTER_ADAPTER_PORT=8088
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434
+DEVMONSTER_DEFAULT_MODEL=gemma4:26b
+```
+
+Important diagnostic findings:
+
+- The initially requested `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary` is inappropriate for this Desktop strategy prompt because that mode requires file-like context and returns `400` for ordinary diagnostic prompts.
+- Sandbox-local Hermes invocations could not reach the adapter; the Hermes CLI needed approved localhost network access outside the Codex sandbox, while still using the isolated temporary `HERMES_HOME`.
+- The default Hermes one-shot request included CLI tool schemas and a larger system scaffold; DevMonster timed out on that heavier request.
+- Adding `platform_toolsets.cli: []` to the isolated temporary config removed tool schemas without modifying `~/.hermes`.
+- With no CLI toolsets and `instruction_context`, Hermes reached the localhost adapter, the adapter returned `200`, and Hermes produced usable stdout in about 86 seconds.
+- The adapter was stopped immediately after the successful run; `curl http://127.0.0.1:8088/health` then failed to connect, confirming no listener remained.
+
+Hermes safety review:
+
+- Hermes recognized the code-signing/Gatekeeper risk and recommended fail-closed forensic verification rather than bypassing macOS controls.
+- Hermes recommended integrity validation, signature-chain auditing, Gatekeeper/notarization assessment, and static bundle inspection.
+- Hermes did not recommend sign-in, credential entry, permission grants, background/resident operation, external-service connection, or persistent Hermes CLI config modification.
+- Hermes did mention `xcrun notarytool verify`, which Codex classifies as requiring separate approval if it would require Apple Developer credentials/session.
+- Hermes mentioned manual extraction to `/Applications` only after all checks pass and `spctl` accepts the app; Codex classifies that as a future replacement/install action requiring separate explicit approval.
+
+No Desktop launch, install, replacement, deletion, recopy, quarantine removal, process kill, sign-in, credential setup, permission grant, persistent Hermes CLI config modification, external service connection, support-message send, or background-service enablement was performed.
+
+Recommended next action:
+
+Use the Hermes strategy as supporting evidence only. The practical next step remains a bounded official support/release-channel clarification or a separately approved local static-inspection phase. Do not launch or replace Desktop until the official artifact's bootstrap/signature state is clarified or a notarized/signature-clean artifact is available.
 
 ## Safety Requirements
 
