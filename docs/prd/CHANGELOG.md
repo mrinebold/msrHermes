@@ -2,6 +2,15 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AB-AC managed adapter runner plus locked-down Hermes pilot config/harness.
+- Added `scripts/run_model_router_adapter.sh` as a foreground-only localhost adapter runner with `127.0.0.1:8088`, DevMonster Gemma defaults, provider timeout 120 seconds, local compatibility mode, default `instruction_context`, context budget 1500 chars, metadata-only logging, startup config printing with secrets redacted, non-localhost refusal, and no launchd/background service behavior.
+- Added `scripts/run_hermes_pilot.sh` as an isolated Hermes pilot harness requiring explicit `--prompt` or `--prompt-file`, defaulting to `HERMES_HOME=/private/tmp/hermes-pilot-home`, configuring only `http://127.0.0.1:8088/v1` with `gemma4:26b`, using a dummy local key, disabling CLI platform toolsets, sanitizing cloud/integration env vars from the child process, and writing output only to `sandbox/output` unless explicitly overridden.
+- Added `config/hermes-pilot.example.env`.
+- Added `docs/HERMES_PILOT_MODE.md`.
+- Added `sandbox/input/hermes_pilot_next_action_prompt.md` for a future PRD/changelog next-action recommendation pilot.
+- Updated `services/model_router_adapter/README.md`, `docs/HERMES_MODEL_PROVIDER_PLAN.md`, `docs/HERMES_SECURITY_MODEL.md`, and `docs/HERMES_OWNERSHIP_MODEL.md` with pilot-mode and runner boundaries.
+- Added tests for shell syntax checks, adapter runner non-localhost refusal, pilot env sanitization/no secret leakage, localhost-only pilot config, and dry-run behavior.
+- Confirmed no background services, launchd plists, persistent Hermes home configuration, external integrations, cloud credentials, Hermes Desktop launch, or live Hermes pilot task were created or run.
 - Completed Phase DESKTOP-12 Hermes Desktop support clarification package.
 - Created `docs/HERMES_DESKTOP_SUPPORT_CLARIFICATION.md`.
 - Captured local environment for support context: macOS `26.5.1` build `25F80`, Apple Silicon / `arm64`, and Hermes CLI `v0.15.2 (2026.5.29.2)`.

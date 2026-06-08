@@ -952,3 +952,35 @@ The local adapter can now produce usable Hermes sandbox summary output through t
 Recommendation:
 
 Keep these settings as the current validated baseline for Hermes file-summary work. The next live validation should use the same settings for `sample_prd.md` in a separate approved phase.
+
+## Phase 5AB-AC Managed Adapter Runner And Pilot Harness
+
+Status: infrastructure complete on 2026-06-08. Live pilot not run.
+
+Phase 5AB-AC added the local infrastructure needed for a limited Hermes pilot:
+
+- `scripts/run_model_router_adapter.sh`
+- `scripts/run_hermes_pilot.sh`
+- `config/hermes-pilot.example.env`
+- `docs/HERMES_PILOT_MODE.md`
+- `sandbox/input/hermes_pilot_next_action_prompt.md`
+
+The managed adapter runner is foreground-only and binds only to `127.0.0.1:8088`. It sets the validated DevMonster route, provider timeout, local compatibility mode, and metadata-only logging. It refuses non-localhost binds and non-`8088` pilot ports. It does not create a launchd plist or background service.
+
+The Hermes pilot harness creates an isolated pilot home at `/private/tmp/hermes-pilot-home` by default and writes only that isolated `config.yaml`. The pilot config points Hermes only to:
+
+```yaml
+model:
+  provider: custom
+  default: gemma4:26b
+  base_url: http://127.0.0.1:8088/v1
+  api_key: dummy-local-adapter-key
+platform_toolsets:
+  cli: []
+```
+
+The harness runs Hermes with an allowlisted child environment so real cloud, Supabase, Google, GitHub, Home Assistant, and Helio variables are not passed through. It requires an explicit `--prompt` or `--prompt-file`, writes generated output to `sandbox/output` by default, and supports `--stdout` for stdout-only pilot tasks.
+
+The first future pilot prompt template is `sandbox/input/hermes_pilot_next_action_prompt.md`. It asks Hermes to read only the master Hermes PRD and changelog, summarize current status, identify the next safest phase, and write recommendation text to stdout only.
+
+Phase 5AB-AC did not start the adapter, did not run a live Hermes pilot, did not configure persistent Hermes home, did not connect external services, and did not add credentials.

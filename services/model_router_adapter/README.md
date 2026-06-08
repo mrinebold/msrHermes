@@ -86,6 +86,44 @@ MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
 
 These settings were validated successfully for `sandbox/input/sample_note.md` in Phase 5AA. The adapter produced one successful chat completion with `gemma4:26b`, response content length 284, and usable five-bullet output.
 
+## Managed Foreground Runner
+
+Phase 5AB-AC added a manual runner:
+
+```sh
+scripts/run_model_router_adapter.sh
+```
+
+The runner is the recommended way to start the adapter for a limited Hermes pilot. It:
+
+- binds only to `127.0.0.1`
+- refuses non-localhost binds
+- refuses non-`8088` pilot ports
+- points DevMonster to `http://100.93.120.124:11434`
+- uses `gemma4:26b`
+- sets provider timeout to 120 seconds
+- enables local compatibility mode
+- defaults `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context`
+- sets local summary context budget to 1500 characters
+- enables metadata-only request, response-shape, and message-structure logging
+- prints startup config with dummy/secrets redacted
+- runs in the foreground only
+- creates no launchd plist and no background service
+
+Use dry-run mode for guardrail checks:
+
+```sh
+scripts/run_model_router_adapter.sh --dry-run
+```
+
+For file-summary validation, override the prompt mode explicitly:
+
+```sh
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary scripts/run_model_router_adapter.sh
+```
+
+For general planning/recommendation prompts, keep the default `instruction_context`.
+
 ## Endpoints
 
 The adapter exposes only:

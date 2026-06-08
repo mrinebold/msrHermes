@@ -295,6 +295,45 @@ Reference:
 - [Hermes Desktop Install Plan](HERMES_DESKTOP_INSTALL_PLAN.md)
 - [Hermes Desktop DevMonster Plan](HERMES_DESKTOP_DEVMONSTER_PLAN.md)
 
+## Hermes Pilot Mode Policy
+
+Phase 5AB-AC adds pilot infrastructure only. It does not approve a live pilot run.
+
+Reference:
+
+- [Hermes Pilot Mode](HERMES_PILOT_MODE.md)
+
+Pilot mode permits Hermes to perform safe local reasoning over explicitly supplied local prompts or files through the localhost model router adapter. It may summarize local repo docs and recommend next actions.
+
+Pilot mode must use:
+
+- isolated `HERMES_HOME=/private/tmp/hermes-pilot-home` by default
+- `model.provider=custom`
+- `model.default=gemma4:26b`
+- `model.base_url=http://127.0.0.1:8088/v1`
+- dummy local API key only
+- `platform_toolsets.cli: []`
+- sanitized child environment with real provider and integration variables removed
+- foreground-only execution
+
+Pilot mode must not:
+
+- execute shell commands independently
+- install software
+- send messages
+- write Supabase
+- connect Google
+- control Home Assistant
+- launch Hermes Desktop
+- modify credentials
+- modify persistent Hermes CLI config
+- modify files outside `sandbox/output`
+- create launchd plists
+- run as a background or resident service
+- connect GitHub, Helio, Agent Bus, cloud providers, or other external services
+
+The adapter runner may log request/status metadata, response shape metadata, and message-structure metadata only. It must not log prompt text, file contents, model output text, credentials, tokens, or keys.
+
 ## Audit Requirements
 
 Every governed action should log:

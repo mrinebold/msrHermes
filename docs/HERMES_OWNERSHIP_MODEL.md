@@ -140,6 +140,31 @@ Approved direction:
 
 Hermes may later use a faster local model for command parsing and triage, but that model must be installed and validated in a separate approved phase.
 
+## Pilot Mode Ownership Boundary
+
+Phase 5AB-AC prepares a limited pilot harness for local reasoning only. In pilot mode, Hermes remains an advisor. Codex or the human operator retains execution, verification, commit, push, and external-contact control.
+
+Hermes may:
+
+- summarize explicitly supplied local repo docs
+- reason about current PRD/changelog status
+- recommend the next safest phase
+- write generated output only to `sandbox/output` unless separately overridden
+
+Hermes may not:
+
+- execute shell commands independently
+- modify source files or docs outside `sandbox/output`
+- install software
+- launch Hermes Desktop
+- send messages or open issues
+- write Supabase or Agent Bus records
+- connect Google, GitHub, Home Assistant, Helio, or cloud providers
+- add, read, or modify durable credentials
+- run as a resident/background service
+
+The pilot harness uses an isolated `HERMES_HOME` and disables CLI platform toolsets. Persistent Hermes CLI config remains outside pilot-mode ownership unless a separate phase explicitly approves changing it.
+
 ## Future Google Workspace Use
 
 Hermes will use Google Workspace only through the existing permission and audit framework.
