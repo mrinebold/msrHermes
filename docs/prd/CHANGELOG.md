@@ -2,6 +2,21 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AG bounded Hermes PRD-review pilot.
+- Updated `scripts/build_hermes_pilot_context_prompt.py` with `--phase5ag` to build a bounded PRD-review prompt from the master PRD, changelog, pilot-mode doc, security model, and model-provider plan.
+- Generated `sandbox/output/hermes_pilot_phase5ag_prd_review_prompt.md`.
+- Started `scripts/run_model_router_adapter.sh` manually in the foreground with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`, and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`.
+- Confirmed adapter bind `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, model `gemma4:26b`, metadata-only logging, no prompt/file-content logging, no cloud fallback, and no launchd/background service.
+- Ran `scripts/run_hermes_pilot.sh --prompt-file sandbox/output/hermes_pilot_phase5ag_prd_review_prompt.md --stdout --config-to-stderr`.
+- Captured `sandbox/output/hermes_pilot_phase5ag_prd_review.md`, `sandbox/output/hermes_pilot_phase5ag_prd_review.stderr`, and `sandbox/output/hermes_pilot_phase5ag_prd_review.metrics`.
+- Recorded Hermes exit code `0`, elapsed time `111` seconds, stdout `1731` bytes, stderr `471` bytes, usable output `true`, selected model `gemma4:26b`, and response content length `1730`.
+- Recorded adapter metadata: local summary extraction succeeded, context chars `1459`, context not truncated, `tools_present=false`, `tool_schemas_forwarded=false`, and successful model call returned status `200` in `110.172` seconds.
+- Captured Hermes' PRD-review finding that Phase 5AF status is consistent across supplied excerpts and that no stale or contradictory status statements were identified.
+- Captured Hermes' recommended PRD updates: define success criteria for transitioning disabled authorities to active mode and formalize credential-rotation procedural requirements before Agent Bus reads or writes resume.
+- Confirmed no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message sending, software install, credential modification, persistent Hermes CLI config change, Hermes Desktop launch, background service, resident mode, launchd plist, or Hermes-generated file write outside `sandbox/output` occurred.
+- Stopped the adapter immediately after the run; confirmed no listener remained on `8088` and no Hermes pilot/adapter/Desktop process remained.
+- Updated `docs/HERMES_PILOT_MODE.md` and the master PRD with the Phase 5AG result.
+- Recommended Phase 5AH as documentation-only clarification for authority re-enable gates and credential-rotation requirements before any broader Hermes authority, Agent Bus activity, Desktop retry, or resident-mode work.
 - Completed Phase 5AF forward-looking Hermes pilot recommendation.
 - Updated `scripts/build_hermes_pilot_context_prompt.py` with `--phase5af` to build a bounded prompt from the master PRD, changelog, pilot-mode doc, and security model.
 - Generated `sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md`.

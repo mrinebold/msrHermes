@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AF
-Status: forward-looking pilot recommendation complete; output usable
+Phase: 5AG
+Status: bounded PRD-review pilot complete; output usable
 
 ## Purpose
 
@@ -366,6 +366,81 @@ Guardrail review:
 Recommendation:
 
 Treat Phase 5AF as a successful forward-looking pilot. The next phase should execute the recommended single bounded PRD-review task using the same explicit-context, `local_summary`, no-tools, no-integrations, foreground-only guardrails, with explicit human approval before execution.
+
+## Phase 5AG Bounded PRD-Review Pilot
+
+Phase 5AG ran one bounded PRD-review pilot on 2026-06-08 using the established explicit-context and `local_summary` baseline.
+
+Phase 5AG updated:
+
+- `scripts/build_hermes_pilot_context_prompt.py --phase5ag`
+- `sandbox/output/hermes_pilot_phase5ag_prd_review_prompt.md`
+
+The Phase 5AG prompt includes bounded context from:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_PILOT_MODE.md`
+- `docs/HERMES_SECURITY_MODEL.md`
+- `docs/HERMES_MODEL_PROVIDER_PLAN.md`
+
+It asked Hermes to review the current Hermes Operating System PRD and supporting context for consistency, missing gates, stale status, and unclear next steps, and to return only:
+
+- PRD consistency findings
+- missing or weak guardrails
+- stale or contradictory status statements
+- recommended PRD updates
+- next safest phase recommendation
+- whether human approval is required before execution
+
+Capture files:
+
+- `sandbox/output/hermes_pilot_phase5ag_prd_review.md`
+- `sandbox/output/hermes_pilot_phase5ag_prd_review.stderr`
+- `sandbox/output/hermes_pilot_phase5ag_prd_review.metrics`
+- `sandbox/output/hermes_pilot_phase5ag_prd_review_prompt.md`
+
+Observed result:
+
+| Check | Result |
+| --- | --- |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter prompt mode | `local_summary` |
+| Context budget | 1500 chars |
+| Extracted context | 1459 chars; not truncated |
+| Selected model | `gemma4:26b` |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| Successful model call | status `200`, response content length `1730`, elapsed `110.172s` |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 111 seconds |
+| Pilot stdout bytes | 1731 |
+| Pilot stderr bytes | 471 |
+| Pilot output usable | yes |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+| Residual Hermes process | none observed |
+| Desktop launch | none observed |
+| External integrations | not touched |
+| Real API keys | not used |
+| Hermes file writes | no Hermes-generated writes outside `sandbox/output` observed |
+
+Hermes found the Phase 5AF completion status consistent across the PRD, changelog, and model-provider plan. It identified two areas for future clarification: concrete triggers for re-enabling disabled authorities, and procedural requirements for credential rotation before Agent Bus reads or writes resume. It did not identify stale or contradictory status statements in the supplied excerpts.
+
+Guardrail review:
+
+- Hermes stayed within pilot boundaries.
+- The harness used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`.
+- The harness used the localhost adapter URL only.
+- The child process used a dummy local API key.
+- `platform_toolsets.cli` remained disabled.
+- Adapter metadata showed `tools_present=false` and `tool_schemas_forwarded=false`.
+- No Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message send, Desktop launch, install, permission grant, credential modification, background service, or resident mode occurred.
+
+Recommendation:
+
+Treat Phase 5AG as a successful bounded PRD-review pilot. The next phase should be documentation-only: clarify authority re-enable gates and credential-rotation requirements in the PRD/security docs before any broader Hermes authority, Agent Bus activity, Desktop retry, or resident-mode work.
 
 ## First Pilot Task Template
 

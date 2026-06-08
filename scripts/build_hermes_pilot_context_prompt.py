@@ -11,6 +11,7 @@ DEFAULT_PRD = Path("docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md")
 DEFAULT_CHANGELOG = Path("docs/prd/CHANGELOG.md")
 DEFAULT_PILOT_MODE = Path("docs/HERMES_PILOT_MODE.md")
 DEFAULT_SECURITY_MODEL = Path("docs/HERMES_SECURITY_MODEL.md")
+DEFAULT_MODEL_PROVIDER = Path("docs/HERMES_MODEL_PROVIDER_PLAN.md")
 DEFAULT_OUTPUT = Path("sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md")
 
 
@@ -183,16 +184,85 @@ def build_phase5af_prompt(
     )
 
 
+def build_phase5ag_prompt(
+    prd_text: str,
+    changelog_text: str,
+    pilot_mode_text: str,
+    security_model_text: str,
+    model_provider_text: str,
+) -> str:
+    prd_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                first_paragraphs(extract_section(prd_text, "## Status"), 1),
+                matching_lines(prd_text, ("| Phase 5AF |", "Phase 5AG should execute"), 260),
+            )
+            if part
+        ),
+        230,
+    )
+    changelog_today = extract_section(changelog_text, "## 2026-06-08")
+    changelog_excerpt = bounded_text(
+        leading_block_until(changelog_today, "- Completed Phase 5AE controlled Hermes pilot with explicit local context."),
+        220,
+    )
+    pilot_excerpt = bounded_text(
+        excerpt_from_marker(pilot_mode_text, "## Phase 5AF Forward-Looking Pilot Recommendation", 520),
+        230,
+    )
+    security_excerpt = bounded_text(
+        excerpt_from_marker(security_model_text, "Phase 5AF security result:", 520),
+        230,
+    )
+    provider_excerpt = bounded_text(
+        excerpt_from_marker(model_provider_text, "## Phase 5AF Forward-Looking Pilot Recommendation", 520),
+        230,
+    )
+
+    return (
+        "Review the current Hermes Operating System PRD and supporting context for consistency, "
+        "missing gates, stale status, and unclear next steps.\n"
+        "Use only the bounded local context below. Do not ask to read files. Do not use tools.\n"
+        "Return only recommendation text with these labels:\n"
+        "PRD consistency findings\n"
+        "missing or weak guardrails\n"
+        "stale or contradictory status statements\n"
+        "recommended PRD updates\n"
+        "next safest phase recommendation\n"
+        "whether human approval is required before execution\n\n"
+        "Document/context:\n"
+        "# Bounded local context for Phase 5AG\n\n"
+        "## Master PRD excerpt\n"
+        "Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md\n"
+        f"{prd_excerpt}\n\n"
+        "## Changelog excerpt\n"
+        "Source: docs/prd/CHANGELOG.md\n"
+        f"{changelog_excerpt}\n\n"
+        "## Pilot mode excerpt\n"
+        "Source: docs/HERMES_PILOT_MODE.md\n"
+        f"{pilot_excerpt}\n\n"
+        "## Security model excerpt\n"
+        "Source: docs/HERMES_SECURITY_MODEL.md\n"
+        f"{security_excerpt}\n\n"
+        "## Model provider excerpt\n"
+        "Source: docs/HERMES_MODEL_PROVIDER_PLAN.md\n"
+        f"{provider_excerpt}\n"
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prd", type=Path, default=DEFAULT_PRD)
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
     parser.add_argument("--pilot-mode", type=Path, default=DEFAULT_PILOT_MODE)
     parser.add_argument("--security-model", type=Path, default=DEFAULT_SECURITY_MODEL)
+    parser.add_argument("--model-provider", type=Path, default=DEFAULT_MODEL_PROVIDER)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-prd-chars", type=int, default=700)
     parser.add_argument("--max-changelog-chars", type=int, default=600)
     parser.add_argument("--phase5af", action="store_true", help="Build the forward-looking Phase 5AF prompt.")
+    parser.add_argument("--phase5ag", action="store_true", help="Build the bounded PRD-review Phase 5AG prompt.")
     return parser.parse_args()
 
 
@@ -200,7 +270,18 @@ def main() -> int:
     args = parse_args()
     prd_text = args.prd.read_text(encoding="utf-8")
     changelog_text = args.changelog.read_text(encoding="utf-8")
-    if args.phase5af:
+    if args.phase5ag:
+        pilot_mode_text = args.pilot_mode.read_text(encoding="utf-8")
+        security_model_text = args.security_model.read_text(encoding="utf-8")
+        model_provider_text = args.model_provider.read_text(encoding="utf-8")
+        prompt = build_phase5ag_prompt(
+            prd_text,
+            changelog_text,
+            pilot_mode_text,
+            security_model_text,
+            model_provider_text,
+        )
+    elif args.phase5af:
         pilot_mode_text = args.pilot_mode.read_text(encoding="utf-8")
         security_model_text = args.security_model.read_text(encoding="utf-8")
         prompt = build_phase5af_prompt(prd_text, changelog_text, pilot_mode_text, security_model_text)
