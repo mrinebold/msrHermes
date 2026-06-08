@@ -9,6 +9,8 @@ from pathlib import Path
 
 DEFAULT_PRD = Path("docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md")
 DEFAULT_CHANGELOG = Path("docs/prd/CHANGELOG.md")
+DEFAULT_PILOT_MODE = Path("docs/HERMES_PILOT_MODE.md")
+DEFAULT_SECURITY_MODEL = Path("docs/HERMES_SECURITY_MODEL.md")
 DEFAULT_OUTPUT = Path("sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md")
 
 
@@ -42,6 +44,13 @@ def leading_block_until(section: str, stop_line: str) -> str:
             break
         selected.append(line)
     return "\n".join(selected).strip()
+
+
+def excerpt_from_marker(text: str, marker: str, limit: int) -> str:
+    start = text.find(marker)
+    if start < 0:
+        return ""
+    return bounded_text(text[start:], limit)
 
 
 def matching_lines(text: str, terms: tuple[str, ...], limit: int) -> str:
@@ -100,13 +109,90 @@ def build_prompt(prd_text: str, changelog_text: str, prd_limit: int, changelog_l
     )
 
 
+def build_phase5af_prompt(
+    prd_text: str,
+    changelog_text: str,
+    pilot_mode_text: str,
+    security_model_text: str,
+) -> str:
+    prd_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                first_paragraphs(extract_section(prd_text, "## Status"), 2),
+                matching_lines(prd_text, ("| Phase 5AE |", "Phase 5AF should preserve"), 260),
+            )
+            if part
+        ),
+        330,
+    )
+    changelog_today = extract_section(changelog_text, "## 2026-06-08")
+    changelog_excerpt = bounded_text(
+        leading_block_until(changelog_today, "- Completed Phase 5AD controlled Hermes pilot execution."),
+        300,
+    )
+    phase5ae_pilot_section = extract_section(pilot_mode_text, "## Phase 5AE Explicit Local Context Pilot Result")
+    pilot_excerpt = bounded_text(
+        "\n".join(
+            line
+            for line in phase5ae_pilot_section.splitlines()
+            if any(
+                term in line
+                for term in (
+                    "Phase 5AE ran",
+                    "explicit local context",
+                    "Adapter prompt mode",
+                    "Pilot output usable",
+                    "Treat Phase 5AE",
+                    "Do not broaden",
+                )
+            )
+        ),
+        300,
+    )
+    security_excerpt = bounded_text(
+        excerpt_from_marker(security_model_text, "Phase 5AE security result:", 700),
+        300,
+    )
+
+    return (
+        "Based on the current PRD, changelog, pilot-mode constraints, and security model, "
+        "recommend the next safest Hermes operating-system phase after Phase 5AE.\n"
+        "Use only the bounded local context below. Do not ask to read files. Do not use tools.\n"
+        "Return only recommendation text with these labels:\n"
+        "recommended phase name\n"
+        "objective\n"
+        "why this is safest\n"
+        "explicit non-goals\n"
+        "acceptance criteria\n"
+        "whether human approval is required before execution\n\n"
+        "Document/context:\n"
+        "# Bounded local context for Phase 5AF\n\n"
+        "## Master PRD excerpt\n"
+        "Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md\n"
+        f"{prd_excerpt}\n\n"
+        "## Changelog excerpt\n"
+        "Source: docs/prd/CHANGELOG.md\n"
+        f"{changelog_excerpt}\n\n"
+        "## Pilot mode excerpt\n"
+        "Source: docs/HERMES_PILOT_MODE.md\n"
+        f"{pilot_excerpt}\n\n"
+        "## Security model excerpt\n"
+        "Source: docs/HERMES_SECURITY_MODEL.md\n"
+        f"{security_excerpt}\n"
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prd", type=Path, default=DEFAULT_PRD)
     parser.add_argument("--changelog", type=Path, default=DEFAULT_CHANGELOG)
+    parser.add_argument("--pilot-mode", type=Path, default=DEFAULT_PILOT_MODE)
+    parser.add_argument("--security-model", type=Path, default=DEFAULT_SECURITY_MODEL)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-prd-chars", type=int, default=700)
     parser.add_argument("--max-changelog-chars", type=int, default=600)
+    parser.add_argument("--phase5af", action="store_true", help="Build the forward-looking Phase 5AF prompt.")
     return parser.parse_args()
 
 
@@ -114,7 +200,12 @@ def main() -> int:
     args = parse_args()
     prd_text = args.prd.read_text(encoding="utf-8")
     changelog_text = args.changelog.read_text(encoding="utf-8")
-    prompt = build_prompt(prd_text, changelog_text, args.max_prd_chars, args.max_changelog_chars)
+    if args.phase5af:
+        pilot_mode_text = args.pilot_mode.read_text(encoding="utf-8")
+        security_model_text = args.security_model.read_text(encoding="utf-8")
+        prompt = build_phase5af_prompt(prd_text, changelog_text, pilot_mode_text, security_model_text)
+    else:
+        prompt = build_prompt(prd_text, changelog_text, args.max_prd_chars, args.max_changelog_chars)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(prompt, encoding="utf-8")
     print(f"hermes_pilot_context_prompt.output={args.output}")

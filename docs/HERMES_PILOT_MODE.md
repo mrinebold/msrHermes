@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AE
-Status: explicit local-context pilot complete; output usable
+Phase: 5AF
+Status: forward-looking pilot recommendation complete; output usable
 
 ## Purpose
 
@@ -272,6 +272,100 @@ Guardrail review:
 Recommendation:
 
 Treat Phase 5AE as the first usable controlled next-action pilot. The next phase should preserve the explicit-context and `local_summary` pattern, then either refine the recommendation prompt to produce forward-looking Phase 5AF text or use the same harness for one bounded PRD-review task. Do not broaden Hermes authority.
+
+## Phase 5AF Forward-Looking Pilot Recommendation
+
+Phase 5AF ran one bounded forward-looking pilot on 2026-06-08 using the proven explicit-context and `local_summary` baseline.
+
+Phase 5AF updated:
+
+- `scripts/build_hermes_pilot_context_prompt.py --phase5af`
+- `sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md`
+
+The Phase 5AF prompt includes bounded context from:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_PILOT_MODE.md`
+- `docs/HERMES_SECURITY_MODEL.md`
+
+It asked Hermes to recommend the next safest Hermes operating-system phase after Phase 5AE, and to return only:
+
+- recommended phase name
+- objective
+- why this is safest
+- explicit non-goals
+- acceptance criteria
+- whether human approval is required before execution
+
+Approved command sequence:
+
+```sh
+python3 scripts/build_hermes_pilot_context_prompt.py --phase5af --output sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary \
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120 \
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500 \
+  scripts/run_model_router_adapter.sh
+scripts/run_hermes_pilot.sh --prompt-file sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md --stdout --config-to-stderr
+```
+
+Capture files:
+
+- `sandbox/output/hermes_pilot_phase5af_next_phase.md`
+- `sandbox/output/hermes_pilot_phase5af_next_phase.stderr`
+- `sandbox/output/hermes_pilot_phase5af_next_phase.metrics`
+- `sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md`
+
+Observed result:
+
+| Check | Result |
+| --- | --- |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter prompt mode | `local_summary` |
+| Context budget | 1500 chars |
+| Extracted context | 1480 chars; not truncated |
+| Selected model | `gemma4:26b` |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| Successful model call | status `200`, response content length `979`, elapsed `115.191s` |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 116 seconds |
+| Pilot stdout bytes | 980 |
+| Pilot stderr bytes | 471 |
+| Pilot output usable | yes |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+| Residual Hermes process | none observed |
+| Desktop launch | none observed |
+| External integrations | not touched |
+| Real API keys | not used |
+| Hermes file writes | no Hermes-generated writes outside `sandbox/output` observed |
+
+The usable stdout recommendation was:
+
+```text
+recommended phase name: Phase 5AF
+objective: Execute one bounded PRD-review task using the established explicit local context harness.
+why this is safest: It adheres to the proven `local_summary` baseline from Phase 5AE, utilizes the existing bounded prompt mode, and operates under Codex control without broadening Hermes authority or expanding into new scopes.
+explicit non-goals: Broadening Hermes authority; expanding scope to include shell command execution, file edit scope, gateway service behavior, Google scopes, Home Assistant token access, or agent dispatch interface modifications; performing live Agent Bus reads or writes before confirmed credential rotation.
+acceptance criteria: Successful completion of a single bounded PRD-review task within the existing security constraints and without any expansion of agent authority.
+whether human approval is required before execution: Yes (to ensure continued Codex control and prevent unauthorized authority broadening).
+```
+
+Guardrail review:
+
+- Hermes stayed within pilot boundaries.
+- The harness used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`.
+- The harness used the localhost adapter URL only.
+- The child process used a dummy local API key.
+- `platform_toolsets.cli` remained disabled.
+- Adapter metadata showed `tools_present=false` and `tool_schemas_forwarded=false`.
+- No Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message send, Desktop launch, install, permission grant, credential modification, background service, or resident mode occurred.
+
+Recommendation:
+
+Treat Phase 5AF as a successful forward-looking pilot. The next phase should execute the recommended single bounded PRD-review task using the same explicit-context, `local_summary`, no-tools, no-integrations, foreground-only guardrails, with explicit human approval before execution.
 
 ## First Pilot Task Template
 

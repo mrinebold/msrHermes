@@ -1094,4 +1094,54 @@ The explicit local-context shape plus `local_summary` mode is now the validated 
 
 Recommendation:
 
-Keep Phase 5AE's explicit-context builder and `--config-to-stderr` harness behavior for future stdout-only pilots. The next phase should either refine the prompt to ask for a forward-looking Phase 5AF recommendation or run one bounded PRD-review task with the same local-only, no-tools, no-background, no-integration guardrails.
+Keep Phase 5AE's explicit-context builder and `--config-to-stderr` harness behavior for future stdout-only pilots. This recommendation was executed in Phase 5AF, which produced a bounded PRD-review recommendation with the same local-only, no-tools, no-background, no-integration guardrails.
+
+## Phase 5AF Forward-Looking Pilot Recommendation
+
+Status: complete on 2026-06-08. Pilot output usable.
+
+Phase 5AF reused the Phase 5AE explicit-context and `local_summary` baseline, then asked Hermes to recommend the next safest Hermes operating-system phase after Phase 5AE.
+
+Implementation updates:
+
+- `scripts/build_hermes_pilot_context_prompt.py --phase5af`
+- `sandbox/output/hermes_pilot_phase5af_next_phase_prompt.md`
+
+The prompt included bounded context from:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_PILOT_MODE.md`
+- `docs/HERMES_SECURITY_MODEL.md`
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 116 seconds |
+| Pilot stdout bytes | 980 |
+| Pilot stderr bytes | 471 |
+| Adapter model calls | yes |
+| Selected model | `gemma4:26b` |
+| Local summary extraction | success |
+| Context chars | 1480 |
+| Context truncated | false |
+| Tools present | false |
+| Tool schemas forwarded | false |
+| Successful model call | status `200`, response content length `979`, elapsed `115.191s` |
+| Output usable | yes |
+| Adapter shutdown | stopped immediately after run |
+| Post-run listener | no `8088` listener remained |
+
+Hermes recommended a single bounded PRD-review task using the established explicit local-context harness. It explicitly kept non-goals around broadened authority, shell execution, file-edit scope, gateway behavior, Google scopes, Home Assistant token access, agent dispatch changes, and live Agent Bus reads/writes before credential rotation.
+
+No background service, launchd plist, persistent Hermes home configuration, cloud credential, Desktop launch, external integration, message send, software install, Supabase write, credential modification, or Hermes-generated write outside `sandbox/output` occurred. No matching Hermes pilot, adapter, or Desktop process remained after cleanup.
+
+Conclusion:
+
+The explicit-context plus `local_summary` baseline can now produce both current-state and forward-looking operating recommendations. The next pilot should remain bounded to PRD review only and must not add execution authority.
+
+Recommendation:
+
+Proceed next with a separately approved bounded PRD-review pilot. It should use the same builder/harness controls, produce review findings or recommendations only, and leave all shell, file-edit, integration, Desktop, and resident-mode authority disabled.

@@ -1,0 +1,14 @@
+hermes_pilot.runner_config
+  repo_root=/Users/michaelrinebold/Documents/Helio/helio-command-center
+  hermes_home=/private/tmp/hermes-pilot-home
+  hermes_bin=/Users/michaelrinebold/.local/bin/hermes
+  model=gemma4:26b
+  base_url=http://127.0.0.1:8088/v1
+  api_key=redacted_dummy_local
+  platform_toolsets_cli=disabled
+  output_mode=stdout
+  output_path=stdout
+  foreground_only=true
+  resident_mode=false
+  background_services=false
+  sensitive_env=unset_in_child_process

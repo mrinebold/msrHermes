@@ -47,6 +47,31 @@ class HermesPilotScriptsTest(unittest.TestCase):
             self.assertNotIn("Read these local repo documents only", prompt)
             self.assertNotIn("Task:", prompt)
 
+    def test_pilot_prompt_builder_creates_phase5af_forward_prompt(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            output = Path(temp_dir) / "phase5af_prompt.md"
+            result = subprocess.run(
+                ["python3", str(PILOT_PROMPT_BUILDER), "--phase5af", "--output", str(output)],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            prompt = output.read_text(encoding="utf-8")
+            self.assertIn("Document/context:", prompt)
+            self.assertIn("# Bounded local context for Phase 5AF", prompt)
+            self.assertIn("Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md", prompt)
+            self.assertIn("Source: docs/prd/CHANGELOG.md", prompt)
+            self.assertIn("Source: docs/HERMES_PILOT_MODE.md", prompt)
+            self.assertIn("Source: docs/HERMES_SECURITY_MODEL.md", prompt)
+            self.assertIn("recommended phase name", prompt)
+            self.assertIn("acceptance criteria", prompt)
+            self.assertIn("whether human approval is required before execution", prompt)
+            self.assertNotIn("Read these local repo documents only", prompt)
+            self.assertNotIn("Task:", prompt)
+
     def test_adapter_runner_refuses_non_localhost_bind(self):
         env = os.environ.copy()
         env["MODEL_ROUTER_ADAPTER_HOST"] = "0.0.0.0"
