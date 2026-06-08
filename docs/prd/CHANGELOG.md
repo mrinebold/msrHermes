@@ -2,6 +2,16 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AH authority and credential gate clarification as documentation only.
+- Updated `docs/HERMES_SECURITY_MODEL.md` with an authority re-enable gate policy.
+- Defined independently gated authority classes for local reasoning, shell execution, file edits, gateway/resident mode, Desktop launch or replacement, Google Workspace, Home Assistant, Supabase/Agent Bus, GitHub writes, Helio/agent dispatch, and cloud model providers.
+- Required every future authority re-enable phase to specify exact authority class, target path/service/account/integration, why the authority is needed, preconditions, command/API/permission/UI surface, expected side effects, rollback or revocation steps, evidence, human approval requirement, and post-run cleanup/residue checks.
+- Updated `docs/HERMES_SECURITY_MODEL.md` with a credential rotation gate policy.
+- Required documented rotation, revocation, or explicit human deferral before resumed live Agent Bus reads/writes, Supabase operations, Helio gateway operations, GitHub mutations, Google operations, Home Assistant operations, external sends, or cloud-provider use.
+- Defined credential-family evidence requirements for Supabase service-role, Supabase anon, OpenAI/Anthropic/cloud model keys, GitHub token, Google OAuth credentials, Home Assistant token, and Helio gateway/dispatcher credentials.
+- Updated the master PRD status, phase table, completed-work snapshot, and next recommended work.
+- Set the next recommended work to Phase 5AI as a human decision gate: confirm/record credential rotation or explicit deferral, or approve sending the prepared Hermes Desktop support clarification.
+- Confirmed Phase 5AH did not run Hermes, start the adapter, launch Desktop, connect integrations, modify credentials, edit files through Hermes, run Agent Bus operations, start background services, create launchd plists, or change runtime state.
 - Completed Phase 5AG bounded Hermes PRD-review pilot.
 - Updated `scripts/build_hermes_pilot_context_prompt.py` with `--phase5ag` to build a bounded PRD-review prompt from the master PRD, changelog, pilot-mode doc, security model, and model-provider plan.
 - Generated `sandbox/output/hermes_pilot_phase5ag_prd_review_prompt.md`.

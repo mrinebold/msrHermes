@@ -442,6 +442,8 @@ Recommendation:
 
 Treat Phase 5AG as a successful bounded PRD-review pilot. The next phase should be documentation-only: clarify authority re-enable gates and credential-rotation requirements in the PRD/security docs before any broader Hermes authority, Agent Bus activity, Desktop retry, or resident-mode work.
 
+Phase 5AH completed that documentation-only clarification. Future pilot phases must preserve the explicit-context, `local_summary`, no-tools, no-integrations, foreground-only baseline unless a later phase explicitly changes the pilot boundary.
+
 ## First Pilot Task Template
 
 The original path-reading pilot task template is:

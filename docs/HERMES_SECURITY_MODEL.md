@@ -80,6 +80,41 @@ Default-deny until separately approved:
 - cloud model providers
 - background gateway service installation
 
+## Authority Re-Enable Gate Policy
+
+Phase 5AH clarifies that disabled Hermes authorities remain off until a later phase explicitly re-enables one narrow authority class. A successful local reasoning pilot does not automatically unlock execution authority.
+
+Any future authority re-enable phase must define:
+
+- exact authority class being considered
+- target path, service, account, or integration
+- reason the authority is needed now
+- preconditions that must be verified before execution
+- command, API, permission, or UI surface to be used
+- expected side effects
+- rollback or revocation steps
+- evidence to capture
+- human approval requirement
+- post-run cleanup and residue checks
+
+Authority classes remain independently gated. Approval for one class does not imply approval for another.
+
+| Authority class | Current state | Minimum re-enable gate |
+| --- | --- | --- |
+| Local reasoning through adapter | Allowed only for bounded explicit-context pilots | Use isolated `HERMES_HOME`, localhost adapter, dummy local key, no tools, no integrations, foreground-only adapter, and output bounded to `sandbox/output`. |
+| Shell execution | Disabled | Add a named command allowlist, classify read/write/destructive risk, require human approval for each write-capable command, capture stdout/stderr/exit code, and prohibit `sudo` unless separately approved. |
+| File edits | Disabled for Hermes | Limit to approved repo paths, require generated diff review before commit, prohibit deletion unless separately approved, and keep credentials/secrets out of edits. |
+| Gateway/resident mode | Disabled | Require a separate launchd/service design, log path, environment contract, stop/rollback procedure, monitoring plan, and human approval before install or start. |
+| Desktop launch or replacement | Fail-closed | Resolve official artifact/signature/release-channel questions or explicitly accept the documented risk, then run a separate controlled Desktop phase with no sign-in, credentials, broad permissions, or integrations. |
+| Google Workspace | Disabled | Confirm scopes, account, read/write tier, consent flow, audit fields, and draft-only behavior before any send/edit/share/delete capability. |
+| Home Assistant | Disabled | Define entity/domain allowlists, read-only telemetry first, high-risk exclusions, and explicit approval for any service call. |
+| Supabase / Agent Bus | Live reads and writes blocked | Satisfy the credential-rotation gate below, then approve a separate read-only phase before any write phase. |
+| GitHub writes | Disabled | Define repository, operation type, branch/PR policy, token scope, and human approval before mutation. |
+| Helio / agent dispatch | Disabled | Use Helio-owned governance only; Hermes may not directly fan out work to agents without a separately approved interface and audit model. |
+| Cloud model providers | Disabled | Document provider, data-sensitivity policy, key storage, fallback prevention, audit fields, and explicit approval before configuration. |
+
+Re-enable phases must be narrow. If a proposed phase includes more than one authority class, split it unless there is a documented operational reason to combine them.
+
 ## Shell Command Policy
 
 Phase 5B:
@@ -174,6 +209,30 @@ Runtime secret locations after future approval:
 - `~/.hermes/.env` for Hermes secrets
 - untracked Helio env files for Helio secrets
 - OS keychain or managed secret store before production use
+
+## Credential Rotation Gate Policy
+
+Phase 5AH clarifies that exposed or potentially exposed credentials remain a hard gate for live shared-system activity. Hermes pilot success does not waive credential rotation requirements.
+
+Before any resumed live Agent Bus read, Agent Bus write, Supabase operation, Helio gateway operation, GitHub mutation, Google operation, Home Assistant operation, or external send, one of these must be documented in the master PRD and changelog:
+
+- rotation confirmed with date, credential family, and verification method
+- credential explicitly revoked with date and verification method
+- credential explicitly deferred by the human owner, with risk accepted and a bounded scope for the next phase
+
+Minimum rotation evidence by credential family:
+
+| Credential family | Required evidence before use resumes |
+| --- | --- |
+| Supabase service-role key | Old key revoked or rotated; new key not exposed to Hermes; no direct Hermes service-role access; any future use goes through a Helio-owned gateway or separately approved admin process. |
+| Supabase anon key | Review whether anon-key exposure is acceptable for scoped read-only preflight; if deferred, document RLS assumptions and exact read-only scope. |
+| OpenAI / Anthropic / cloud model keys | Old keys rotated or explicitly deferred; cloud model providers remain disabled in Hermes until a separate provider phase approves them. |
+| GitHub token | Token revoked or rotated; new token scope documented; no Hermes GitHub mutation until a separate GitHub write phase approves repository and operation scope. |
+| Google OAuth credentials | Client/token files reviewed or rotated before any OAuth run; no send/edit/share/delete scope until separately approved. |
+| Home Assistant token | Token absent, revoked, rotated, or explicitly deferred; no service calls until entity/domain allowlists are approved. |
+| Helio gateway or dispatcher credentials | Gateway/dispatcher endpoints and credentials reviewed before any Hermes-to-Helio operation; no agent dispatch until Helio governance interface is approved. |
+
+If rotation is explicitly deferred, the next phase must stay within the accepted risk boundary. Deferral for read-only inspection does not permit writes, broad reads, credential storage, background services, or resident operation.
 
 ## Google Workspace Policy
 
