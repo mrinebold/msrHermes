@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AB-AC
-Status: infrastructure prepared; live pilot not run
+Phase: 5AD
+Status: first controlled pilot run complete; output not usable
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Pilot mode is not resident mode, not autonomous execution, and not Desktop valid
 | Adapter runner | `scripts/run_model_router_adapter.sh` | Starts the localhost OpenAI-compatible MSR Model Router Adapter manually in the foreground. |
 | Hermes pilot harness | `scripts/run_hermes_pilot.sh` | Runs one isolated Hermes prompt against the localhost adapter. |
 | Example env | `config/hermes-pilot.example.env` | Documents safe pilot variables with dummy local key only. |
-| Next-action prompt | `sandbox/input/hermes_pilot_next_action_prompt.md` | Template prompt for a future PRD/changelog summary run. |
+| Next-action prompt | `sandbox/input/hermes_pilot_next_action_prompt.md` | Template prompt for the PRD/changelog summary run. |
 
 ## Adapter Runner
 
@@ -138,9 +138,64 @@ Hermes may not:
 - run as a background or resident service
 - connect GitHub, Helio, Agent Bus, cloud providers, or other external services
 
+## Phase 5AD Controlled Pilot Result
+
+Phase 5AD ran the first bounded pilot task on 2026-06-08.
+
+Approved command sequence:
+
+```sh
+scripts/run_model_router_adapter.sh
+scripts/run_hermes_pilot.sh --prompt-file sandbox/input/hermes_pilot_next_action_prompt.md --stdout
+```
+
+Capture files:
+
+- `sandbox/output/hermes_pilot_next_action.md`
+- `sandbox/output/hermes_pilot_next_action.stderr`
+- `sandbox/output/hermes_pilot_next_action.metrics`
+
+Observed result:
+
+| Check | Result |
+| --- | --- |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Selected model | `gemma4:26b` |
+| Timeout | 120 seconds |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| Response content length | repeated `0` byte completions |
+| Pilot stdout bytes | 471 |
+| Pilot stderr bytes | 0 |
+| Pilot output usable | no; stdout contained only redacted harness config |
+| Pilot exit | operator-terminated stuck tool session after repeated empty responses |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+| Residual Hermes pilot process | none observed |
+| Desktop launch | no new launch; a pre-existing `Hermes-Setup` process remained outside this phase |
+| External integrations | not touched |
+| Real API keys | not used |
+| Hermes file writes | no Hermes-generated writes outside `sandbox/output` observed |
+
+Guardrail review:
+
+- Hermes stayed within pilot boundaries.
+- The harness used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`.
+- The harness used the localhost adapter URL only.
+- The child process used a dummy local API key.
+- No Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, or cloud provider integration was connected.
+- No Hermes Desktop launch, install, replacement, permission grant, credential modification, background service, resident mode, or message send occurred.
+
+The pilot did not produce a usable recommendation. Adapter metadata showed the prompt reached the model path with `instruction_context`, but DevMonster/Gemma returned empty content repeatedly. This differs from the earlier Phase 5AA useful-output baseline, which used `local_summary` against a file-summary task.
+
+Recommendation:
+
+Do not expand Hermes authority or run additional open-ended pilot tasks yet. The next phase should either adjust the pilot harness to use the validated `local_summary` path with explicit file-like context, or add a narrower next-action prompt mode that supplies the PRD/changelog content as bounded context while preserving the same no-tools/no-integrations/no-background guardrails.
+
 ## First Pilot Task Template
 
-The first future pilot task template is:
+The first pilot task template is:
 
 ```text
 sandbox/input/hermes_pilot_next_action_prompt.md
@@ -153,7 +208,7 @@ It asks Hermes to read only:
 
 and then summarize status, identify the next safest phase, and write recommendation text to stdout only.
 
-Do not run this live pilot task until a later phase explicitly approves it.
+The first live run was attempted in Phase 5AD and did not produce usable output. Do not rerun it unchanged until a later phase explicitly approves a prompt-mode or harness adjustment.
 
 ## Stop Conditions
 

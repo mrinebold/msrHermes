@@ -297,7 +297,7 @@ Reference:
 
 ## Hermes Pilot Mode Policy
 
-Phase 5AB-AC adds pilot infrastructure only. It does not approve a live pilot run.
+Phase 5AB-AC added pilot infrastructure only. Phase 5AD approved and completed one controlled live pilot run through that infrastructure.
 
 Reference:
 
@@ -333,6 +333,27 @@ Pilot mode must not:
 - connect GitHub, Helio, Agent Bus, cloud providers, or other external services
 
 The adapter runner may log request/status metadata, response shape metadata, and message-structure metadata only. It must not log prompt text, file contents, model output text, credentials, tokens, or keys.
+
+Phase 5AD security result:
+
+- adapter bound only to `127.0.0.1:8088`
+- Hermes used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`
+- Hermes used only `http://127.0.0.1:8088/v1`
+- Hermes used only dummy local API key material
+- real provider and integration environment variables were not passed into the child process
+- adapter received model calls and selected `gemma4:26b`
+- model responses contained repeated zero-length content, so pilot output was not usable
+- Hermes did not execute shell commands independently
+- Hermes did not install software
+- Hermes did not send messages
+- Hermes did not write Supabase
+- Hermes did not connect Google, Home Assistant, GitHub, Helio, Agent Bus, cloud providers, or external services
+- Hermes did not launch Desktop
+- Hermes did not modify credentials or persistent Hermes CLI config
+- Hermes did not create launchd plists, resident mode, or background services
+- no `8088` listener or Hermes pilot process remained after cleanup
+
+The next pilot attempt must remain under the same security policy. It should adjust prompt construction or harness context delivery before rerun, not expand permissions.
 
 ## Audit Requirements
 

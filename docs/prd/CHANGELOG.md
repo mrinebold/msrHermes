@@ -2,6 +2,18 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AD controlled Hermes pilot execution.
+- Started `scripts/run_model_router_adapter.sh` manually in the foreground after sandbox bind denial required approved localhost-binding escalation.
+- Confirmed adapter startup config: `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, model `gemma4:26b`, provider timeout 120 seconds, local compatibility mode enabled, `instruction_context` prompt mode, metadata-only logging, no prompt/file-content logging, no cloud fallback, and no launchd/background service.
+- Ran `scripts/run_hermes_pilot.sh --prompt-file sandbox/input/hermes_pilot_next_action_prompt.md --stdout` with the locked-down isolated pilot home and captured stdout/stderr/metrics under `sandbox/output`.
+- Recorded `sandbox/output/hermes_pilot_next_action.md`, `sandbox/output/hermes_pilot_next_action.stderr`, and `sandbox/output/hermes_pilot_next_action.metrics`.
+- Confirmed adapter received model calls and selected `gemma4:26b`, but repeated chat-completion response content lengths were `0`; the pilot produced no usable recommendation text.
+- Recorded stdout as 471 bytes containing only the redacted harness runner config, stderr as 0 bytes, and the stuck pilot session as operator-terminated after repeated empty responses.
+- Stopped the adapter immediately after the pilot run; confirmed no listener remained on `8088` and no Hermes pilot/adapter background process remained.
+- Confirmed no new Hermes Desktop launch occurred; the only Desktop-related process observed after cleanup was the pre-existing `Hermes-Setup` process already documented in earlier Desktop phases.
+- Confirmed no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message sending, software install, credential modification, persistent Hermes CLI config change, background service, resident mode, or Hermes-generated file write outside `sandbox/output` occurred.
+- Updated `docs/HERMES_PILOT_MODE.md`, `docs/HERMES_MODEL_PROVIDER_PLAN.md`, `docs/HERMES_SECURITY_MODEL.md`, and the master PRD with the Phase 5AD result.
+- Recommended Phase 5AE as a prompt/harness adjustment that supplies PRD and changelog content as explicit bounded local context through the validated `local_summary` path before any additional pilot run.
 - Completed Phase 5AB-AC managed adapter runner plus locked-down Hermes pilot config/harness.
 - Added `scripts/run_model_router_adapter.sh` as a foreground-only localhost adapter runner with `127.0.0.1:8088`, DevMonster Gemma defaults, provider timeout 120 seconds, local compatibility mode, default `instruction_context`, context budget 1500 chars, metadata-only logging, startup config printing with secrets redacted, non-localhost refusal, and no launchd/background service behavior.
 - Added `scripts/run_hermes_pilot.sh` as an isolated Hermes pilot harness requiring explicit `--prompt` or `--prompt-file`, defaulting to `HERMES_HOME=/private/tmp/hermes-pilot-home`, configuring only `http://127.0.0.1:8088/v1` with `gemma4:26b`, using a dummy local key, disabling CLI platform toolsets, sanitizing cloud/integration env vars from the child process, and writing output only to `sandbox/output` unless explicitly overridden.

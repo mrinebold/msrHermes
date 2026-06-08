@@ -984,3 +984,51 @@ The harness runs Hermes with an allowlisted child environment so real cloud, Sup
 The first future pilot prompt template is `sandbox/input/hermes_pilot_next_action_prompt.md`. It asks Hermes to read only the master Hermes PRD and changelog, summarize current status, identify the next safest phase, and write recommendation text to stdout only.
 
 Phase 5AB-AC did not start the adapter, did not run a live Hermes pilot, did not configure persistent Hermes home, did not connect external services, and did not add credentials.
+
+## Phase 5AD Controlled Hermes Pilot Execution
+
+Status: complete on 2026-06-08. Pilot output not usable.
+
+Phase 5AD ran the first bounded Hermes pilot task with the managed foreground adapter runner and locked-down pilot harness:
+
+```sh
+scripts/run_model_router_adapter.sh
+scripts/run_hermes_pilot.sh --prompt-file sandbox/input/hermes_pilot_next_action_prompt.md --stdout
+```
+
+Capture files:
+
+- `sandbox/output/hermes_pilot_next_action.md`
+- `sandbox/output/hermes_pilot_next_action.stderr`
+- `sandbox/output/hermes_pilot_next_action.metrics`
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter model | `gemma4:26b` |
+| Provider timeout | 120 seconds |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| Selected model | `gemma4:26b` |
+| Response content length | repeated `0` byte completions |
+| Pilot stdout bytes | 471 |
+| Pilot stderr bytes | 0 |
+| Pilot output usable | no; stdout contained only redacted harness config |
+| Pilot exit | interrupted after the harness remained stuck following repeated empty responses |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+
+The first controlled pilot stayed within the security envelope but did not produce recommendation text. The adapter received Hermes chat-completion calls, routed to DevMonster Gemma, and logged metadata-only message and response shapes. No prompt text, file contents, credentials, or model output text were logged by the adapter.
+
+No background service, launchd plist, persistent Hermes home configuration, cloud credential, Desktop launch, external integration, message send, software install, Supabase write, credential modification, or file write outside `sandbox/output` was performed by Hermes. The only Desktop-related process observed after cleanup was the pre-existing `Hermes-Setup` process from earlier Desktop phases.
+
+Conclusion:
+
+Phase 5AD validates the managed runner/harness guardrails but not pilot usefulness. The current next-action prompt uses the default `instruction_context` adapter mode and does not reproduce the Phase 5AA useful-output baseline, which used `local_summary` with bounded file-like context.
+
+Recommendation:
+
+Do not broaden Hermes pilot authority or run another open-ended pilot unchanged. The next phase should adjust the pilot prompt/harness to feed the PRD and changelog as explicit bounded local context through the validated `local_summary` path, then run one more controlled stdout-only pilot under the same foreground/no-tools/no-integrations guardrails.

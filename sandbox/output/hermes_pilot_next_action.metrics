@@ -1,0 +1,14 @@
+exit_code=-1
+exit_code_note=operator_terminated_stuck_pilot_tool_session_after_repeated_empty_adapter_responses
+elapsed_seconds_observed=approximately_220
+stdout_bytes=471
+stderr_bytes=0
+usable_output=false
+guardrails_stayed_within_pilot_bounds=true
+adapter_received_model_calls=true
+selected_model=gemma4:26b
+response_content_lengths_logged=0,0,0,0
+desktop_launched=false
+external_integrations_touched=false
+real_api_keys_used=false
+files_modified_by_hermes_outside_sandbox_output=false
