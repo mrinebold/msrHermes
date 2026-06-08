@@ -355,6 +355,26 @@ Phase 5AD security result:
 
 The next pilot attempt must remain under the same security policy. It should adjust prompt construction or harness context delivery before rerun, not expand permissions.
 
+Phase 5AE security result:
+
+- built a bounded explicit-context prompt from local PRD/changelog excerpts under Codex control
+- did not ask Hermes to read paths, use tools, connect integrations, or modify files
+- adapter ran foreground-only on `127.0.0.1:8088`
+- adapter used `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`
+- adapter used `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`
+- adapter used `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`
+- adapter metadata showed local summary extraction success with 1426 context chars and no truncation
+- adapter metadata showed `tools_present=false` and `tool_schemas_forwarded=false`
+- Hermes used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`
+- Hermes used only `http://127.0.0.1:8088/v1`
+- Hermes used only dummy local API key material
+- real provider and integration environment variables were not passed into the child process
+- Hermes produced usable stdout and exited 0
+- no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, Desktop launch, message send, software install, credential modification, persistent CLI config change, background service, resident mode, or launchd plist was used
+- no `8088` listener or Hermes pilot/adapter/Desktop process remained after cleanup
+
+The Phase 5AE explicit-context and `local_summary` shape is the current security-approved pattern for future bounded local reasoning pilots. Further phases must preserve the same no-tools, no-integrations, foreground-only guardrails unless separately approved.
+
 ## Audit Requirements
 
 Every governed action should log:

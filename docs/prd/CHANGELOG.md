@@ -2,6 +2,20 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AE controlled Hermes pilot with explicit local context.
+- Added `scripts/build_hermes_pilot_context_prompt.py` to build a bounded prompt from local PRD/changelog excerpts with a short instruction, explicit output format, and `Document/context:` marker for the adapter's validated `local_summary` path.
+- Updated `scripts/run_hermes_pilot.sh` with `--config-to-stderr` so stdout-only pilot captures can contain only Hermes recommendation text while redacted runner config goes to stderr.
+- Generated `sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md`.
+- Started `scripts/run_model_router_adapter.sh` manually in the foreground with `MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary`, `MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120`, and `MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500`.
+- Confirmed adapter bind `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, model `gemma4:26b`, metadata-only logging, no prompt/file-content logging, no cloud fallback, and no launchd/background service.
+- Ran `scripts/run_hermes_pilot.sh --prompt-file sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md --stdout --config-to-stderr`.
+- Captured `sandbox/output/hermes_pilot_next_action_phase5ae.md`, `sandbox/output/hermes_pilot_next_action_phase5ae.stderr`, and `sandbox/output/hermes_pilot_next_action_phase5ae.metrics`.
+- Recorded Hermes exit code `0`, elapsed time `174` seconds, stdout `638` bytes, stderr `471` bytes, usable output `true`, selected model `gemma4:26b`, and response content length `637` on the successful retry.
+- Recorded adapter metadata: local summary extraction succeeded, context chars `1426`, context not truncated, `tools_present=false`, `tool_schemas_forwarded=false`, first model call timed out after `120.011` seconds with status `502`, and successful retry returned status `200` in `49.883` seconds.
+- Confirmed no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message sending, software install, credential modification, persistent Hermes CLI config change, Hermes Desktop launch, background service, resident mode, launchd plist, or Hermes-generated file write outside `sandbox/output` occurred.
+- Stopped the adapter immediately after the run; confirmed no listener remained on `8088` and no Hermes pilot/adapter/Desktop process remained.
+- Updated `docs/HERMES_PILOT_MODE.md`, `docs/HERMES_MODEL_PROVIDER_PLAN.md`, `docs/HERMES_SECURITY_MODEL.md`, and the master PRD with the Phase 5AE result.
+- Recommended Phase 5AF as one bounded forward-looking pilot using the same explicit-context and `local_summary` baseline to ask for the next Hermes operating-system phase after Phase 5AE.
 - Completed Phase 5AD controlled Hermes pilot execution.
 - Started `scripts/run_model_router_adapter.sh` manually in the foreground after sandbox bind denial required approved localhost-binding escalation.
 - Confirmed adapter startup config: `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, model `gemma4:26b`, provider timeout 120 seconds, local compatibility mode enabled, `instruction_context` prompt mode, metadata-only logging, no prompt/file-content logging, no cloud fallback, and no launchd/background service.

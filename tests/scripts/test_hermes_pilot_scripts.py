@@ -8,6 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ADAPTER_RUNNER = REPO_ROOT / "scripts" / "run_model_router_adapter.sh"
 PILOT_RUNNER = REPO_ROOT / "scripts" / "run_hermes_pilot.sh"
+PILOT_PROMPT_BUILDER = REPO_ROOT / "scripts" / "build_hermes_pilot_context_prompt.py"
 PILOT_ENV = REPO_ROOT / "config" / "hermes-pilot.example.env"
 
 
@@ -24,6 +25,27 @@ class HermesPilotScriptsTest(unittest.TestCase):
                 )
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_pilot_prompt_builder_creates_explicit_local_context_prompt(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            output = Path(temp_dir) / "phase5ae_prompt.md"
+            result = subprocess.run(
+                ["python3", str(PILOT_PROMPT_BUILDER), "--output", str(output)],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            prompt = output.read_text(encoding="utf-8")
+            self.assertIn("Document/context:", prompt)
+            self.assertIn("## Master PRD excerpt", prompt)
+            self.assertIn("## Changelog excerpt", prompt)
+            self.assertIn("Return only recommendation text", prompt)
+            self.assertIn("Phase 5AD", prompt)
+            self.assertNotIn("Read these local repo documents only", prompt)
+            self.assertNotIn("Task:", prompt)
 
     def test_adapter_runner_refuses_non_localhost_bind(self):
         env = os.environ.copy()
@@ -88,6 +110,33 @@ class HermesPilotScriptsTest(unittest.TestCase):
             self.assertIn("platform_toolsets:", config)
             self.assertIn("  cli: []", config)
             self.assertNotIn("100.93.120.124", config)
+
+    def test_pilot_harness_can_send_runner_config_to_stderr(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            hermes_home = Path(temp_dir) / "hermes-home"
+            env = os.environ.copy()
+            env["HERMES_HOME"] = str(hermes_home)
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(PILOT_RUNNER),
+                    "--dry-run",
+                    "--stdout",
+                    "--config-to-stderr",
+                    "--prompt",
+                    "local reasoning only",
+                ],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("hermes_pilot.runner_config", result.stderr)
+            self.assertIn("hermes_pilot.dry_run_complete", result.stderr)
 
     def test_pilot_harness_dry_run_does_not_emit_sensitive_env_values(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

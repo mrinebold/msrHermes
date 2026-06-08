@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AD
-Status: first controlled pilot run complete; output not usable
+Phase: 5AE
+Status: explicit local-context pilot complete; output usable
 
 ## Purpose
 
@@ -193,9 +193,89 @@ Recommendation:
 
 Do not expand Hermes authority or run additional open-ended pilot tasks yet. The next phase should either adjust the pilot harness to use the validated `local_summary` path with explicit file-like context, or add a narrower next-action prompt mode that supplies the PRD/changelog content as bounded context while preserving the same no-tools/no-integrations/no-background guardrails.
 
+## Phase 5AE Explicit Local Context Pilot Result
+
+Phase 5AE ran a second bounded pilot task on 2026-06-08 using explicit local context.
+
+Phase 5AE added:
+
+- `scripts/build_hermes_pilot_context_prompt.py`
+- `scripts/run_hermes_pilot.sh --config-to-stderr`
+- `sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md`
+
+The prompt builder reads the master PRD and changelog locally, creates a bounded prompt with a short instruction, includes compact PRD/changelog excerpts after a `Document/context:` marker, and tells Hermes to return only recommendation text. It does not ask Hermes to read paths, use tools, connect integrations, or modify files.
+
+Approved command sequence:
+
+```sh
+python3 scripts/build_hermes_pilot_context_prompt.py --output sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=local_summary \
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120 \
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500 \
+  scripts/run_model_router_adapter.sh
+scripts/run_hermes_pilot.sh --prompt-file sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md --stdout --config-to-stderr
+```
+
+Capture files:
+
+- `sandbox/output/hermes_pilot_next_action_phase5ae.md`
+- `sandbox/output/hermes_pilot_next_action_phase5ae.stderr`
+- `sandbox/output/hermes_pilot_next_action_phase5ae.metrics`
+- `sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md`
+
+Observed result:
+
+| Check | Result |
+| --- | --- |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter prompt mode | `local_summary` |
+| Context budget | 1500 chars |
+| Extracted context | 1426 chars; not truncated |
+| Selected model | `gemma4:26b` |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| First model call | timed out after 120.011 seconds with status `502` |
+| Successful retry | status `200`, response content length `637`, elapsed `49.883s` |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 174 seconds |
+| Pilot stdout bytes | 638 |
+| Pilot stderr bytes | 471 |
+| Pilot output usable | yes |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+| Residual Hermes process | none observed |
+| Desktop launch | none observed |
+| External integrations | not touched |
+| Real API keys | not used |
+| Hermes file writes | no Hermes-generated writes outside `sandbox/output` observed |
+
+The usable stdout recommendation was:
+
+```text
+Status: Phase 5AD completed its first controlled pilot task with successful guardrail adherence, but the output was unusable due to pending approvals.
+Next safest phase: Phase 5AE involves a prompt and harness adjustment that supplies PRD and changelog content as explicit bounded local context before any additional pilot run.
+Guardrails: Do not start background services, expose the adapter externally, use cloud providers, or broaden Hermes authority without new explicit phase approval.
+Recommendation: Implement Phase 5AE to provide validated local context through the `local_summary` path before proceeding with further pilot runs.
+```
+
+Guardrail review:
+
+- Hermes stayed within pilot boundaries.
+- The harness used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`.
+- The harness used the localhost adapter URL only.
+- The child process used a dummy local API key.
+- `platform_toolsets.cli` remained disabled.
+- Adapter metadata showed `tools_present=false` and `tool_schemas_forwarded=false`.
+- No Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message send, Desktop launch, install, permission grant, credential modification, background service, or resident mode occurred.
+
+Recommendation:
+
+Treat Phase 5AE as the first usable controlled next-action pilot. The next phase should preserve the explicit-context and `local_summary` pattern, then either refine the recommendation prompt to produce forward-looking Phase 5AF text or use the same harness for one bounded PRD-review task. Do not broaden Hermes authority.
+
 ## First Pilot Task Template
 
-The first pilot task template is:
+The original path-reading pilot task template is:
 
 ```text
 sandbox/input/hermes_pilot_next_action_prompt.md
@@ -208,7 +288,7 @@ It asks Hermes to read only:
 
 and then summarize status, identify the next safest phase, and write recommendation text to stdout only.
 
-The first live run was attempted in Phase 5AD and did not produce usable output. Do not rerun it unchanged until a later phase explicitly approves a prompt-mode or harness adjustment.
+The first live run was attempted in Phase 5AD and did not produce usable output. Phase 5AE replaced this shape with `sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md`, which embeds bounded local context and produced usable output through `local_summary`. Do not rerun the original path-reading template unchanged.
 
 ## Stop Conditions
 

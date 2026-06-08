@@ -1031,4 +1031,67 @@ Phase 5AD validates the managed runner/harness guardrails but not pilot usefulne
 
 Recommendation:
 
-Do not broaden Hermes pilot authority or run another open-ended pilot unchanged. The next phase should adjust the pilot prompt/harness to feed the PRD and changelog as explicit bounded local context through the validated `local_summary` path, then run one more controlled stdout-only pilot under the same foreground/no-tools/no-integrations guardrails.
+Do not broaden Hermes pilot authority or run another open-ended pilot unchanged. This recommendation was executed in Phase 5AE by feeding the PRD and changelog as explicit bounded local context through the validated `local_summary` path under the same foreground/no-tools/no-integrations guardrails.
+
+## Phase 5AE Explicit Local Context Pilot
+
+Status: complete on 2026-06-08. Pilot output usable.
+
+Phase 5AE implemented the Phase 5AD recommendation by adding a deterministic prompt builder and a harness mode that keeps runner config off stdout:
+
+- `scripts/build_hermes_pilot_context_prompt.py`
+- `scripts/run_hermes_pilot.sh --config-to-stderr`
+
+The builder created:
+
+- `sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md`
+
+The prompt contains a short instruction, bounded excerpts from the master Hermes PRD and changelog, explicit output format, and a `Document/context:` marker so the adapter's validated `local_summary` extraction path can treat the PRD/changelog excerpts as local context. Hermes was not asked to read paths or use tools.
+
+Run configuration:
+
+| Setting | Value |
+| --- | --- |
+| Adapter runner | foreground only |
+| Bind | `127.0.0.1:8088` |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter prompt mode | `local_summary` |
+| Provider timeout | 120 seconds |
+| Context budget | 1500 chars |
+| Hermes home | `/private/tmp/hermes-pilot-home` |
+| Hermes base URL | `http://127.0.0.1:8088/v1` |
+| Hermes model | `gemma4:26b` |
+| Platform tools | disabled |
+
+Validation results:
+
+| Check | Result |
+| --- | --- |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 174 seconds |
+| Pilot stdout bytes | 638 |
+| Pilot stderr bytes | 471 |
+| Adapter model calls | yes |
+| Selected model | `gemma4:26b` |
+| Local summary extraction | success |
+| Context chars | 1426 |
+| Context truncated | false |
+| Tools present | false |
+| Tool schemas forwarded | false |
+| First model call | timed out after 120.011 seconds, status `502` |
+| Successful retry | status `200`, response content length `637`, elapsed `49.883s` |
+| Output usable | yes |
+| Adapter shutdown | stopped immediately after run |
+| Post-run listener | no `8088` listener remained |
+
+The successful stdout response was a concise four-line recommendation in the requested format. Stderr contained only the redacted harness runner config because `--config-to-stderr` was used.
+
+No background service, launchd plist, persistent Hermes home configuration, cloud credential, Desktop launch, external integration, message send, software install, Supabase write, credential modification, or Hermes-generated write outside `sandbox/output` occurred. No matching Hermes pilot, adapter, or Desktop process remained after cleanup.
+
+Conclusion:
+
+The explicit local-context shape plus `local_summary` mode is now the validated baseline for bounded Hermes next-action pilot work. The first provider call may still time out at 120 seconds, but Hermes can recover on retry and produce usable output without tools or integrations.
+
+Recommendation:
+
+Keep Phase 5AE's explicit-context builder and `--config-to-stderr` harness behavior for future stdout-only pilots. The next phase should either refine the prompt to ask for a forward-looking Phase 5AF recommendation or run one bounded PRD-review task with the same local-only, no-tools, no-background, no-integration guardrails.

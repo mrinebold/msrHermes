@@ -16,10 +16,11 @@ PROMPT_FILE=""
 OUTPUT_MODE="file"
 DRY_RUN=false
 ALLOW_OUTSIDE_OUTPUT=false
+CONFIG_TO_STDERR=false
 
 usage() {
   cat <<'EOF'
-usage: scripts/run_hermes_pilot.sh (--prompt TEXT | --prompt-file FILE) [--stdout | --output FILE] [--allow-outside-output] [--dry-run]
+usage: scripts/run_hermes_pilot.sh (--prompt TEXT | --prompt-file FILE) [--stdout | --output FILE] [--allow-outside-output] [--config-to-stderr] [--dry-run]
 
 Runs one foreground Hermes pilot prompt through an isolated HERMES_HOME and the
 localhost model router adapter. Does not start the adapter.
@@ -47,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --allow-outside-output)
       ALLOW_OUTSIDE_OUTPUT=true
+      shift
+      ;;
+    --config-to-stderr)
+      CONFIG_TO_STDERR=true
       shift
       ;;
     --dry-run)
@@ -116,6 +121,12 @@ platform_toolsets:
   cli: []
 EOF
 
+CONFIG_FD=1
+if [[ "${CONFIG_TO_STDERR}" == "true" ]]; then
+  CONFIG_FD=2
+fi
+
+{
 cat <<EOF
 hermes_pilot.runner_config
   repo_root=${REPO_ROOT}
@@ -132,9 +143,10 @@ hermes_pilot.runner_config
   background_services=false
   sensitive_env=unset_in_child_process
 EOF
+} >&"${CONFIG_FD}"
 
 if [[ "${DRY_RUN}" == "true" ]]; then
-  echo "hermes_pilot.dry_run_complete"
+  echo "hermes_pilot.dry_run_complete" >&"${CONFIG_FD}"
   exit 0
 fi
 
