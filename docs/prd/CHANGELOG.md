@@ -2,6 +2,13 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AK Hermes local-only operational readiness review.
+- Added `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md` with current proven capabilities, current blocked capabilities, remaining risks, required gates before narrow capabilities, recommended next three phases, explicit human approval points, and a readiness matrix.
+- Added readiness matrix coverage for local adapter, local pilot harness, DevMonster Gemma worker, Hermes CLI, Hermes Desktop, Google Workspace, Supabase Agent Bus, Home Assistant, GitHub, credential rotation, and logging/audit.
+- Updated `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` to reference the operational readiness review and broaden approved review surfaces for Phase 5AK.
+- Updated the master PRD status, phase table, completed-work snapshot, and next recommended work.
+- Added tests confirming the readiness review references the credential deferral freeze, does not claim live integrations are approved, keeps Hermes Desktop fail-closed, and avoids real-looking secret markers.
+- Confirmed Phase 5AK did not start the adapter, run Hermes live, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, create launchd/background services, modify credentials, or broaden Hermes authority.
 - Completed Phase 5AJ local-only validation and configuration checks under the Phase 5AI credential deferral boundary.
 - Added `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` with approved surfaces, local-only invariants, credential-deferral boundaries, validation commands, evidence requirements, and the next gate.
 - Updated `docs/HERMES_PILOT_MODE.md` to record local validation mode and credential-stripping alignment.

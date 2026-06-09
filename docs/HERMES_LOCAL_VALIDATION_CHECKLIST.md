@@ -1,13 +1,15 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ
-Status: local-only validation checklist
+Phase: 5AJ-5AK
+Status: local-only validation checklist and readiness review input
 
 ## Purpose
 
 Validate Hermes operating-system readiness using local configuration and documentation checks only. Phase 5AJ operates under the Phase 5AI credential-rotation deferral boundary.
 
 This checklist does not approve credential use, live Agent Bus reads/writes, integrations, Hermes Desktop launch, background services, or broader Hermes authority.
+
+Phase 5AK uses this checklist as an input to the operational readiness review in `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`.
 
 ## Approved Surfaces
 
@@ -19,6 +21,9 @@ Inspect only:
 - `services/model_router_adapter/README.md`
 - `docs/HERMES_PILOT_MODE.md`
 - `docs/HERMES_SECURITY_MODEL.md`
+- `docs/HERMES_MODEL_PROVIDER_PLAN.md`
+- `docs/HERMES_OWNERSHIP_MODEL.md`
+- `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
 - `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
 - `docs/prd/CHANGELOG.md`
 
@@ -88,9 +93,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AJ, the safest next step is either:
+After Phase 5AK, the safest next step is either:
 
 - continue local-only hardening of tests/docs/config examples, or
-- prepare a separate, human-approved read-only configuration phase that states exactly whether any credential-family-specific deferral is being used.
+- prepare a separate, human-approved narrow capability phase that states exactly whether any credential-family-specific deferral is being used.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

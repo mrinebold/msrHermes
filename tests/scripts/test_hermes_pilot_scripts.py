@@ -13,6 +13,7 @@ PILOT_ENV = REPO_ROOT / "config" / "hermes-pilot.example.env"
 PILOT_MODE_DOC = REPO_ROOT / "docs" / "HERMES_PILOT_MODE.md"
 SECURITY_DOC = REPO_ROOT / "docs" / "HERMES_SECURITY_MODEL.md"
 LOCAL_VALIDATION_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_VALIDATION_CHECKLIST.md"
+READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -178,7 +179,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
     def test_local_validation_docs_preserve_credential_deferral_freeze(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (SECURITY_DOC, LOCAL_VALIDATION_DOC)
+            for path in (SECURITY_DOC, LOCAL_VALIDATION_DOC, READINESS_DOC)
         )
 
         self.assertIn("Phase 5AI", combined)
@@ -186,6 +187,37 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("local-only", combined)
         self.assertIn("live Agent Bus reads/writes", combined)
         self.assertIn("Desktop launch", combined)
+
+    def test_readiness_doc_does_not_claim_live_integrations_are_approved(self):
+        content = READINESS_DOC.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Phase 5AK", content)
+        self.assertIn("Current Blocked Capabilities", content)
+        self.assertIn("Credential rotation", content)
+        self.assertIn("Human approval is required before", content)
+        self.assertIn("Hermes is ready only for continued local-only", content)
+
+        forbidden_claims = (
+            "google workspace is approved",
+            "supabase agent bus is approved",
+            "agent bus writes are approved",
+            "home assistant control is approved",
+            "github token use is approved",
+            "desktop relaunch is approved",
+            "credential rotation is complete",
+            "resident operation is approved",
+        )
+        for claim in forbidden_claims:
+            self.assertNotIn(claim, lower_content)
+
+    def test_readiness_doc_keeps_desktop_fail_closed(self):
+        content = READINESS_DOC.read_text(encoding="utf-8")
+
+        self.assertIn("Hermes Desktop | Not ready; fail-closed", content)
+        self.assertIn("Desktop Relaunch", content)
+        self.assertIn("Resolve release-channel/signature questions", content)
+        self.assertIn("new phase-specific human approval gate", content)
 
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
@@ -196,6 +228,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             PILOT_MODE_DOC,
             SECURITY_DOC,
             LOCAL_VALIDATION_DOC,
+            READINESS_DOC,
         ]
         disallowed_markers = (
             "sk-live-",
