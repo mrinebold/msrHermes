@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AM
-Status: local-only validation checklist and persistent config application record
+Phase: 5AJ-5AN
+Status: local validation checklist and persistent config live-local validation record
 
 ## Purpose
 
@@ -14,6 +14,8 @@ Phase 5AK uses this checklist as an input to the operational readiness review in
 Phase 5AL uses this checklist as an input to the proposal-only persistent local config plan in `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`.
 
 Phase 5AM applied the approved persistent local config to `~/.hermes/config.yaml` with backup and validation. This checklist still does not approve live Hermes runs, adapter start, background services, integrations, Agent Bus reads/writes, Desktop launch, or broader Hermes authority.
+
+Phase 5AN approved and completed one live local validation prompt through the foreground localhost adapter. This does not approve additional prompts, background services, integrations, Agent Bus reads/writes, Desktop launch, resident mode, or broader Hermes authority.
 
 ## Approved Surfaces
 
@@ -53,6 +55,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - persistent config points only to the localhost adapter and does not add real credentials
 - Hermes receives no broad filesystem authority
 - every boundary-crossing action still requires a new explicit human-approved phase
+- Phase 5AN proved one harmless prompt can use the persistent config through the localhost adapter
 
 ## Credential Deferral Boundary
 
@@ -99,9 +102,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AM, the safest next step is either:
+After Phase 5AN, the safest next step is either:
 
 - continue local-only hardening of tests/docs/config examples, or
-- prepare a separate, human-approved live local validation phase that states whether the adapter may be started manually and whether one harmless Hermes prompt may be run against the localhost adapter.
+- prepare a separate, human-approved resident-mode design proposal that covers launchd/background behavior, logs, health checks, stop/rollback, scope, and audit.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

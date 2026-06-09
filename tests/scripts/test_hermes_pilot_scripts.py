@@ -223,13 +223,15 @@ class HermesPilotScriptsTest(unittest.TestCase):
     def test_persistent_config_plan_preserves_localhost_only_adapter(self):
         content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
 
-        self.assertIn("Status: persistent local config applied", content)
+        self.assertIn("Status: persistent local config live-local validated", content)
         self.assertIn("http://127.0.0.1:8088/v1", content)
         self.assertIn("gemma4:26b", content)
         self.assertIn("provider: custom", content)
         self.assertIn("platform_toolsets:", content)
         self.assertIn("cli: []", content)
         self.assertIn("phase5am-20260608T232816", content)
+        self.assertIn("Phase 5AN Live Local Validation Result", content)
+        self.assertIn("Persistent local Hermes config works.", content)
 
     def test_persistent_config_plan_excludes_credentials_and_live_integrations(self):
         content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")

@@ -2,6 +2,14 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AN live local validation of persistent Hermes config.
+- Started `scripts/run_model_router_adapter.sh` manually in the foreground and confirmed bind `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, default model `gemma4:26b`, provider timeout `120`, metadata-only logging, and no prompt/file/model-output/secret logging.
+- Ran exactly one sanitized-env Hermes prompt through persistent config: `Reply with exactly: Persistent local Hermes config works.`
+- Captured `sandbox/output/hermes_persistent_config_phase5an.stdout`, `sandbox/output/hermes_persistent_config_phase5an.stderr`, and `sandbox/output/hermes_persistent_config_phase5an.metrics`.
+- Recorded exit code `0`, elapsed time `74` seconds, stdout `38` bytes, stderr `0` bytes, and stdout text `Persistent local Hermes config works.`
+- Recorded adapter metadata: selected model `gemma4:26b`, response content length `37`, successful `POST /v1/chat/completions`, and chat completion elapsed time `72.634` seconds.
+- Stopped the adapter immediately after validation and confirmed no `8088` listener, Hermes/adapter/Desktop process, Hermes launchd/LaunchAgent/LaunchDaemon match, `.env` modification, real API key use, external integration, Agent Bus read/write, Desktop launch, background service, resident mode, credential modification, or authority broadening.
+- Updated `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AN result.
 - Completed Phase 5AM persistent local Hermes config application with backup and rollback path.
 - Inspected current `~/.hermes` metadata without printing file contents or secret values; identified `~/.hermes/config.yaml` and `~/.hermes/.env` as candidate config files and reported secret-like names by name only.
 - Created timestamped backup `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak` before modifying `~/.hermes/config.yaml`.

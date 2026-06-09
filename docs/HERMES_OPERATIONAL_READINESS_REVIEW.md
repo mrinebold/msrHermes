@@ -50,7 +50,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
 | Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets | Separate approval for live pilot prompts |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
-| Hermes CLI | Ready for local adapter config; not resident | Persistent `~/.hermes/config.yaml` now points to localhost adapter with dummy local key | Live Hermes run or resident operation approval |
+| Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through localhost adapter | Resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
 | Google Workspace | Not ready | No OAuth run, no token grant, no scopes approved | Credential review/rotation gate plus read-only OAuth phase |
 | Supabase Agent Bus | Not ready for live access | Prior anon-key read-only validation completed, but exposed credentials remain deferred | Credential-family-specific approval and read-only scope |
@@ -172,3 +172,9 @@ Phase 5AL added `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md` as a proposal-only
 Phase 5AM applied the approved persistent local config to `~/.hermes/config.yaml` after creating `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak`. The applied config uses `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, `model.api_key=dummy-local-adapter-key`, and `platform_toolsets.cli=[]`.
 
 No `~/.hermes/.env` change was made. No adapter, Hermes live run, Desktop launch, credentialed operation, integration, Agent Bus read/write, launchd plist, background service, resident mode, or authority broadening occurred. Hermes remains not ready for resident operation until a later explicit phase approves a live validation and resident-mode design.
+
+## Phase 5AN Live Local Validation Result
+
+Phase 5AN validated the persistent config with one harmless prompt through the manually started foreground adapter. Hermes exited `0` after `74` seconds, wrote `38` stdout bytes, wrote `0` stderr bytes, and returned exactly `Persistent local Hermes config works.` Adapter metadata showed selected model `gemma4:26b`, response content length `37`, and a successful `POST /v1/chat/completions` in `72.634` seconds.
+
+The adapter was stopped immediately afterward. No `8088` listener, Hermes/adapter/Desktop process, launchd plist, LaunchAgent, or LaunchDaemon match remained. `~/.hermes/.env` stayed untouched. No real API keys, Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud-provider integration, Desktop launch, background service, resident mode, or authority broadening was used.

@@ -1,13 +1,13 @@
 # Hermes Persistent Local Config Plan
 
-Phase: 5AM
-Status: persistent local config applied
+Phase: 5AN
+Status: persistent local config live-local validated
 
 ## Purpose
 
 Define and record the persistent local Hermes configuration needed for a future resident-readiness path.
 
-Phase 5AM applied only the approved local adapter config to `~/.hermes/config.yaml`. It did not run Hermes, start the adapter, create background services, launch Desktop, use real credentials, connect integrations, modify credential files, or broaden Hermes authority.
+Phase 5AM applied only the approved local adapter config to `~/.hermes/config.yaml`. Phase 5AN then validated that config with one harmless live local prompt through the foreground localhost adapter. No background services, Desktop launch, real credentials, integrations, credential file modifications, Agent Bus operations, or broader Hermes authority were used.
 
 ## Proposed Persistent Scope
 
@@ -130,6 +130,54 @@ config_file=/Users/michaelrinebold/.hermes/config.yaml
 config_mode=-rw-------
 config_size=4670
 ```
+
+## Phase 5AN Live Local Validation Result
+
+Phase 5AN started `scripts/run_model_router_adapter.sh` manually in the foreground and ran exactly one Hermes prompt through the persistent config:
+
+```text
+Reply with exactly: Persistent local Hermes config works.
+```
+
+Captured files:
+
+- `sandbox/output/hermes_persistent_config_phase5an.stdout`
+- `sandbox/output/hermes_persistent_config_phase5an.stderr`
+- `sandbox/output/hermes_persistent_config_phase5an.metrics`
+
+Run result:
+
+| Field | Value |
+| --- | --- |
+| Exit code | `0` |
+| Elapsed time | `74` seconds |
+| Stdout bytes | `38` |
+| Stderr bytes | `0` |
+| Stdout text | `Persistent local Hermes config works.` |
+
+Adapter evidence:
+
+- runner bound only to `127.0.0.1:8088`
+- DevMonster endpoint was `http://100.93.120.124:11434`
+- default model was `gemma4:26b`
+- provider timeout was `120` seconds
+- prompt/file/model-output/secret logging remained disabled
+- `GET /v1/models` returned `200`
+- `POST /v1/chat/completions` returned `200`
+- selected model was `gemma4:26b`
+- response content length was `37`
+- chat completion elapsed time was `72.634` seconds
+
+Post-run validation:
+
+- adapter was stopped immediately after the run
+- no `8088` listener remained
+- no Hermes, adapter, or Desktop process remained
+- no Hermes launchd, LaunchAgent, or LaunchDaemon match was found
+- no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, or cloud-provider integration was touched
+- no real API keys were inherited by the Hermes child process
+- `~/.hermes/.env` remained unmodified with modified time `Jun 4 11:35:14 2026`
+- `~/.hermes/config.yaml` still validated with localhost base URL, `gemma4:26b`, dummy local key, and disabled CLI platform toolset
 
 ## Rollback
 
