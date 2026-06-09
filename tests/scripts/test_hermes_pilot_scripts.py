@@ -10,6 +10,25 @@ ADAPTER_RUNNER = REPO_ROOT / "scripts" / "run_model_router_adapter.sh"
 PILOT_RUNNER = REPO_ROOT / "scripts" / "run_hermes_pilot.sh"
 PILOT_PROMPT_BUILDER = REPO_ROOT / "scripts" / "build_hermes_pilot_context_prompt.py"
 PILOT_ENV = REPO_ROOT / "config" / "hermes-pilot.example.env"
+PILOT_MODE_DOC = REPO_ROOT / "docs" / "HERMES_PILOT_MODE.md"
+SECURITY_DOC = REPO_ROOT / "docs" / "HERMES_SECURITY_MODEL.md"
+LOCAL_VALIDATION_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_VALIDATION_CHECKLIST.md"
+
+SENSITIVE_ENV_VARS = {
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "OPENROUTER_API_KEY",
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "GOOGLE_CLIENT_SECRET_FILE",
+    "GOOGLE_TOKEN_FILE",
+    "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "HASS_URL",
+    "HASS_TOKEN",
+    "HELIO_GATEWAY_URL",
+    "HELIO_DISPATCHER_MCP_URL",
+}
 
 
 class HermesPilotScriptsTest(unittest.TestCase):
@@ -137,6 +156,66 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("HERMES_PILOT_MODEL=gemma4:26b", content)
         self.assertIn("HERMES_PILOT_API_KEY=dummy-local-adapter-key", content)
         self.assertNotIn("sk-", content)
+
+    def test_pilot_env_stripping_list_matches_documented_credential_services(self):
+        env_content = PILOT_ENV.read_text(encoding="utf-8")
+        pilot_doc = PILOT_MODE_DOC.read_text(encoding="utf-8")
+        runner = PILOT_RUNNER.read_text(encoding="utf-8")
+        sanitized_env = runner.split("SANITIZED_ENV=(", 1)[1].split(")", 1)[0]
+
+        for variable in SENSITIVE_ENV_VARS:
+            with self.subTest(variable=variable):
+                self.assertIn(f"{variable}=", env_content)
+                self.assertIn(f"`{variable}`", pilot_doc)
+
+        for variable in SENSITIVE_ENV_VARS - {"OPENAI_API_KEY"}:
+            with self.subTest(stripped_variable=variable):
+                self.assertNotIn(variable, sanitized_env)
+
+        self.assertIn('"OPENAI_API_KEY=${HERMES_PILOT_API_KEY}"', sanitized_env)
+        self.assertNotIn("${OPENAI_API_KEY}", sanitized_env)
+
+    def test_local_validation_docs_preserve_credential_deferral_freeze(self):
+        combined = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (SECURITY_DOC, LOCAL_VALIDATION_DOC)
+        )
+
+        self.assertIn("Phase 5AI", combined)
+        self.assertIn("credential rotation", combined)
+        self.assertIn("local-only", combined)
+        self.assertIn("live Agent Bus reads/writes", combined)
+        self.assertIn("Desktop launch", combined)
+
+    def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
+        surfaces = [
+            PILOT_ENV,
+            ADAPTER_RUNNER,
+            PILOT_RUNNER,
+            REPO_ROOT / "services" / "model_router_adapter" / "README.md",
+            PILOT_MODE_DOC,
+            SECURITY_DOC,
+            LOCAL_VALIDATION_DOC,
+        ]
+        disallowed_markers = (
+            "sk-live-",
+            "sk-proj-",
+            "sk-ant-",
+            "xoxb-",
+            "ghp_",
+            "github_pat_",
+            "SUPABASE_SERVICE_ROLE_KEY=ey",
+            "HASS_TOKEN=ey",
+            "OPENAI_API_KEY=sk-",
+            "ANTHROPIC_API_KEY=sk-",
+            "OPENROUTER_API_KEY=sk-",
+        )
+
+        for path in surfaces:
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                content = path.read_text(encoding="utf-8")
+                for marker in disallowed_markers:
+                    self.assertNotIn(marker, content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

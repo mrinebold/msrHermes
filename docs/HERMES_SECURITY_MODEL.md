@@ -363,6 +363,7 @@ Phase 5AB-AC added pilot infrastructure only. Phase 5AD approved and completed o
 Reference:
 
 - [Hermes Pilot Mode](HERMES_PILOT_MODE.md)
+- [Hermes Local Validation Checklist](HERMES_LOCAL_VALIDATION_CHECKLIST.md)
 
 Pilot mode permits Hermes to perform safe local reasoning over explicitly supplied local prompts or files through the localhost model router adapter. It may summarize local repo docs and recommend next actions.
 
@@ -456,6 +457,16 @@ Phase 5AF security result:
 - no `8088` listener or Hermes pilot/adapter/Desktop process remained after cleanup
 
 Hermes' Phase 5AF recommendation correctly required human approval before executing the next PRD-review phase and kept authority broadening as a non-goal. The next phase may perform bounded local reasoning over explicit context only; it must not introduce shell execution, file edits, gateway behavior, external integrations, Agent Bus access, Desktop launch, or resident operation without separate approval.
+
+Phase 5AJ local validation result:
+
+- inspected the pilot env, adapter runner, pilot harness, adapter README, pilot-mode doc, security model, and master PRD for local-only consistency
+- added `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` as the local-only readiness checklist under the Phase 5AI credential deferral boundary
+- validated that adapter and pilot defaults remain `127.0.0.1:8088` only
+- validated that the pilot harness uses the dummy local adapter key only and strips real credentialed-service environment variables from the Hermes child process
+- validated that committed pilot examples and local validation docs do not contain real-looking provider, GitHub, Supabase service-role, or Home Assistant token markers
+- confirmed local-only validation does not authorize live Agent Bus reads/writes, provider console/API calls, Google, Supabase, Home Assistant, GitHub, Helio, Desktop launch, credential changes, background services, resident mode, or broader Hermes authority
+- no adapter, Hermes pilot, Desktop, external integration, credentialed operation, live Agent Bus operation, background service, or resident mode was started
 
 ## Audit Requirements
 

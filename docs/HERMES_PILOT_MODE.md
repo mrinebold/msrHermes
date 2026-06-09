@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AG
-Status: bounded PRD-review pilot complete; output usable
+Phase: 5AJ
+Status: local-only validation/configuration checks complete
 
 ## Purpose
 
@@ -17,6 +17,7 @@ Pilot mode is not resident mode, not autonomous execution, and not Desktop valid
 | Hermes pilot harness | `scripts/run_hermes_pilot.sh` | Runs one isolated Hermes prompt against the localhost adapter. |
 | Example env | `config/hermes-pilot.example.env` | Documents safe pilot variables with dummy local key only. |
 | Next-action prompt | `sandbox/input/hermes_pilot_next_action_prompt.md` | Template prompt for the PRD/changelog summary run. |
+| Local validation checklist | `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` | Records local-only readiness checks under the credential deferral boundary. |
 
 ## Adapter Runner
 
@@ -104,11 +105,33 @@ The sanitized Hermes child process removes real provider and integration variabl
 - `HELIO_GATEWAY_URL`
 - `HELIO_DISPATCHER_MCP_URL`
 
+Phase 5AJ validates that the example env, pilot harness, security model, and local validation checklist stay aligned on this credential-stripping set. The harness may pass only the dummy local adapter key as `OPENAI_API_KEY` inside the isolated child process because Hermes requires an OpenAI-compatible API-key-shaped value syntactically.
+
 Dry-run guardrail check:
 
 ```sh
 scripts/run_hermes_pilot.sh --dry-run --prompt-file sandbox/input/hermes_pilot_next_action_prompt.md
 ```
+
+## Local Validation Mode
+
+Phase 5AJ local validation is documentation and test validation only. It does not start the adapter, run Hermes, launch Desktop, connect integrations, use live credentials, or run Agent Bus reads/writes.
+
+Use the checklist:
+
+```text
+docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md
+```
+
+Local validation confirms:
+
+- localhost-only adapter and pilot configuration
+- no cloud-provider fallback
+- no real API keys in committed examples
+- no Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus credential use
+- no Desktop launch
+- no background/resident service setup
+- human approval remains required before boundary-crossing actions
 
 ## Allowed Pilot Behavior
 

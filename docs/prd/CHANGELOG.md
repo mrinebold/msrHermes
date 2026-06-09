@@ -2,6 +2,13 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AJ local-only validation and configuration checks under the Phase 5AI credential deferral boundary.
+- Added `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` with approved surfaces, local-only invariants, credential-deferral boundaries, validation commands, evidence requirements, and the next gate.
+- Updated `docs/HERMES_PILOT_MODE.md` to record local validation mode and credential-stripping alignment.
+- Updated `docs/HERMES_SECURITY_MODEL.md` with the Phase 5AJ local validation result and a reference to the local validation checklist.
+- Updated the master PRD status, phase table, completed-work snapshot, and next recommended work.
+- Added tests confirming runner defaults remain localhost-only, the pilot env-stripping set includes all credentialed services, committed local pilot/config surfaces avoid real-looking secret markers, and local-only mode remains compatible with the credential deferral freeze.
+- Confirmed Phase 5AJ did not start the adapter, run Hermes live, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, create launchd/background services, modify credentials, or broaden Hermes authority.
 - Completed Phase 5AI credential-rotation deferral decision gate as documentation only.
 - Recorded the human owner's explicit deferral of credential rotation for the next bounded local-only validation/configuration scope.
 - Updated `docs/security/CREDENTIAL_ROTATION_CHECKLIST.md` to distinguish the deferral from rotation, revocation, review completion, or credential safety.
