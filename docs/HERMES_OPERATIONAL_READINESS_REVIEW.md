@@ -50,7 +50,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
 | Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets | Separate approval for live pilot prompts |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
-| Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through localhost adapter | Resident operation approval |
+| Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through foreground adapter and Phase 5AU stdout through manual adapter service | Resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
 | Google Workspace | Not ready | No OAuth run, no token grant, no scopes approved | Credential review/rotation gate plus read-only OAuth phase |
 | Supabase Agent Bus | Not ready for live access | Prior anon-key read-only validation completed, but exposed credentials remain deferred | Credential-family-specific approval and read-only scope |
@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Manual adapter service operation validated; Hermes resident disabled | Phase 5AT validates helper-driven manual adapter service start/status/stop while preserving `RunAtLoad=false` and `KeepAlive=false` | Separate approval for RunAtLoad, KeepAlive, or Hermes resident mode |
+| Resident mode | Manual adapter service operation validated; Hermes resident disabled | Phase 5AT validates helper-driven manual adapter service start/status/stop and Phase 5AU validates one Hermes prompt through that procedure while preserving `RunAtLoad=false` and `KeepAlive=false` | Separate approval for RunAtLoad, KeepAlive, or Hermes resident mode |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -225,3 +225,11 @@ Phase 5AT added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` plus `scripts/adapter_s
 The helpers use the existing user LaunchAgent only, do not use sudo, do not modify the plist, do not create services, and fail closed on unsafe listener or plist-policy drift. Validation showed manual start succeeded, `/health` worked, `/v1/models` returned `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, stop succeeded, and final status reported `loaded=false` and `listener=false`.
 
 Readiness position: manual adapter service start/stop is ready as an operator procedure. Hermes resident mode, automatic RunAtLoad, KeepAlive, Desktop, credentials, integrations, and Agent Bus activity remain unapproved.
+
+## Phase 5AU Manual-Service Hermes Validation Result
+
+Phase 5AU validated the approved manual adapter service procedure with one harmless Hermes prompt through the persistent localhost-only config. The adapter service started through `scripts/adapter_service_start.sh`, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+
+Hermes exited `0` after `28` seconds, wrote `49` stdout bytes, wrote `0` stderr bytes, and returned exactly `Hermes works through the manual adapter service.` The service was stopped with `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no matching adapter, Hermes, Desktop, or resident process remaining.
+
+Readiness position: the manual adapter service is now validated for bounded local Hermes prompt execution. Additional prompts, PRD review, task inbox usage, resident mode, automatic RunAtLoad, KeepAlive, Desktop, credentials, integrations, and Agent Bus activity still require explicit phase approval.

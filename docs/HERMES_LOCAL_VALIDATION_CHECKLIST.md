@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AT
-Status: local validation checklist, resident design, adapter service validation, and manual runbook input
+Phase: 5AJ-5AU
+Status: local validation checklist, resident design, adapter service validation, manual runbook input, and bounded manual-service Hermes validation
 
 ## Purpose
 
@@ -28,6 +28,8 @@ Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as a proposal-
 Phase 5AS created the wrapper, moved only the minimal adapter runtime to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`, validated manual LaunchAgent start/health/models/localhost-only binding, and stopped/unloaded the service. It does not approve Hermes resident mode, RunAtLoad, KeepAlive, credentials, integrations, Desktop launch, Agent Bus activity, or `~/.hermes` modification.
 
 Phase 5AT added a manual adapter service runbook and helper scripts. It validates manual start/status/stop only and does not approve automatic service start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
+
+Phase 5AU used the manual adapter service procedure for one harmless Hermes prompt through the persistent localhost-only config. The prompt exited `0`, returned usable output, and the adapter service was stopped/unloaded afterward. It does not approve additional live prompts, automatic service start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
 ## Approved Surfaces
 
@@ -77,6 +79,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AR recommends minimal wrapper remediation over broad macOS privacy permission and whole-repo movement
 - Phase 5AS validates manual adapter LaunchAgent start/stop from a non-`Documents` self-contained runtime and leaves the service stopped
 - Phase 5AT validates helper-driven manual start/stop and keeps `RunAtLoad=false`, `KeepAlive=false`, and Hermes resident mode disabled
+- Phase 5AU validates one harmless Hermes prompt through the manual adapter service and leaves the service stopped
 
 ## Credential Deferral Boundary
 
@@ -123,9 +126,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AT, the safest next step is either:
+After Phase 5AU, the safest next step is either:
 
-- explicitly approve a bounded Hermes local inference run that first starts the adapter service manually and stops it afterward, or
+- explicitly approve a bounded Hermes local PRD review with explicit local context that first starts the adapter service manually and stops it afterward, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

@@ -1,7 +1,7 @@
 # Hermes Adapter Service Runbook
 
-Phase: 5AT
-Status: manual adapter service operating procedure
+Phase: 5AT-5AU
+Status: manual adapter service operating procedure and bounded Hermes validation
 
 ## Purpose
 
@@ -206,16 +206,47 @@ Observed result:
 
 The service was not left running after validation.
 
+## Phase 5AU Hermes Validation Result
+
+Phase 5AU used the manual adapter service procedure for one bounded Hermes prompt through the persistent local config.
+
+Validation sequence:
+
+1. `scripts/adapter_service_start.sh`
+2. `scripts/adapter_service_status.sh`
+3. `/health`
+4. `/v1/models`
+5. one `hermes -z` prompt
+6. `scripts/adapter_service_stop.sh`
+7. no-listener and no-process confirmation
+
+Observed result:
+
+- service started through the helper script and launchctl
+- DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`
+- `/health` returned status `ok`
+- `/v1/models` returned model metadata including `gemma4:26b`
+- listener inspection showed only `127.0.0.1:8088`
+- Hermes exited `0` in `28` seconds
+- Hermes stdout was `49` bytes and stderr was `0` bytes
+- Hermes returned exactly `Hermes works through the manual adapter service.`
+- output artifacts were written under `sandbox/output/`
+- `scripts/adapter_service_stop.sh` stopped and unloaded the service
+- final status reported `loaded=false` and `listener=false`
+- no matching adapter, Hermes, Hermes Desktop, or resident process remained
+
+The service was not left running after validation.
+
 ## Non-Goals
 
-Phase 5AT does not approve:
+Phase 5AT does not approve automatic service policy changes, and Phase 5AU does not approve:
 
 - `RunAtLoad=true`
 - `KeepAlive=true`
 - Hermes resident/autonomous mode
 - Hermes launchd service
 - leaving the adapter service running
-- Hermes live prompt execution
+- additional Hermes live prompt execution
 - Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, or cloud-provider integrations
 - real credentials
 - Desktop launch

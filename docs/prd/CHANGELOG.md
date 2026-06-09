@@ -2,6 +2,15 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AU manual-service Hermes validation.
+- Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Confirmed DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`.
+- Ran exactly one harmless `hermes -z` prompt through the persistent localhost-only config.
+- Captured `sandbox/output/hermes_phase5au_manual_service.stdout`, `sandbox/output/hermes_phase5au_manual_service.stderr`, and `sandbox/output/hermes_phase5au_manual_service.metrics`.
+- Recorded Hermes exit code `0`, elapsed time `28` seconds, stdout `49` bytes, stderr `0` bytes, and exact stdout `Hermes works through the manual adapter service.`
+- Stopped/unloaded the adapter service through `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no `8088` listener and no matching adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AU result.
+- Confirmed Phase 5AU did not set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AT manual adapter service operating procedure.
 - Added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` documenting exact manual commands for launchctl bootstrap, kickstart, status, `/health`, `/v1/models`, log tailing, stop/bootout, and rollback/removal.
 - Added helper scripts `scripts/adapter_service_start.sh`, `scripts/adapter_service_stop.sh`, and `scripts/adapter_service_status.sh`.
