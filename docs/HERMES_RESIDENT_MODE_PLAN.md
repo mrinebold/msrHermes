@@ -1,0 +1,218 @@
+# Hermes Resident Mode Plan
+
+Phase: 5AO
+Status: design proposal only
+
+## Purpose
+
+Design how Hermes and the local MSR Model Router Adapter could eventually run in resident/background mode on the Mac mini.
+
+Phase 5AO does not create launchd plists, start background services, run Hermes, start the adapter, connect integrations, use real credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
+
+## Proposed Resident Architecture
+
+Resident rollout should be staged:
+
+1. Adapter service only first.
+2. Hermes remains manually invoked at first.
+3. Future Hermes resident/autonomous mode requires a separate approval phase.
+
+Initial resident service candidate:
+
+```text
+Hermes CLI/manual invocation
+  -> http://127.0.0.1:8088/v1
+  -> launchd-managed local adapter service
+  -> services/model_router
+  -> DevMonster Gemma over Tailscale
+```
+
+Required architecture constraints:
+
+- adapter binds only to `127.0.0.1:8088`
+- adapter never binds to `0.0.0.0`, LAN, public, or Tailscale interfaces
+- Hermes uses the persistent local config already validated in Phase 5AN
+- Hermes Desktop is not a dependency
+- Hermes Desktop remains fail-closed
+- Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen
+- no real credentials are added to the adapter service environment
+- no Hermes autonomous resident process is approved by this plan
+
+## Future Launchd Proposal
+
+No plist is created in Phase 5AO. A later approved phase may create a user LaunchAgent with these proposed settings.
+
+| Field | Proposed value |
+| --- | --- |
+| Label | `com.msr.hermes.model-router-adapter` |
+| Plist path | `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` |
+| ProgramArguments | `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` |
+| WorkingDirectory | `/Users/michaelrinebold/Documents/Helio/helio-command-center` |
+| RunAtLoad | `true` only in a separately approved service-install phase |
+| KeepAlive | `false` for first background validation; consider `true` only after foreground and one-shot background validation are stable |
+| StandardOutPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stdout.log` |
+| StandardErrorPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stderr.log` |
+
+Proposed environment variables:
+
+```text
+MODEL_ROUTER_ADAPTER_HOST=127.0.0.1
+MODEL_ROUTER_ADAPTER_PORT=8088
+DEVMONSTER_OLLAMA_URL=http://100.93.120.124:11434
+DEVMONSTER_DEFAULT_MODEL=gemma4:26b
+MODEL_ROUTER_PROVIDER_TIMEOUT_SECONDS=120
+MODEL_ROUTER_ADAPTER_LOCAL_COMPAT_MODE=true
+MODEL_ROUTER_ADAPTER_GEMMA_PROMPT_MODE=instruction_context
+MODEL_ROUTER_ADAPTER_LOCAL_SUMMARY_MAX_CONTEXT_CHARS=1500
+MODEL_ROUTER_ADAPTER_LOG_REQUESTS=true
+MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES=true
+MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE=true
+```
+
+Do not include:
+
+- OpenAI, Anthropic, or OpenRouter keys
+- Supabase credentials
+- Google credentials
+- GitHub tokens
+- Home Assistant tokens
+- Helio gateway or dispatcher tokens
+- prompt text
+- file contents
+- model output
+
+## Future Commands
+
+These commands are proposal-only. Do not run them until a later phase explicitly approves service creation.
+
+Install/load candidate:
+
+```sh
+launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist"
+```
+
+Start candidate:
+
+```sh
+launchctl kickstart "gui/$(id -u)/com.msr.hermes.model-router-adapter"
+```
+
+Stop candidate:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist"
+```
+
+Rollback candidate:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist"
+mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/.hermes/backups/"
+```
+
+## Health Checks
+
+Future resident validation must include:
+
+```sh
+curl -sS http://127.0.0.1:8088/health
+curl -sS http://127.0.0.1:8088/v1/models
+lsof -nP -iTCP:8088 -sTCP:LISTEN
+```
+
+Expected checks:
+
+- `/health` returns healthy status
+- `/v1/models` includes `gemma4:26b`
+- listener is only `127.0.0.1:8088`
+- no `0.0.0.0` listener
+- no LAN/public/Tailscale bind
+- DevMonster is reachable only through the adapter route
+- no cloud provider fallback is selected
+- no real secrets appear in the adapter process environment
+- no Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, or Desktop activity appears
+
+## Logs And Audit
+
+Adapter logs must remain metadata-only:
+
+- request timestamp
+- method and path
+- response status
+- selected model
+- elapsed time
+- response shape metadata
+- message-structure metadata
+
+Adapter logs must not include:
+
+- prompt text
+- file contents
+- model output text
+- API keys
+- OAuth tokens
+- Supabase keys
+- GitHub tokens
+- Home Assistant tokens
+- Helio credentials
+
+Recommended log handling:
+
+- write stdout/stderr under `~/.hermes/logs/`
+- keep log permissions owner-readable only where possible
+- add rotation before long-running resident use
+- cap file size or use periodic rotation
+- include a cleanup command in every validation phase
+
+## Gates Before Future Resident Mode
+
+Before creating any service:
+
+- human approval for the exact phase
+- review and back up existing configs
+- test `scripts/run_model_router_adapter.sh` in foreground first
+- verify `127.0.0.1:8088` binding
+- verify no `0.0.0.0`, LAN, public, or Tailscale bind
+- verify no external integrations are enabled
+- verify no real credentials are present in process env
+- verify stop command works
+- verify rollback command works
+- verify logs remain metadata-only
+- verify no prompt text, file contents, or model output are logged
+- verify no Desktop launch
+- verify no Hermes autonomous resident process
+
+Before Hermes resident/autonomous operation:
+
+- complete adapter service validation first
+- create a separate Hermes resident-mode PRD
+- define exact authority classes Hermes may use
+- define audit fields, approval IDs, and refusal behavior
+- define stop and rollback procedures
+- define maximum runtime, log retention, and monitoring
+- require separate human approval
+
+## Non-Goals
+
+Phase 5AO does not approve:
+
+- creating launchd plists
+- starting adapter live
+- starting background services
+- Hermes autonomous resident process
+- Hermes Desktop launch
+- Google Workspace
+- Supabase
+- GitHub
+- Home Assistant
+- Helio gateway or dispatcher use
+- Agent Bus reads or writes
+- credential rotation
+- real credentials
+- shell/action automation
+- cloud provider fallback
+- broad filesystem authority
+
+## Phase 5AO Conclusion
+
+The safest resident path is adapter-service-first, with Hermes remaining manually invoked. The next executable phase, if approved, should create and validate only the adapter LaunchAgent with rollback, not Hermes autonomous resident mode.

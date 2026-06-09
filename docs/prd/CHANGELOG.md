@@ -2,6 +2,12 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AO resident-mode design proposal only.
+- Added `docs/HERMES_RESIDENT_MODE_PLAN.md` with adapter-service-first architecture, future launchd proposal, health checks, logs/audit, gates before future resident mode, explicit non-goals, and conclusion.
+- Proposed future adapter service label `com.msr.hermes.model-router-adapter`, user LaunchAgent path, command path, working directory, environment variables, stdout/stderr log paths, RunAtLoad behavior, KeepAlive recommendation, shutdown/stop command, health checks, and rollback command.
+- Documented that Hermes remains manually invoked at first and future Hermes autonomous resident mode requires separate approval.
+- Updated `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AO result.
+- Confirmed Phase 5AO did not create launchd plists, start background services, run Hermes live, start the adapter live, modify `~/.hermes`, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, modify credentials, or broaden Hermes authority.
 - Completed Phase 5AN live local validation of persistent Hermes config.
 - Started `scripts/run_model_router_adapter.sh` manually in the foreground and confirmed bind `127.0.0.1:8088`, DevMonster endpoint `http://100.93.120.124:11434`, default model `gemma4:26b`, provider timeout `120`, metadata-only logging, and no prompt/file/model-output/secret logging.
 - Ran exactly one sanitized-env Hermes prompt through persistent config: `Reply with exactly: Persistent local Hermes config works.`

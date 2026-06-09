@@ -58,6 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
+| Resident mode | Design proposed only | Phase 5AO proposes adapter-service-first architecture; no plist or service was created | Separate service-install approval |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -178,3 +179,9 @@ No `~/.hermes/.env` change was made. No adapter, Hermes live run, Desktop launch
 Phase 5AN validated the persistent config with one harmless prompt through the manually started foreground adapter. Hermes exited `0` after `74` seconds, wrote `38` stdout bytes, wrote `0` stderr bytes, and returned exactly `Persistent local Hermes config works.` Adapter metadata showed selected model `gemma4:26b`, response content length `37`, and a successful `POST /v1/chat/completions` in `72.634` seconds.
 
 The adapter was stopped immediately afterward. No `8088` listener, Hermes/adapter/Desktop process, launchd plist, LaunchAgent, or LaunchDaemon match remained. `~/.hermes/.env` stayed untouched. No real API keys, Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud-provider integration, Desktop launch, background service, resident mode, or authority broadening was used.
+
+## Phase 5AO Resident Design Result
+
+Phase 5AO added `docs/HERMES_RESIDENT_MODE_PLAN.md` as a design proposal only. The proposed path is adapter service first, with Hermes remaining manually invoked until a later explicit approval. The future adapter LaunchAgent proposal keeps bind `127.0.0.1:8088`, uses DevMonster Gemma through the existing local adapter path, writes metadata-only logs under `~/.hermes/logs/`, and defines health checks, stop, rollback, and resident-mode gates.
+
+No launchd plist was created, no service was started, no adapter or Hermes process was run, no `~/.hermes` file was modified, no Desktop launch occurred, no integrations or credentials were used, and Hermes autonomous resident mode remains unapproved.

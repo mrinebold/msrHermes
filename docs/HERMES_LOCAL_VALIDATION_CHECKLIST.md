@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AN
-Status: local validation checklist and persistent config live-local validation record
+Phase: 5AJ-5AO
+Status: local validation checklist and resident design input
 
 ## Purpose
 
@@ -17,6 +17,8 @@ Phase 5AM applied the approved persistent local config to `~/.hermes/config.yaml
 
 Phase 5AN approved and completed one live local validation prompt through the foreground localhost adapter. This does not approve additional prompts, background services, integrations, Agent Bus reads/writes, Desktop launch, resident mode, or broader Hermes authority.
 
+Phase 5AO added a resident-mode design proposal only in `docs/HERMES_RESIDENT_MODE_PLAN.md`. It does not approve creating launchd plists, starting background services, running Hermes resident mode, or broadening authority.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -31,6 +33,7 @@ Inspect only:
 - `docs/HERMES_OWNERSHIP_MODEL.md`
 - `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
 - `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`
+- `docs/HERMES_RESIDENT_MODE_PLAN.md`
 - `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
 - `docs/prd/CHANGELOG.md`
 
@@ -56,6 +59,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Hermes receives no broad filesystem authority
 - every boundary-crossing action still requires a new explicit human-approved phase
 - Phase 5AN proved one harmless prompt can use the persistent config through the localhost adapter
+- Phase 5AO keeps resident mode proposal-only and adapter-service-first
 
 ## Credential Deferral Boundary
 
@@ -102,9 +106,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AN, the safest next step is either:
+After Phase 5AO, the safest next step is either:
 
 - continue local-only hardening of tests/docs/config examples, or
-- prepare a separate, human-approved resident-mode design proposal that covers launchd/background behavior, logs, health checks, stop/rollback, scope, and audit.
+- prepare a separate, human-approved adapter-service install proposal that creates no Hermes resident/autonomous process and includes exact plist content, backups, health checks, stop, rollback, and residue checks.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.
