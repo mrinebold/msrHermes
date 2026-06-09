@@ -2,6 +2,13 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AI credential-rotation deferral decision gate as documentation only.
+- Recorded the human owner's explicit deferral of credential rotation for the next bounded local-only validation/configuration scope.
+- Updated `docs/security/CREDENTIAL_ROTATION_CHECKLIST.md` to distinguish the deferral from rotation, revocation, review completion, or credential safety.
+- Updated `docs/HERMES_SECURITY_MODEL.md` to state that the deferral does not authorize provider console/API calls, live Agent Bus reads/writes, Supabase service-role use, external integrations, credential storage or modification, Desktop launch, background services, or resident mode.
+- Updated the master PRD status, phase table, completed-work snapshot, blocked-work language, and next recommended work.
+- Set the next recommended work to Phase 5AJ: local-only validation/configuration checks under the deferral boundary, with no live bus reads/writes or authority broadening.
+- Confirmed Phase 5AI did not rotate, revoke, review, store, delete, or modify credentials; did not call external/provider APIs; did not run Agent Bus reads/writes; did not start Hermes, the adapter, Desktop, background services, or launchd; and did not connect Google, Supabase, Home Assistant, GitHub, Helio, or cloud providers.
 - Completed Phase 5AH authority and credential gate clarification as documentation only.
 - Updated `docs/HERMES_SECURITY_MODEL.md` with an authority re-enable gate policy.
 - Defined independently gated authority classes for local reasoning, shell execution, file edits, gateway/resident mode, Desktop launch or replacement, Google Workspace, Home Assistant, Supabase/Agent Bus, GitHub writes, Helio/agent dispatch, and cloud model providers.

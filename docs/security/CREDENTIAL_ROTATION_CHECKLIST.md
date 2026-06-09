@@ -4,7 +4,9 @@
 
 Phase SECURITY-2 post-exposure tracking only. No credentials were rotated by this document. No external APIs were called.
 
-No further live bus reads/writes until rotation is confirmed or explicitly deferred.
+Phase 5AI recorded explicit human deferral of credential rotation on 2026-06-08 for the next bounded local-only phase. This deferral does not mark any credential rotated, revoked, reviewed, or safe.
+
+No further live bus reads/writes until rotation is confirmed or a separate phase explicitly approves a narrow read-only scope under the documented deferral.
 
 ## Exposure Summary
 
@@ -28,11 +30,28 @@ The Supabase anon key is lower risk because it is designed for client-side use a
 
 | Item | Current status | Basis | Next required confirmation |
 | --- | --- | --- | --- |
-| Supabase service-role key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
-| OpenAI key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
-| Anthropic/Claude key | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
-| GitHub token | Pending user confirmation | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or explicitly defers. |
-| Supabase anon key review | Pending user confirmation | No review or rotation decision was confirmed in this phase. | User confirms review complete and whether rotation is required. |
+| Supabase service-role key | Deferred for Phase 5AI local-only scope; pending before use | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or approves a separate credential-family-specific deferral before any use. |
+| OpenAI key | Deferred for Phase 5AI local-only scope; pending before use | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or approves a separate credential-family-specific deferral before any use. |
+| Anthropic/Claude key | Deferred for Phase 5AI local-only scope; pending before use | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or approves a separate credential-family-specific deferral before any use. |
+| GitHub token | Deferred for Phase 5AI local-only scope; pending before use | No rotation was performed by Helio, and provider state was not checked. | User confirms revoked/rotated, or approves a separate credential-family-specific deferral before any use. |
+| Supabase anon key review | Deferred for Phase 5AI local-only scope; pending before use | No review or rotation decision was confirmed in this phase. | User confirms review complete, or approves a separate credential-family-specific deferral before any use. |
+
+## Phase 5AI Deferral Record
+
+On 2026-06-08, the human owner explicitly deferred credential rotation and approved proceeding only within a bounded local validation/configuration planning scope.
+
+Deferral applies only to documenting the decision and preparing a later local-only validation phase. It does not approve:
+
+- live Agent Bus reads
+- Agent Bus writes
+- Supabase service-role use
+- provider console/API calls
+- Google, GitHub, Home Assistant, Helio, or cloud-provider operations
+- credential storage, replacement, deletion, or modification
+- Hermes Desktop launch
+- background or resident services
+
+The exposed credential families remain pending until the owner later confirms rotation, revocation, review completion, or a narrower credential-family-specific deferral.
 
 ## Immediate Actions
 
@@ -44,7 +63,8 @@ The Supabase anon key is lower risk because it is designed for client-side use a
 - [ ] Update `config/local.env` after rotation using only the minimum keys needed for the next approved phase.
 - [ ] Verify `config/local.env` remains gitignored and is not staged.
 - [ ] Remove any stale local secret files that are no longer needed.
-- [ ] Confirm or explicitly defer rotation before any further live bus read or write.
+- [x] Record explicit Phase 5AI deferral before any next local-only validation/configuration phase.
+- [ ] Confirm rotation, revocation, or credential-family-specific deferral before any further live bus read or write.
 
 ## Post-Rotation Validation
 
@@ -64,9 +84,9 @@ set +a
 python3 scripts/agent_bus_readonly_preflight.py verify-config
 ```
 
-Do not run live read commands until the exposed high-risk credentials have been rotated and the next phase is explicitly approved.
+Do not run live read commands until the exposed high-risk credentials have been rotated or a new phase explicitly approves a narrow read-only scope under the documented deferral.
 
-Blocked until rotation:
+Blocked until rotation or separate narrow read-only approval:
 
 - `list-org-configs`
 - `read-hermes-messages`

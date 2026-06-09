@@ -214,6 +214,8 @@ Runtime secret locations after future approval:
 
 Phase 5AH clarifies that exposed or potentially exposed credentials remain a hard gate for live shared-system activity. Hermes pilot success does not waive credential rotation requirements.
 
+Phase 5AI records the human owner's explicit 2026-06-08 decision to defer credential rotation for the next bounded local-only validation/configuration phase. This deferral does not mean any credential is rotated, revoked, reviewed, or safe. It only allows documentation and later local-only checks that do not use provider consoles, external APIs, live Agent Bus reads/writes, Supabase service-role credentials, external integrations, credential storage, Desktop launch, or resident/background services.
+
 Before any resumed live Agent Bus read, Agent Bus write, Supabase operation, Helio gateway operation, GitHub mutation, Google operation, Home Assistant operation, or external send, one of these must be documented in the master PRD and changelog:
 
 - rotation confirmed with date, credential family, and verification method
@@ -232,7 +234,7 @@ Minimum rotation evidence by credential family:
 | Home Assistant token | Token absent, revoked, rotated, or explicitly deferred; no service calls until entity/domain allowlists are approved. |
 | Helio gateway or dispatcher credentials | Gateway/dispatcher endpoints and credentials reviewed before any Hermes-to-Helio operation; no agent dispatch until Helio governance interface is approved. |
 
-If rotation is explicitly deferred, the next phase must stay within the accepted risk boundary. Deferral for read-only inspection does not permit writes, broad reads, credential storage, background services, or resident operation.
+If rotation is explicitly deferred, the next phase must stay within the accepted risk boundary. Deferral for local validation or read-only inspection does not permit writes, broad reads, credential storage, background services, resident operation, or any use of service-role credentials. Each later credential-using phase must restate the specific credential family, scope, evidence, and human approval.
 
 ## Google Workspace Policy
 
