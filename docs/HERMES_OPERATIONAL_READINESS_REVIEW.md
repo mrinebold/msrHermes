@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Adapter service manually validated; Hermes resident disabled | Phase 5AS validates a user LaunchAgent adapter service from a self-contained Application Support runtime; service is stopped/unloaded after validation | Separate approval for operational service start policy, RunAtLoad, KeepAlive, or Hermes resident mode |
+| Resident mode | Manual adapter service operation validated; Hermes resident disabled | Phase 5AT validates helper-driven manual adapter service start/status/stop while preserving `RunAtLoad=false` and `KeepAlive=false` | Separate approval for RunAtLoad, KeepAlive, or Hermes resident mode |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -217,3 +217,11 @@ Phase 5AS created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-ada
 The first wrapper-only attempt failed closed because the service still depended on the `Documents` repo path. The final self-contained runtime fix succeeded: manual `launchctl kickstart` started the adapter, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
 
 The service was stopped and unloaded after validation. No `8088` listener remains, no adapter/Hermes/Desktop/resident process remains, no `~/.hermes` file was modified, no credentials or integrations were used, and no Agent Bus read/write occurred.
+
+## Phase 5AT Manual Adapter Service Runbook Result
+
+Phase 5AT added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` plus `scripts/adapter_service_start.sh`, `scripts/adapter_service_stop.sh`, and `scripts/adapter_service_status.sh`.
+
+The helpers use the existing user LaunchAgent only, do not use sudo, do not modify the plist, do not create services, and fail closed on unsafe listener or plist-policy drift. Validation showed manual start succeeded, `/health` worked, `/v1/models` returned `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, stop succeeded, and final status reported `loaded=false` and `listener=false`.
+
+Readiness position: manual adapter service start/stop is ready as an operator procedure. Hermes resident mode, automatic RunAtLoad, KeepAlive, Desktop, credentials, integrations, and Agent Bus activity remain unapproved.

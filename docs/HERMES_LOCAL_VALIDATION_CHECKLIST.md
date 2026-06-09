@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AS
-Status: local validation checklist, resident design, adapter service validation, and wrapper service input
+Phase: 5AJ-5AT
+Status: local validation checklist, resident design, adapter service validation, and manual runbook input
 
 ## Purpose
 
@@ -26,6 +26,8 @@ Phase 5AQ approved one controlled adapter LaunchAgent install validation. Foregr
 Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as a proposal-only comparison. It recommends a minimal no-secret wrapper under `/Users/michaelrinebold/.local/bin/` and does not approve creating it, editing the plist, retrying launchd, granting privacy permissions, moving the repo, starting the adapter, or running Hermes live.
 
 Phase 5AS created the wrapper, moved only the minimal adapter runtime to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`, validated manual LaunchAgent start/health/models/localhost-only binding, and stopped/unloaded the service. It does not approve Hermes resident mode, RunAtLoad, KeepAlive, credentials, integrations, Desktop launch, Agent Bus activity, or `~/.hermes` modification.
+
+Phase 5AT added a manual adapter service runbook and helper scripts. It validates manual start/status/stop only and does not approve automatic service start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
 ## Approved Surfaces
 
@@ -74,6 +76,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AQ proves the foreground adapter remains healthy but launchd service execution from the `Documents` repo path is blocked by macOS permissions
 - Phase 5AR recommends minimal wrapper remediation over broad macOS privacy permission and whole-repo movement
 - Phase 5AS validates manual adapter LaunchAgent start/stop from a non-`Documents` self-contained runtime and leaves the service stopped
+- Phase 5AT validates helper-driven manual start/stop and keeps `RunAtLoad=false`, `KeepAlive=false`, and Hermes resident mode disabled
 
 ## Credential Deferral Boundary
 
@@ -120,9 +123,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AS, the safest next step is either:
+After Phase 5AT, the safest next step is either:
 
-- explicitly approve a narrow adapter service operating policy for manual start/stop only, or
+- explicitly approve a bounded Hermes local inference run that first starts the adapter service manually and stops it afterward, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

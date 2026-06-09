@@ -338,4 +338,18 @@ mv "$HOME/.local/bin/msr-hermes-model-router-adapter" "$HOME/.local/bin/msr-herm
 mv "$HOME/Library/Application Support/Helio/hermes-adapter-service/current" "$HOME/Library/Application Support/Helio/hermes-adapter-service/current.disabled.$(date +%Y%m%dT%H%M%S)"
 ```
 
-Recommended next action: define operating policy for manual service start/stop. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without separate approval.
+## Phase 5AT Manual Operating Procedure Result
+
+Phase 5AT added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` and three helper scripts:
+
+```text
+scripts/adapter_service_start.sh
+scripts/adapter_service_stop.sh
+scripts/adapter_service_status.sh
+```
+
+The helpers use only the existing user LaunchAgent label `com.msr.hermes.model-router-adapter`, do not use sudo, do not modify the plist, do not create services, and do not broaden authority. The start helper validates plist policy, starts the service manually, checks `/health`, checks `/v1/models`, and verifies localhost-only binding. The stop helper unloads the service and verifies no `8088` listener remains.
+
+Validation result: start passed, health passed, models passed with `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, stop passed, and final status reported `loaded=false` and `listener=false`.
+
+Recommended next action: keep manual service start/stop as the approved operating procedure. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without separate approval.

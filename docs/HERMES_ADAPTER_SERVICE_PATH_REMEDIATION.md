@@ -396,4 +396,25 @@ mv "$HOME/Library/Application Support/Helio/hermes-adapter-service/current" "$HO
 lsof -nP -iTCP:8088 -sTCP:LISTEN
 ```
 
-Recommended next action: Phase 5AT should define the policy for manual service start/stop versus keeping the adapter foreground-only by default. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without a new explicit approval.
+## Phase 5AT Manual Operating Procedure Result
+
+Phase 5AT defined and validated manual service operation in `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`. The approved helper scripts are:
+
+```text
+scripts/adapter_service_start.sh
+scripts/adapter_service_stop.sh
+scripts/adapter_service_status.sh
+```
+
+The manual procedure keeps the wrapper and Application Support runtime from Phase 5AS, preserves `RunAtLoad=false` and `KeepAlive=false`, and leaves Hermes resident/autonomous mode disabled.
+
+Validation result:
+
+- start helper passed
+- `/health` returned status `ok`
+- `/v1/models` returned model metadata including `gemma4:26b`
+- listener inspection showed only `127.0.0.1:8088`
+- stop helper passed
+- final status showed `loaded=false` and `listener=false`
+
+Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without a new explicit approval.

@@ -2,6 +2,14 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AT manual adapter service operating procedure.
+- Added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` documenting exact manual commands for launchctl bootstrap, kickstart, status, `/health`, `/v1/models`, log tailing, stop/bootout, and rollback/removal.
+- Added helper scripts `scripts/adapter_service_start.sh`, `scripts/adapter_service_stop.sh`, and `scripts/adapter_service_status.sh`.
+- Helper scripts use only the existing user LaunchAgent label `com.msr.hermes.model-router-adapter`, do not use sudo, do not modify the plist, do not create services, preserve localhost-only checks, and fail closed on unsafe listener or plist policy drift.
+- Validated helper scripts: `scripts/adapter_service_start.sh` started the service, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, `scripts/adapter_service_stop.sh` stopped/unloaded the service, and final `scripts/adapter_service_status.sh` reported `loaded=false` and `listener=false`.
+- Preserved `RunAtLoad=false`, `KeepAlive=false`, Hermes resident/autonomous mode disabled, Hermes Desktop fail-closed, and credentialed integrations frozen.
+- Updated `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`, `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AT result.
+- Confirmed Phase 5AT did not create Hermes resident mode, create a Hermes launchd service, leave adapter service running, start Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AS adapter LaunchAgent wrapper service validation.
 - Confirmed clean preflight: no `127.0.0.1:8088` listener, no adapter process, no Hermes Desktop process, no Hermes resident/autonomous process, DevMonster `0.30.4`, and LaunchAgent initially unloaded.
 - Created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` with permissions `-rwx------`.

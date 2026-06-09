@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO-5AS
-Status: adapter LaunchAgent service validated manually; Hermes resident mode disabled
+Phase: 5AO-5AT
+Status: manual adapter service operation validated; Hermes resident mode disabled
 
 ## Purpose
 
@@ -16,6 +16,8 @@ Phase 5AQ approved one controlled user LaunchAgent install validation. The foreg
 Phase 5AR proposes remediating the launchd path failure with a minimal no-secret wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`. Phase 5AR does not create the wrapper, modify the plist, retry launchd, start the adapter, or enable resident Hermes mode.
 
 Phase 5AS created the wrapper and a self-contained adapter runtime outside `Documents` under `~/Library/Application Support/Helio/hermes-adapter-service/`. The LaunchAgent started manually, served health and model metadata on `127.0.0.1:8088`, and was stopped/unloaded after validation. Hermes resident/autonomous mode remains disabled.
+
+Phase 5AT defines manual adapter service operation with helper scripts and a runbook. The validated policy is manual start/stop only; `RunAtLoad=false`, `KeepAlive=false`, and Hermes resident/autonomous mode remain unchanged.
 
 ## Proposed Resident Architecture
 
@@ -254,3 +256,9 @@ Phase 5AS created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-ada
 The service started successfully. `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`. The service was then stopped and unloaded; no `8088` listener remains.
 
 Adapter service mechanics are validated for manual start/stop. Hermes remains manually invoked only, and Hermes resident/autonomous mode remains disabled. The next resident-related phase should decide whether manual adapter service start is allowed as an operational procedure, not enable RunAtLoad or KeepAlive by default.
+
+## Phase 5AT Manual Service Operation Result
+
+Phase 5AT added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` and helper scripts for manual service start, stop, and status. `scripts/adapter_service_start.sh` successfully started the existing adapter LaunchAgent, validated `/health`, validated `/v1/models`, and confirmed only `127.0.0.1:8088` was listening. `scripts/adapter_service_stop.sh` stopped/unloaded the service and confirmed no `8088` listener remained. Final `scripts/adapter_service_status.sh` reported `loaded=false` and `listener=false`.
+
+Manual adapter service start/stop is now documented as the safe operating procedure. Automatic start and keepalive remain disabled.

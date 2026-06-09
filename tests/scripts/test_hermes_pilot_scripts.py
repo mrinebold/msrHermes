@@ -18,6 +18,10 @@ PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PL
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
+ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
+ADAPTER_SERVICE_START = REPO_ROOT / "scripts" / "adapter_service_start.sh"
+ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
+ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -38,7 +42,7 @@ SENSITIVE_ENV_VARS = {
 
 class HermesPilotScriptsTest(unittest.TestCase):
     def test_shell_scripts_pass_syntax_check(self):
-        for script in (ADAPTER_RUNNER, PILOT_RUNNER):
+        for script in (ADAPTER_RUNNER, PILOT_RUNNER, ADAPTER_SERVICE_START, ADAPTER_SERVICE_STOP, ADAPTER_SERVICE_STATUS):
             with self.subTest(script=script.name):
                 result = subprocess.run(
                     ["bash", "-n", str(script)],
@@ -191,6 +195,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
                 RESIDENT_MODE_PLAN,
                 ADAPTER_SERVICE_PLAN,
                 ADAPTER_SERVICE_REMEDIATION,
+                ADAPTER_SERVICE_RUNBOOK,
             )
         )
 
@@ -289,7 +294,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = RESIDENT_MODE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: adapter LaunchAgent service validated manually; Hermes resident mode disabled", content)
+        self.assertIn("Status: manual adapter service operation validated; Hermes resident mode disabled", content)
         self.assertIn("Adapter service only first", content)
         self.assertIn("Hermes remains manually invoked at first", content)
         self.assertIn("Future Hermes resident/autonomous mode requires a separate approval phase", content)
@@ -436,6 +441,50 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("home assistant control is approved", lower_content)
         self.assertNotIn("github token use is approved", lower_content)
 
+    def test_adapter_service_helpers_are_scoped_to_existing_launchagent(self):
+        helper_contents = {
+            "start": ADAPTER_SERVICE_START.read_text(encoding="utf-8"),
+            "stop": ADAPTER_SERVICE_STOP.read_text(encoding="utf-8"),
+            "status": ADAPTER_SERVICE_STATUS.read_text(encoding="utf-8"),
+        }
+
+        for name, content in helper_contents.items():
+            with self.subTest(helper=name):
+                self.assertIn('LABEL="com.msr.hermes.model-router-adapter"', content)
+                self.assertIn('PLIST="${HOME}/Library/LaunchAgents/${LABEL}.plist"', content)
+                self.assertNotIn("sudo", content)
+                self.assertNotIn("RunAtLoad=true", content)
+                self.assertNotIn("KeepAlive=true", content)
+                self.assertNotIn("~/.hermes", content)
+
+        self.assertIn("launchctl bootstrap", helper_contents["start"])
+        self.assertIn("launchctl kickstart", helper_contents["start"])
+        self.assertIn("launchctl bootout", helper_contents["stop"])
+        self.assertNotIn("plistlib.dump", helper_contents["start"])
+        self.assertNotIn("plistlib.dump", helper_contents["stop"])
+        self.assertNotIn("plistlib.dump", helper_contents["status"])
+
+    def test_adapter_service_runbook_keeps_manual_only_policy(self):
+        content = ADAPTER_SERVICE_RUNBOOK.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: manual adapter service operating procedure", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("Hermes resident/autonomous mode remains disabled", content)
+        self.assertIn("Hermes Desktop remains fail-closed", content)
+        self.assertIn("Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen", content)
+        self.assertIn("scripts/adapter_service_start.sh", content)
+        self.assertIn("scripts/adapter_service_stop.sh", content)
+        self.assertIn("scripts/adapter_service_status.sh", content)
+        self.assertIn("The service was not left running after validation.", content)
+        self.assertIn("Phase 5AT does not approve", content)
+        self.assertNotIn("runatload=true is approved", lower_content)
+        self.assertNotIn("keepalive=true is approved", lower_content)
+        self.assertNotIn("hermes resident mode is approved", lower_content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -450,6 +499,10 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_MODE_PLAN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
+            ADAPTER_SERVICE_RUNBOOK,
+            ADAPTER_SERVICE_START,
+            ADAPTER_SERVICE_STOP,
+            ADAPTER_SERVICE_STATUS,
         ]
         disallowed_markers = (
             "sk-live-",
