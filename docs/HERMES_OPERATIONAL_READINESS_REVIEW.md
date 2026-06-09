@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Design proposed only | Phase 5AO proposes adapter-service-first architecture; no plist or service was created | Separate service-install approval |
+| Resident mode | Design plus install proposal only | Phase 5AO proposes adapter-service-first architecture; Phase 5AP drafts exact future LaunchAgent install steps; no plist or service was created | Separate service-install approval |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -185,3 +185,11 @@ The adapter was stopped immediately afterward. No `8088` listener, Hermes/adapte
 Phase 5AO added `docs/HERMES_RESIDENT_MODE_PLAN.md` as a design proposal only. The proposed path is adapter service first, with Hermes remaining manually invoked until a later explicit approval. The future adapter LaunchAgent proposal keeps bind `127.0.0.1:8088`, uses DevMonster Gemma through the existing local adapter path, writes metadata-only logs under `~/.hermes/logs/`, and defines health checks, stop, rollback, and resident-mode gates.
 
 No launchd plist was created, no service was started, no adapter or Hermes process was run, no `~/.hermes` file was modified, no Desktop launch occurred, no integrations or credentials were used, and Hermes autonomous resident mode remains unapproved.
+
+## Phase 5AP Adapter Service Install Proposal Result
+
+Phase 5AP added `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as proposal-only documentation for a future user-level LaunchAgent install. The plan defines label `com.msr.hermes.model-router-adapter`, path `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, exact future plist XML, working directory `/Users/michaelrinebold/Documents/Helio/helio-command-center`, `RunAtLoad=false`, `KeepAlive=false`, metadata-only log paths, localhost-only bind settings, DevMonster Gemma environment variables, health checks, status commands, stop commands, and rollback/removal commands.
+
+The readiness position does not change: background adapter service installation remains blocked until a separate explicit phase approves plist creation and launchctl operations. Hermes remains manually invoked, Hermes autonomous resident mode is not approved, Hermes Desktop remains fail-closed, and Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen.
+
+No launchd plist was created, installed, bootstrapped, loaded, kickstarted, or started. No adapter or Hermes live run occurred. No `~/Library/LaunchAgents` or `~/.hermes` file was modified. No credentials, integrations, Desktop launch, Agent Bus reads/writes, background service, resident mode, or authority broadening occurred.

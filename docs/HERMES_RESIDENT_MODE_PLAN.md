@@ -1,13 +1,15 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO
-Status: design proposal only
+Phase: 5AO-5AP
+Status: resident design plus adapter service install proposal only
 
 ## Purpose
 
 Design how Hermes and the local MSR Model Router Adapter could eventually run in resident/background mode on the Mac mini.
 
 Phase 5AO does not create launchd plists, start background services, run Hermes, start the adapter, connect integrations, use real credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
+
+Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as the exact future LaunchAgent service-install proposal. Phase 5AP also does not create, install, load, bootstrap, kickstart, or start any service.
 
 ## Proposed Resident Architecture
 
@@ -40,7 +42,7 @@ Required architecture constraints:
 
 ## Future Launchd Proposal
 
-No plist is created in Phase 5AO. A later approved phase may create a user LaunchAgent with these proposed settings.
+No plist is created in Phase 5AO or Phase 5AP. A later approved phase may create a user LaunchAgent with the exact proposal in `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`.
 
 | Field | Proposed value |
 | --- | --- |
@@ -48,8 +50,8 @@ No plist is created in Phase 5AO. A later approved phase may create a user Launc
 | Plist path | `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` |
 | ProgramArguments | `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` |
 | WorkingDirectory | `/Users/michaelrinebold/Documents/Helio/helio-command-center` |
-| RunAtLoad | `true` only in a separately approved service-install phase |
-| KeepAlive | `false` for first background validation; consider `true` only after foreground and one-shot background validation are stable |
+| RunAtLoad | `false` for first service install so loading the plist does not auto-start the adapter |
+| KeepAlive | `false` for first service install; consider `true` only after foreground and one-shot background validation are stable |
 | StandardOutPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stdout.log` |
 | StandardErrorPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stderr.log` |
 
@@ -216,3 +218,9 @@ Phase 5AO does not approve:
 ## Phase 5AO Conclusion
 
 The safest resident path is adapter-service-first, with Hermes remaining manually invoked. The next executable phase, if approved, should create and validate only the adapter LaunchAgent with rollback, not Hermes autonomous resident mode.
+
+## Phase 5AP Service Install Proposal Result
+
+Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as a proposal-only service install package. It defines the future user LaunchAgent label, plist path, exact plist XML, command path, working directory, metadata-only log paths, localhost-only environment, future bootstrap/status/health/stop/log/rollback commands, preflight requirements, and future acceptance criteria.
+
+The proposal keeps `RunAtLoad=false` and `KeepAlive=false` for the first service install. Hermes remains manually invoked, Hermes autonomous resident mode remains unapproved, Hermes Desktop remains fail-closed, and credentialed integrations remain frozen. No plist or launchd file was created, loaded, or started in Phase 5AP.

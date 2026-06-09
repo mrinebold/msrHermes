@@ -1,5 +1,17 @@
 # PRD Changelog
 
+## 2026-06-09
+
+- Completed Phase 5AP adapter service install proposal only.
+- Added `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` with the exact future user-level LaunchAgent plan for the localhost MSR Model Router Adapter.
+- Drafted future plist content for label `com.msr.hermes.model-router-adapter`, path `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, script `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh`, working directory `/Users/michaelrinebold/Documents/Helio/helio-command-center`, `RunAtLoad=false`, `KeepAlive=false`, stdout/stderr logs under `~/.hermes/logs/`, localhost-only bind settings, DevMonster Gemma settings, provider timeout, local compatibility mode, prompt mode, context budget, and metadata-only logging.
+- Documented future-only launchctl bootstrap, print/status, kickstart, bootout/stop, log tail, health check, and rollback/removal commands without running them.
+- Defined preflight requirements for a later install phase: foreground runner validation, no existing `8088` listener, DevMonster reachability, human plist review, logs/backups directories, no secrets in plist, no broad permissions, no integrations, and rollback readiness.
+- Defined future acceptance criteria requiring localhost-only bind, working `/health` and `/v1/models`, no `0.0.0.0` or LAN/public/Tailscale listener, no cloud fallback, no real credentials, metadata-only logs, clean stop, rollback, Desktop fail-closed status, and no Hermes autonomous resident mode.
+- Updated `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AP result.
+- Added tests confirming the service plan is adapter-only, localhost-only, proposal-only, includes rollback and health checks, avoids real-looking secret markers, keeps Desktop fail-closed, and keeps credentialed integrations frozen.
+- Confirmed Phase 5AP did not create a plist, modify `~/Library/LaunchAgents`, install/load/start a service, start the adapter, run Hermes live, create launchd files, modify `~/.hermes`, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, modify credentials, or broaden Hermes authority.
+
 ## 2026-06-08
 
 - Completed Phase 5AO resident-mode design proposal only.

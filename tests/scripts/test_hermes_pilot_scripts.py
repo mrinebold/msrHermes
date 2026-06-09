@@ -16,6 +16,7 @@ LOCAL_VALIDATION_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_VALIDATION_CHECKLIST.m
 READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
+ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -187,6 +188,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
                 READINESS_DOC,
                 PERSISTENT_CONFIG_PLAN,
                 RESIDENT_MODE_PLAN,
+                ADAPTER_SERVICE_PLAN,
             )
         )
 
@@ -285,7 +287,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = RESIDENT_MODE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: design proposal only", content)
+        self.assertIn("Status: resident design plus adapter service install proposal only", content)
         self.assertIn("Adapter service only first", content)
         self.assertIn("Hermes remains manually invoked at first", content)
         self.assertIn("Future Hermes resident/autonomous mode requires a separate approval phase", content)
@@ -323,6 +325,58 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("agent bus reads are approved", lower_content)
         self.assertNotIn("real credentials are approved", lower_content)
 
+    def test_adapter_service_plan_is_adapter_only_not_hermes_resident(self):
+        content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: proposal only", content)
+        self.assertIn("The future service is adapter-only", content)
+        self.assertIn("Hermes remains manually invoked", content)
+        self.assertIn("Hermes autonomous resident mode is not approved", content)
+        self.assertIn("Phase 5AP does not create a plist", content)
+        self.assertNotIn("hermes autonomous resident mode is approved", lower_content)
+        self.assertNotIn("hermes resident mode is approved", lower_content)
+
+    def test_adapter_service_plan_contains_localhost_only_launchagent(self):
+        content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("com.msr.hermes.model-router-adapter", content)
+        self.assertIn("~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist", content)
+        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh", content)
+        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center", content)
+        self.assertIn("<key>RunAtLoad</key>", content)
+        self.assertIn("<false/>", content)
+        self.assertIn("<key>KeepAlive</key>", content)
+        self.assertIn("<key>MODEL_ROUTER_ADAPTER_HOST</key>", content)
+        self.assertIn("<string>127.0.0.1</string>", content)
+        self.assertIn("<key>MODEL_ROUTER_ADAPTER_PORT</key>", content)
+        self.assertIn("<string>8088</string>", content)
+        self.assertIn("no `0.0.0.0` listener exists", content)
+        self.assertIn("no LAN/public/Tailscale bind exists", content)
+
+    def test_adapter_service_plan_includes_health_stop_and_rollback(self):
+        content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("curl -sS http://127.0.0.1:8088/health", content)
+        self.assertIn("curl -sS http://127.0.0.1:8088/v1/models", content)
+        self.assertIn("lsof -nP -iTCP:8088 -sTCP:LISTEN", content)
+        self.assertIn("launchctl print", content)
+        self.assertIn("launchctl bootout", content)
+        self.assertIn("Rollback/removal commands", content)
+        self.assertIn("$HOME/.hermes/backups/com.msr.hermes.model-router-adapter.plist.$(date +%Y%m%dT%H%M%S).bak", content)
+
+    def test_adapter_service_plan_keeps_desktop_and_integrations_frozen(self):
+        content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Hermes Desktop is not a dependency and remains fail-closed", content)
+        self.assertIn("Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen", content)
+        self.assertIn("no real credentials or secret-like values belong in the plist", content)
+        self.assertIn("Phase 5AP does not approve", content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("agent bus reads are approved", lower_content)
+        self.assertNotIn("real credentials are approved", lower_content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -335,6 +389,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             READINESS_DOC,
             PERSISTENT_CONFIG_PLAN,
             RESIDENT_MODE_PLAN,
+            ADAPTER_SERVICE_PLAN,
         ]
         disallowed_markers = (
             "sk-live-",

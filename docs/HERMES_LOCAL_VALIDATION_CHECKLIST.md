@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AO
-Status: local validation checklist and resident design input
+Phase: 5AJ-5AP
+Status: local validation checklist, resident design, and adapter service proposal input
 
 ## Purpose
 
@@ -19,6 +19,8 @@ Phase 5AN approved and completed one live local validation prompt through the fo
 
 Phase 5AO added a resident-mode design proposal only in `docs/HERMES_RESIDENT_MODE_PLAN.md`. It does not approve creating launchd plists, starting background services, running Hermes resident mode, or broadening authority.
 
+Phase 5AP added an adapter LaunchAgent service-install proposal only in `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`. It does not approve creating the plist, modifying `~/Library/LaunchAgents`, loading or starting launchd services, starting the adapter, running Hermes live, or broadening authority.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -34,6 +36,7 @@ Inspect only:
 - `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
 - `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`
 - `docs/HERMES_RESIDENT_MODE_PLAN.md`
+- `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`
 - `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
 - `docs/prd/CHANGELOG.md`
 
@@ -60,6 +63,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - every boundary-crossing action still requires a new explicit human-approved phase
 - Phase 5AN proved one harmless prompt can use the persistent config through the localhost adapter
 - Phase 5AO keeps resident mode proposal-only and adapter-service-first
+- Phase 5AP keeps service installation proposal-only with `RunAtLoad=false`, `KeepAlive=false`, rollback defined, and no plist created
 
 ## Credential Deferral Boundary
 
@@ -106,9 +110,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AO, the safest next step is either:
+After Phase 5AP, the safest next step is either:
 
-- continue local-only hardening of tests/docs/config examples, or
-- prepare a separate, human-approved adapter-service install proposal that creates no Hermes resident/autonomous process and includes exact plist content, backups, health checks, stop, rollback, and residue checks.
+- explicitly approve a separate adapter-service install validation phase that creates the reviewed plist, keeps `RunAtLoad=false` and `KeepAlive=false`, bootstraps/kickstarts only with approval, proves health checks, and verifies rollback, or
+- defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.
