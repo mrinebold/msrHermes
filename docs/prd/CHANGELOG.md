@@ -2,6 +2,13 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AL persistent Hermes local config proposal only.
+- Added `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md` defining the future localhost-only persistent config scope, proposed `config.yaml`, future `~/.hermes` files and backup paths, backup plan, validation steps, rollback steps, non-goals, and explicit approval requirements.
+- Proposed future Hermes config uses only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, dummy/local syntactic API key only if required, and disabled platform tools.
+- Updated `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md` and `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` to reference the persistent local config proposal.
+- Updated the master PRD status, phase table, completed-work snapshot, and next recommended work.
+- Added tests confirming the persistent config plan references the localhost-only model adapter, excludes real cloud/API credentials and live integrations, includes backup and rollback, keeps Desktop fail-closed, and does not imply launchd/resident service approval.
+- Confirmed Phase 5AL did not apply persistent Hermes config, modify `~/.hermes`, start the adapter, run Hermes live, create launchd/background services, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, modify credentials, or broaden Hermes authority.
 - Completed Phase 5AK Hermes local-only operational readiness review.
 - Added `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md` with current proven capabilities, current blocked capabilities, remaining risks, required gates before narrow capabilities, recommended next three phases, explicit human approval points, and a readiness matrix.
 - Added readiness matrix coverage for local adapter, local pilot harness, DevMonster Gemma worker, Hermes CLI, Hermes Desktop, Google Workspace, Supabase Agent Bus, Home Assistant, GitHub, credential rotation, and logging/audit.

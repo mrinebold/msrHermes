@@ -139,7 +139,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 
 ## Recommended Next 3 Phases
 
-1. Phase 5AL: persistent Hermes local config proposal only. Draft the exact isolated config and rollback plan, but do not apply it.
+1. Phase 5AL: persistent Hermes local config proposal only. Draft the exact isolated config and rollback plan in `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`, but do not apply it.
 2. Phase 5AM: read-only Agent Bus configuration gate. Decide whether anon-key read-only config validation is allowed under the credential deferral boundary, then run config validation only if approved.
 3. Phase DESKTOP-13 or 5AN: either send the prepared Desktop support clarification after approval, or continue local-only pilot hardening with no live integrations.
 
@@ -162,3 +162,7 @@ Human approval is required before:
 ## Phase 5AK Conclusion
 
 Hermes is ready only for continued local-only planning, documentation, tests, and separately approved bounded local reasoning. It is not ready for credentialed integrations, live Agent Bus access, resident operation, background services, or Desktop relaunch without a new phase-specific human approval gate.
+
+## Phase 5AL Proposal Result
+
+Phase 5AL added `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md` as a proposal-only plan for future persistent Hermes local configuration. The plan keeps Hermes pointed only at `http://127.0.0.1:8088/v1`, uses `gemma4:26b`, permits only a dummy/local syntactic key if required, keeps platform tools disabled, defines future `~/.hermes` backup and rollback paths, and preserves Desktop fail-closed status. It does not apply persistent config or approve live Hermes runs, launchd, resident mode, credentials, Agent Bus access, integrations, or Desktop launch.

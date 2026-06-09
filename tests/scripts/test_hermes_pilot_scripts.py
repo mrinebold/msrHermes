@@ -14,6 +14,7 @@ PILOT_MODE_DOC = REPO_ROOT / "docs" / "HERMES_PILOT_MODE.md"
 SECURITY_DOC = REPO_ROOT / "docs" / "HERMES_SECURITY_MODEL.md"
 LOCAL_VALIDATION_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_VALIDATION_CHECKLIST.md"
 READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
+PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -179,7 +180,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
     def test_local_validation_docs_preserve_credential_deferral_freeze(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (SECURITY_DOC, LOCAL_VALIDATION_DOC, READINESS_DOC)
+            for path in (SECURITY_DOC, LOCAL_VALIDATION_DOC, READINESS_DOC, PERSISTENT_CONFIG_PLAN)
         )
 
         self.assertIn("Phase 5AI", combined)
@@ -219,6 +220,57 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Resolve release-channel/signature questions", content)
         self.assertIn("new phase-specific human approval gate", content)
 
+    def test_persistent_config_plan_preserves_localhost_only_adapter(self):
+        content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("Status: proposal only", content)
+        self.assertIn("http://127.0.0.1:8088/v1", content)
+        self.assertIn("gemma4:26b", content)
+        self.assertIn("provider: custom", content)
+        self.assertIn("platform_toolsets:", content)
+        self.assertIn("cli: []", content)
+
+    def test_persistent_config_plan_excludes_credentials_and_live_integrations(self):
+        content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        required_phrases = (
+            "no real openai key",
+            "no real anthropic key",
+            "no real openrouter key",
+            "no google credentials",
+            "no supabase credentials",
+            "no github token",
+            "no home assistant token",
+            "no helio gateway or dispatcher token",
+            "no cloud provider",
+            "no cloud provider, google, supabase, home assistant, github, helio, or agent bus integration is contacted",
+        )
+        for phrase in required_phrases:
+            self.assertIn(phrase, lower_content)
+
+    def test_persistent_config_plan_includes_backup_and_rollback(self):
+        content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("## Backup Plan Before Future Application", content)
+        self.assertIn("## Future Rollback", content)
+        self.assertIn("~/.hermes/config.yaml.<timestamp>.bak", content)
+        self.assertIn("restore timestamped backups", content.lower())
+        self.assertIn("Confirm no `8088` listener remains", content)
+
+    def test_persistent_config_plan_keeps_desktop_and_resident_modes_blocked(self):
+        content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Desktop dependency: none", content)
+        self.assertIn("Hermes Desktop is not launched", content)
+        self.assertIn("launchd", content)
+        self.assertIn("background service", content)
+        self.assertIn("resident mode", content)
+        self.assertNotIn("launchd is approved", lower_content)
+        self.assertNotIn("resident mode is approved", lower_content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -229,6 +281,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             SECURITY_DOC,
             LOCAL_VALIDATION_DOC,
             READINESS_DOC,
+            PERSISTENT_CONFIG_PLAN,
         ]
         disallowed_markers = (
             "sk-live-",
