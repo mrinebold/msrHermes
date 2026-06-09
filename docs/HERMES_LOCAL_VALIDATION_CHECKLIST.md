@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AQ
-Status: local validation checklist, resident design, and adapter service validation input
+Phase: 5AJ-5AR
+Status: local validation checklist, resident design, adapter service validation, and path remediation input
 
 ## Purpose
 
@@ -23,6 +23,8 @@ Phase 5AP added an adapter LaunchAgent service-install proposal only in `docs/HE
 
 Phase 5AQ approved one controlled adapter LaunchAgent install validation. Foreground adapter validation passed, but the LaunchAgent failed closed with exit code `126` because launchd could not execute the adapter script from the `Documents` repo path. The service is unloaded and stopped; the plist remains installed on disk.
 
+Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as a proposal-only comparison. It recommends a minimal no-secret wrapper under `/Users/michaelrinebold/.local/bin/` and does not approve creating it, editing the plist, retrying launchd, granting privacy permissions, moving the repo, starting the adapter, or running Hermes live.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -39,6 +41,7 @@ Inspect only:
 - `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`
 - `docs/HERMES_RESIDENT_MODE_PLAN.md`
 - `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`
+- `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md`
 - `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
 - `docs/prd/CHANGELOG.md`
 
@@ -67,6 +70,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AO keeps resident mode proposal-only and adapter-service-first
 - Phase 5AP keeps service installation proposal-only with `RunAtLoad=false`, `KeepAlive=false`, rollback defined, and no plist created
 - Phase 5AQ proves the foreground adapter remains healthy but launchd service execution from the `Documents` repo path is blocked by macOS permissions
+- Phase 5AR recommends minimal wrapper remediation over broad macOS privacy permission and whole-repo movement
 
 ## Credential Deferral Boundary
 
@@ -113,9 +117,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AQ, the safest next step is either:
+After Phase 5AR, the safest next step is either:
 
-- explicitly approve a narrow service path remediation plan that compares a non-`Documents` runner location with an explicit macOS privacy permission decision, or
+- explicitly approve a narrow wrapper implementation and launchd retry phase using `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

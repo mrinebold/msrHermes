@@ -17,6 +17,7 @@ READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
+ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -189,6 +190,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
                 PERSISTENT_CONFIG_PLAN,
                 RESIDENT_MODE_PLAN,
                 ADAPTER_SERVICE_PLAN,
+                ADAPTER_SERVICE_REMEDIATION,
             )
         )
 
@@ -287,7 +289,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = RESIDENT_MODE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: resident design plus adapter service install attempt failed closed", content)
+        self.assertIn("Status: resident design plus adapter service install attempt failed closed and remediation proposed", content)
         self.assertIn("Adapter service only first", content)
         self.assertIn("Hermes remains manually invoked at first", content)
         self.assertIn("Future Hermes resident/autonomous mode requires a separate approval phase", content)
@@ -329,7 +331,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: proposal created; controlled install attempted and failed closed", content)
+        self.assertIn("Status: proposal created; controlled install failed closed; path remediation proposed", content)
         self.assertIn("The future service is adapter-only", content)
         self.assertIn("Hermes remains manually invoked", content)
         self.assertIn("Hermes autonomous resident mode is not approved", content)
@@ -383,6 +385,53 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("agent bus reads are approved", lower_content)
         self.assertNotIn("real credentials are approved", lower_content)
 
+    def test_adapter_service_remediation_recommends_minimal_wrapper(self):
+        content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: proposal only", content)
+        self.assertIn("Recommend Option A", content)
+        self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter", content)
+        self.assertIn("avoids broad macOS privacy permissions", content)
+        self.assertIn("avoids moving the entire repo", content)
+        self.assertIn("No remediation was applied", RESIDENT_MODE_PLAN.read_text(encoding="utf-8"))
+        self.assertNotIn("full disk access is approved", lower_content)
+        self.assertNotIn("move the whole repo is approved", lower_content)
+
+    def test_adapter_service_remediation_preserves_localhost_only(self):
+        content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")
+
+        self.assertIn("adapter binds only to `127.0.0.1:8088`", content)
+        self.assertIn("no `0.0.0.0`, LAN, public, or Tailscale listener", content)
+        self.assertIn("MODEL_ROUTER_ADAPTER_HOST=127.0.0.1", content)
+        self.assertIn("MODEL_ROUTER_ADAPTER_PORT=8088", content)
+        self.assertIn("service binds only `127.0.0.1:8088`", content)
+
+    def test_adapter_service_remediation_keeps_hermes_resident_disabled(self):
+        content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Hermes remains manually invoked", content)
+        self.assertIn("Hermes resident/autonomous mode remains disabled", content)
+        self.assertIn("no Hermes resident/autonomous process exists", content)
+        self.assertIn("enabling Hermes resident/autonomous mode", content)
+        self.assertNotIn("hermes resident mode is approved", lower_content)
+        self.assertNotIn("hermes autonomous resident mode is approved", lower_content)
+
+    def test_adapter_service_remediation_includes_rollback_without_live_integration_approval(self):
+        content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("## Future Stop And Rollback", content)
+        self.assertIn("launchctl bootout", content)
+        self.assertIn("msr-hermes-model-router-adapter.disabled.$(date +%Y%m%dT%H%M%S)", content)
+        self.assertIn("Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen", content)
+        self.assertNotIn("google workspace is approved", lower_content)
+        self.assertNotIn("supabase agent bus is approved", lower_content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+        self.assertNotIn("home assistant control is approved", lower_content)
+        self.assertNotIn("github token use is approved", lower_content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -396,6 +445,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             PERSISTENT_CONFIG_PLAN,
             RESIDENT_MODE_PLAN,
             ADAPTER_SERVICE_PLAN,
+            ADAPTER_SERVICE_REMEDIATION,
         ]
         disallowed_markers = (
             "sk-live-",

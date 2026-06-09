@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO-5AQ
-Status: resident design plus adapter service install attempt failed closed
+Phase: 5AO-5AR
+Status: resident design plus adapter service install attempt failed closed and remediation proposed
 
 ## Purpose
 
@@ -12,6 +12,8 @@ Phase 5AO does not create launchd plists, start background services, run Hermes,
 Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as the exact future LaunchAgent service-install proposal. Phase 5AP also does not create, install, load, bootstrap, kickstart, or start any service.
 
 Phase 5AQ approved one controlled user LaunchAgent install validation. The foreground adapter validated successfully, but the LaunchAgent could not execute the adapter script from the `Documents` repo path and exited `126` before binding. The service was unloaded and stopped; no resident Hermes mode was created.
+
+Phase 5AR proposes remediating the launchd path failure with a minimal no-secret wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`. Phase 5AR does not create the wrapper, modify the plist, retry launchd, start the adapter, or enable resident Hermes mode.
 
 ## Proposed Resident Architecture
 
@@ -54,8 +56,8 @@ No plist is created in Phase 5AO or Phase 5AP. A later approved phase may create
 | WorkingDirectory | `/Users/michaelrinebold/Documents/Helio/helio-command-center` |
 | RunAtLoad | `false` for first service install so loading the plist does not auto-start the adapter |
 | KeepAlive | `false` for first service install; consider `true` only after foreground and one-shot background validation are stable |
-| StandardOutPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stdout.log` |
-| StandardErrorPath | `/Users/michaelrinebold/.hermes/logs/model-router-adapter.stderr.log` |
+| StandardOutPath | `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log` |
+| StandardErrorPath | `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log` |
 
 Proposed environment variables:
 
@@ -111,7 +113,7 @@ Rollback candidate:
 
 ```sh
 launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist"
-mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/.hermes/backups/"
+mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist.disabled.$(date +%Y%m%dT%H%M%S)"
 ```
 
 ## Health Checks
@@ -162,7 +164,7 @@ Adapter logs must not include:
 
 Recommended log handling:
 
-- write stdout/stderr under `~/.hermes/logs/`
+- write stdout/stderr under `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/`
 - keep log permissions owner-readable only where possible
 - add rotation before long-running resident use
 - cap file size or use periodic rotation
@@ -236,3 +238,9 @@ Foreground runner validation passed before launchd was touched: `/health` worked
 Manual `launchctl kickstart` failed closed with exit code `126`. The stderr log reported `Operation not permitted` for `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh`, indicating launchd could not execute from the `Documents` repo path under the current macOS privacy boundary. The service was unloaded afterward and no `8088` listener remained.
 
 Resident mode remains blocked. Hermes remains manually invoked only. The next resident-related phase should remediate the service path or explicitly decide on macOS privacy permissions before retrying launchd.
+
+## Phase 5AR Path Remediation Proposal Result
+
+Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` and recommends a minimal wrapper outside `Documents` instead of broad macOS privacy permissions or moving the entire repo. The wrapper option keeps the service adapter-only, preserves localhost-only behavior through the existing runner, avoids real credentials, and keeps Hermes resident/autonomous mode disabled.
+
+No remediation was applied in Phase 5AR. Resident mode remains blocked until a later explicit phase creates the wrapper, updates the plist, and validates launchd start/stop behavior.

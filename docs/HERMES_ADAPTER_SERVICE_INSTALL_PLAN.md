@@ -1,7 +1,7 @@
 # Hermes Adapter Service Install Plan
 
-Phase: 5AP-5AQ
-Status: proposal created; controlled install attempted and failed closed
+Phase: 5AP-5AR
+Status: proposal created; controlled install failed closed; path remediation proposed
 
 ## Purpose
 
@@ -10,6 +10,8 @@ Draft the exact future user-level LaunchAgent installation plan for the localhos
 Phase 5AP did not create a plist, install, load, start, or stop a service. It did not start the adapter, run Hermes, modify `~/Library/LaunchAgents`, modify `~/.hermes`, connect integrations, use credentials, launch Desktop, or broaden Hermes authority.
 
 Phase 5AQ created the user LaunchAgent plist and attempted one controlled launchctl validation. The foreground runner validated successfully, but the LaunchAgent start failed closed with exit code `126` because launchd could not execute the adapter script from the `Documents` repo path. The service was unloaded and stopped; the plist remains installed on disk for inspection.
+
+Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as a proposal-only remediation plan. It recommends a minimal no-secret wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` over broad macOS privacy permissions, moving the whole repo, or retrying launchd unchanged.
 
 ## Service Scope
 
@@ -275,3 +277,17 @@ lsof -nP -iTCP:8088 -sTCP:LISTEN
 ```
 
 Recommended next action: approve a narrow Phase 5AR service path remediation plan. The safest options to compare are a non-`Documents` adapter runner location such as `~/.local/bin` or `~/Library/Application Support/Helio/`, or an explicit human-managed macOS privacy permission decision. Do not grant broad permissions, move files, or retry launchd until that remediation plan is approved.
+
+## Phase 5AR Path Remediation Proposal Result
+
+Phase 5AR compared five remediation options: minimal wrapper outside `Documents`, moving the whole repo, broad macOS privacy permission, foreground-only deferral, and another user-owned non-protected service directory.
+
+The recommended next path is a minimal wrapper at:
+
+```text
+/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter
+```
+
+The proposed wrapper contains no secrets and delegates to the existing reviewed runner. The future plist change would only replace `ProgramArguments` with the wrapper path while preserving `RunAtLoad=false`, `KeepAlive=false`, localhost-only adapter environment variables, repo-local logs, and no Hermes resident mode.
+
+Phase 5AR did not create the wrapper, edit the plist, load or start launchd, grant privacy permissions, move the repo, start the adapter, run Hermes, connect external services, use credentials, launch Desktop, or modify `~/.hermes`.

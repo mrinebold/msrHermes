@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Install attempted; service failed closed | Phase 5AQ installed the user LaunchAgent plist and validated foreground runner health, but launchd could not execute from the `Documents` repo path and exited `126`; service is unloaded/stopped | Path remediation or explicit macOS privacy decision |
+| Resident mode | Install attempted; service failed closed; remediation proposed | Phase 5AQ installed the user LaunchAgent plist and validated foreground runner health, but launchd could not execute from the `Documents` repo path and exited `126`; Phase 5AR recommends a minimal wrapper outside `Documents` | Separate wrapper/remediation approval |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -201,3 +201,11 @@ Phase 5AQ approved and attempted the controlled user LaunchAgent installation. P
 The plist was installed at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, validated with `plutil`, bootstrapped as a user LaunchAgent, and manually started once. The manual launch failed closed with exit code `126` before binding. The stderr log recorded `Operation not permitted` when launchd attempted to execute `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` from the `Documents` repo path.
 
 Final readiness state: plist remains installed on disk for inspection, but the service is unloaded and stopped; no `8088` listener remains; no adapter, Hermes, Hermes Desktop, or Hermes resident process remains. No `~/.hermes` file was modified, no credentials or integrations were used, and no Agent Bus read/write occurred. The next gate should remediate the launchd execution path or make an explicit macOS privacy permission decision before any service retry.
+
+## Phase 5AR Adapter Service Path Remediation Proposal Result
+
+Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as proposal-only documentation. It compares a minimal wrapper under `/Users/michaelrinebold/.local/bin/`, moving the whole repo, granting macOS privacy permissions, foreground-only deferral, and another user-owned non-protected directory.
+
+The recommended remediation is the minimal wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`. This avoids broad macOS privacy permissions, avoids moving the whole repo, keeps adapter logic in the reviewed runner, preserves localhost-only enforcement, and keeps real credentials out of the wrapper and plist.
+
+No wrapper was created, no plist was modified, no launchd operation was retried, no adapter or Hermes process was started, no privacy permissions were granted, no repo move occurred, no integrations or credentials were used, and no `~/.hermes` file was modified.

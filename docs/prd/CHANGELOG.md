@@ -2,6 +2,13 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AR adapter LaunchAgent path remediation proposal only.
+- Added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` comparing five remediation options after the Phase 5AQ launchd path failure: minimal wrapper under `/Users/michaelrinebold/.local/bin/`, moving the whole repo outside `Documents`, granting macOS privacy/Full Disk Access/Files and Folders permission, using foreground-only mode, and another user-owned non-protected service directory.
+- Recommended the minimal no-secret wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` over broad macOS privacy permissions or moving the entire repo.
+- Defined proposed wrapper content, owner-executable permissions, updated plist `ProgramArguments`, unchanged localhost-only adapter environment, repo-local logs path, health checks, stop/removal commands, validation plan, and rollback.
+- Updated `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AR recommendation.
+- Added tests confirming the docs recommend a minimal wrapper over broad permissions, keep the adapter localhost-only, keep Hermes resident disabled, include rollback, avoid real-looking secrets, and do not imply live integrations are approved.
+- Confirmed Phase 5AR did not create a wrapper, modify the LaunchAgent plist, load/start service, grant privacy permissions, move the repo, start the adapter live, run Hermes live, connect external services, use real credentials, launch Hermes Desktop, or modify `~/.hermes`.
 - Completed Phase 5AQ controlled adapter LaunchAgent install validation with a fail-closed result.
 - Confirmed preflight state before modifying launchd: no existing `127.0.0.1:8088` listener, no adapter process, no Hermes Desktop process, and DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`.
 - Ran the foreground adapter once through `scripts/run_model_router_adapter.sh`; confirmed `/health` worked, `/v1/models` worked and included `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, metadata-only logging was enabled, no cloud fallback or real credentials were used, and the foreground adapter stopped cleanly with no `8088` listener remaining.
