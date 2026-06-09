@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO-5AP
-Status: resident design plus adapter service install proposal only
+Phase: 5AO-5AQ
+Status: resident design plus adapter service install attempt failed closed
 
 ## Purpose
 
@@ -10,6 +10,8 @@ Design how Hermes and the local MSR Model Router Adapter could eventually run in
 Phase 5AO does not create launchd plists, start background services, run Hermes, start the adapter, connect integrations, use real credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
 
 Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as the exact future LaunchAgent service-install proposal. Phase 5AP also does not create, install, load, bootstrap, kickstart, or start any service.
+
+Phase 5AQ approved one controlled user LaunchAgent install validation. The foreground adapter validated successfully, but the LaunchAgent could not execute the adapter script from the `Documents` repo path and exited `126` before binding. The service was unloaded and stopped; no resident Hermes mode was created.
 
 ## Proposed Resident Architecture
 
@@ -224,3 +226,13 @@ The safest resident path is adapter-service-first, with Hermes remaining manuall
 Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as a proposal-only service install package. It defines the future user LaunchAgent label, plist path, exact plist XML, command path, working directory, metadata-only log paths, localhost-only environment, future bootstrap/status/health/stop/log/rollback commands, preflight requirements, and future acceptance criteria.
 
 The proposal keeps `RunAtLoad=false` and `KeepAlive=false` for the first service install. Hermes remains manually invoked, Hermes autonomous resident mode remains unapproved, Hermes Desktop remains fail-closed, and credentialed integrations remain frozen. No plist or launchd file was created, loaded, or started in Phase 5AP.
+
+## Phase 5AQ Controlled Install Validation Result
+
+Phase 5AQ installed the user LaunchAgent plist at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` and validated it with `plutil`. The plist uses `RunAtLoad=false`, `KeepAlive=false`, approved localhost adapter environment variables, and repo-local logs under `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/`.
+
+Foreground runner validation passed before launchd was touched: `/health` worked, `/v1/models` worked, DevMonster responded with version `0.30.4`, and listener inspection showed only `127.0.0.1:8088`.
+
+Manual `launchctl kickstart` failed closed with exit code `126`. The stderr log reported `Operation not permitted` for `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh`, indicating launchd could not execute from the `Documents` repo path under the current macOS privacy boundary. The service was unloaded afterward and no `8088` listener remained.
+
+Resident mode remains blocked. Hermes remains manually invoked only. The next resident-related phase should remediate the service path or explicitly decide on macOS privacy permissions before retrying launchd.

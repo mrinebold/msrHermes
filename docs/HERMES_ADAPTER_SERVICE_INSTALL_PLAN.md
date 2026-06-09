@@ -1,13 +1,15 @@
 # Hermes Adapter Service Install Plan
 
-Phase: 5AP
-Status: proposal only
+Phase: 5AP-5AQ
+Status: proposal created; controlled install attempted and failed closed
 
 ## Purpose
 
 Draft the exact future user-level LaunchAgent installation plan for the localhost MSR Model Router Adapter.
 
-Phase 5AP does not create a plist, install, load, start, or stop a service. It does not start the adapter, run Hermes, modify `~/Library/LaunchAgents`, modify `~/.hermes`, connect integrations, use credentials, launch Desktop, or broaden Hermes authority.
+Phase 5AP did not create a plist, install, load, start, or stop a service. It did not start the adapter, run Hermes, modify `~/Library/LaunchAgents`, modify `~/.hermes`, connect integrations, use credentials, launch Desktop, or broaden Hermes authority.
+
+Phase 5AQ created the user LaunchAgent plist and attempted one controlled launchctl validation. The foreground runner validated successfully, but the LaunchAgent start failed closed with exit code `126` because launchd could not execute the adapter script from the `Documents` repo path. The service was unloaded and stopped; the plist remains installed on disk for inspection.
 
 ## Service Scope
 
@@ -54,10 +56,10 @@ Future plist content:
   <false/>
 
   <key>StandardOutPath</key>
-  <string>/Users/michaelrinebold/.hermes/logs/model-router-adapter.stdout.log</string>
+  <string>/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log</string>
 
   <key>StandardErrorPath</key>
-  <string>/Users/michaelrinebold/.hermes/logs/model-router-adapter.stderr.log</string>
+  <string>/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log</string>
 
   <key>EnvironmentVariables</key>
   <dict>
@@ -81,8 +83,6 @@ Future plist content:
     <string>true</string>
     <key>MODEL_ROUTER_ADAPTER_LOG_RESPONSE_SHAPES</key>
     <string>true</string>
-    <key>MODEL_ROUTER_ADAPTER_LOG_MESSAGE_STRUCTURE</key>
-    <string>true</string>
   </dict>
 </dict>
 </plist>
@@ -92,13 +92,13 @@ RunAtLoad is `false` for the first install proposal so the service does not auto
 
 ## Future Commands
 
-These commands are proposal-only. Do not run them in Phase 5AP.
+These commands were proposal-only in Phase 5AP. Phase 5AQ approved the controlled install validation and used the same commands with repo-local log paths.
 
 Prepare paths:
 
 ```sh
 mkdir -p "$HOME/Library/LaunchAgents"
-mkdir -p "$HOME/.hermes/logs"
+mkdir -p "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs"
 ```
 
 Write plist path:
@@ -134,8 +134,8 @@ launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.mode
 Log tail commands:
 
 ```sh
-tail -n 100 "$HOME/.hermes/logs/model-router-adapter.stdout.log"
-tail -n 100 "$HOME/.hermes/logs/model-router-adapter.stderr.log"
+tail -n 100 "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log"
+tail -n 100 "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log"
 ```
 
 Health check commands:
@@ -150,7 +150,7 @@ Rollback/removal commands:
 
 ```sh
 launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist"
-mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/.hermes/backups/com.msr.hermes.model-router-adapter.plist.$(date +%Y%m%dT%H%M%S).bak"
+mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist.disabled.$(date +%Y%m%dT%H%M%S)"
 lsof -nP -iTCP:8088 -sTCP:LISTEN
 ```
 
@@ -162,8 +162,7 @@ Before any future service install:
 - confirm no existing `8088` listener
 - confirm DevMonster is reachable through the foreground adapter path
 - review exact plist content with the human operator
-- ensure `$HOME/.hermes/logs` exists
-- ensure `$HOME/.hermes/backups` exists
+- ensure `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs` exists
 - confirm plist contains no secrets
 - confirm no broad filesystem or accessibility permissions are required
 - confirm no Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, or Desktop access is enabled
@@ -210,3 +209,69 @@ Phase 5AP does not approve:
 ## Phase 5AP Conclusion
 
 The future install path is ready for human review as a proposal. The next phase must explicitly approve whether to create the plist and whether to bootstrap/kickstart the adapter service. Until then, no service exists and no resident/background operation is enabled.
+
+## Phase 5AQ Controlled Install Validation Result
+
+Phase 5AQ was approved to install and validate the user LaunchAgent. Preflight passed:
+
+- no existing `127.0.0.1:8088` listener
+- no adapter process running
+- no Hermes Desktop process running
+- DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`
+- foreground `scripts/run_model_router_adapter.sh` started with `127.0.0.1:8088`, DevMonster `gemma4:26b`, provider timeout `120`, local compatibility mode, `instruction_context`, metadata-only logging, and no prompt/file-content logging
+- foreground `/health` returned status `ok`
+- foreground `/v1/models` returned model metadata including `gemma4:26b`
+- foreground listener inspection showed only `TCP 127.0.0.1:8088 (LISTEN)`
+- foreground adapter stopped cleanly and left no `8088` listener
+
+The LaunchAgent plist was created at:
+
+```text
+/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist
+```
+
+The plist was validated with `plutil -lint` and parsed with `plutil -p`. It contains no real credentials, uses `RunAtLoad=false`, uses `KeepAlive=false`, points to the approved script path, and writes stdout/stderr under:
+
+```text
+/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/
+```
+
+Launchctl validation result:
+
+- `launchctl bootstrap gui/501 ...` loaded the user LaunchAgent
+- `launchctl print gui/501/com.msr.hermes.model-router-adapter` showed type `LaunchAgent`, state `not running`, `runs = 0`, and the approved environment before manual start
+- `launchctl kickstart gui/501/com.msr.hermes.model-router-adapter` attempted one manual start
+- the service exited with code `126` and did not bind `8088`
+- stderr recorded:
+
+```text
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+bash: /Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh: Operation not permitted
+```
+
+Codex classification: the foreground adapter is healthy, but the LaunchAgent cannot execute from the `Documents` repo path under the current macOS privacy/TCC boundary. No broad filesystem permission was granted and no attempt was made to bypass that boundary.
+
+Final Phase 5AQ state:
+
+- plist path: `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`
+- plist installed on disk: yes
+- service loaded: no
+- service running: no
+- health check result for service: not available because the service failed before binding
+- logs path: `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log` and `logs/model-router-adapter.stderr.log`
+- stdout log: empty
+- stderr log: contains the launchd `Operation not permitted` failure
+- no `8088` listener remains
+- no adapter, Hermes, or Hermes Desktop process remains
+- no Hermes resident/autonomous process was created
+- no real credentials, cloud providers, Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, Desktop, or `~/.hermes` modification was involved
+
+Rollback command:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" || true
+mv "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist.disabled.$(date +%Y%m%dT%H%M%S)"
+lsof -nP -iTCP:8088 -sTCP:LISTEN
+```
+
+Recommended next action: approve a narrow Phase 5AR service path remediation plan. The safest options to compare are a non-`Documents` adapter runner location such as `~/.local/bin` or `~/Library/Application Support/Helio/`, or an explicit human-managed macOS privacy permission decision. Do not grant broad permissions, move files, or retry launchd until that remediation plan is approved.

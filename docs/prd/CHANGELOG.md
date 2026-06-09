@@ -2,6 +2,17 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AQ controlled adapter LaunchAgent install validation with a fail-closed result.
+- Confirmed preflight state before modifying launchd: no existing `127.0.0.1:8088` listener, no adapter process, no Hermes Desktop process, and DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`.
+- Ran the foreground adapter once through `scripts/run_model_router_adapter.sh`; confirmed `/health` worked, `/v1/models` worked and included `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, metadata-only logging was enabled, no cloud fallback or real credentials were used, and the foreground adapter stopped cleanly with no `8088` listener remaining.
+- Created repo-local `logs/` and installed the user LaunchAgent plist at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` with `RunAtLoad=false`, `KeepAlive=false`, approved localhost adapter environment variables, and stdout/stderr paths under `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/`.
+- Validated the plist with `plutil -lint` and parsed it with `plutil -p`; no real credentials were present.
+- Bootstrapped the plist as user LaunchAgent and manually attempted one `launchctl kickstart`.
+- Recorded the launchd validation failure: service exited `126`, did not bind `8088`, and stderr reported `Operation not permitted` when launchd attempted to execute `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` from the `Documents` repo path.
+- Unloaded/stopped the service after the failed start. Final state: plist remains installed on disk for inspection, service is unloaded, service is not running, no `8088` listener remains, and no adapter, Hermes, Hermes Desktop, or Hermes resident process remains.
+- Updated `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AQ result.
+- Confirmed Phase 5AQ did not create Hermes resident mode, create a Hermes launchd service, start Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
+- Recommended Phase 5AR as a narrow service path remediation decision gate before any launchd retry.
 - Completed Phase 5AP adapter service install proposal only.
 - Added `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` with the exact future user-level LaunchAgent plan for the localhost MSR Model Router Adapter.
 - Drafted future plist content for label `com.msr.hermes.model-router-adapter`, path `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, script `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh`, working directory `/Users/michaelrinebold/Documents/Helio/helio-command-center`, `RunAtLoad=false`, `KeepAlive=false`, stdout/stderr logs under `~/.hermes/logs/`, localhost-only bind settings, DevMonster Gemma settings, provider timeout, local compatibility mode, prompt mode, context budget, and metadata-only logging.

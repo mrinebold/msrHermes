@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Design plus install proposal only | Phase 5AO proposes adapter-service-first architecture; Phase 5AP drafts exact future LaunchAgent install steps; no plist or service was created | Separate service-install approval |
+| Resident mode | Install attempted; service failed closed | Phase 5AQ installed the user LaunchAgent plist and validated foreground runner health, but launchd could not execute from the `Documents` repo path and exited `126`; service is unloaded/stopped | Path remediation or explicit macOS privacy decision |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -193,3 +193,11 @@ Phase 5AP added `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as proposal-only d
 The readiness position does not change: background adapter service installation remains blocked until a separate explicit phase approves plist creation and launchctl operations. Hermes remains manually invoked, Hermes autonomous resident mode is not approved, Hermes Desktop remains fail-closed, and Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, and cloud-provider integrations remain frozen.
 
 No launchd plist was created, installed, bootstrapped, loaded, kickstarted, or started. No adapter or Hermes live run occurred. No `~/Library/LaunchAgents` or `~/.hermes` file was modified. No credentials, integrations, Desktop launch, Agent Bus reads/writes, background service, resident mode, or authority broadening occurred.
+
+## Phase 5AQ Controlled Adapter LaunchAgent Validation Result
+
+Phase 5AQ approved and attempted the controlled user LaunchAgent installation. Preflight and foreground validation passed: no prior `8088` listener or adapter/Desktop process was present, DevMonster returned version `0.30.4`, foreground `/health` worked, foreground `/v1/models` worked, and listener inspection showed only `127.0.0.1:8088`.
+
+The plist was installed at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, validated with `plutil`, bootstrapped as a user LaunchAgent, and manually started once. The manual launch failed closed with exit code `126` before binding. The stderr log recorded `Operation not permitted` when launchd attempted to execute `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` from the `Documents` repo path.
+
+Final readiness state: plist remains installed on disk for inspection, but the service is unloaded and stopped; no `8088` listener remains; no adapter, Hermes, Hermes Desktop, or Hermes resident process remains. No `~/.hermes` file was modified, no credentials or integrations were used, and no Agent Bus read/write occurred. The next gate should remediate the launchd execution path or make an explicit macOS privacy permission decision before any service retry.

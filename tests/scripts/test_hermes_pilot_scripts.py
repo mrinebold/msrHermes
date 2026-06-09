@@ -287,7 +287,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = RESIDENT_MODE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: resident design plus adapter service install proposal only", content)
+        self.assertIn("Status: resident design plus adapter service install attempt failed closed", content)
         self.assertIn("Adapter service only first", content)
         self.assertIn("Hermes remains manually invoked at first", content)
         self.assertIn("Future Hermes resident/autonomous mode requires a separate approval phase", content)
@@ -329,11 +329,13 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: proposal only", content)
+        self.assertIn("Status: proposal created; controlled install attempted and failed closed", content)
         self.assertIn("The future service is adapter-only", content)
         self.assertIn("Hermes remains manually invoked", content)
         self.assertIn("Hermes autonomous resident mode is not approved", content)
-        self.assertIn("Phase 5AP does not create a plist", content)
+        self.assertIn("Phase 5AP did not create a plist", content)
+        self.assertIn("service is adapter-only", content)
+        self.assertIn("service running: no", content)
         self.assertNotIn("hermes autonomous resident mode is approved", lower_content)
         self.assertNotIn("hermes resident mode is approved", lower_content)
 
@@ -347,6 +349,8 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("<key>RunAtLoad</key>", content)
         self.assertIn("<false/>", content)
         self.assertIn("<key>KeepAlive</key>", content)
+        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log", content)
+        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log", content)
         self.assertIn("<key>MODEL_ROUTER_ADAPTER_HOST</key>", content)
         self.assertIn("<string>127.0.0.1</string>", content)
         self.assertIn("<key>MODEL_ROUTER_ADAPTER_PORT</key>", content)
@@ -363,7 +367,9 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("launchctl print", content)
         self.assertIn("launchctl bootout", content)
         self.assertIn("Rollback/removal commands", content)
-        self.assertIn("$HOME/.hermes/backups/com.msr.hermes.model-router-adapter.plist.$(date +%Y%m%dT%H%M%S).bak", content)
+        self.assertIn("$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist.disabled.$(date +%Y%m%dT%H%M%S)", content)
+        self.assertIn("Operation not permitted", content)
+        self.assertIn("no `8088` listener remains", content)
 
     def test_adapter_service_plan_keeps_desktop_and_integrations_frozen(self):
         content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")

@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AP
-Status: local validation checklist, resident design, and adapter service proposal input
+Phase: 5AJ-5AQ
+Status: local validation checklist, resident design, and adapter service validation input
 
 ## Purpose
 
@@ -20,6 +20,8 @@ Phase 5AN approved and completed one live local validation prompt through the fo
 Phase 5AO added a resident-mode design proposal only in `docs/HERMES_RESIDENT_MODE_PLAN.md`. It does not approve creating launchd plists, starting background services, running Hermes resident mode, or broadening authority.
 
 Phase 5AP added an adapter LaunchAgent service-install proposal only in `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`. It does not approve creating the plist, modifying `~/Library/LaunchAgents`, loading or starting launchd services, starting the adapter, running Hermes live, or broadening authority.
+
+Phase 5AQ approved one controlled adapter LaunchAgent install validation. Foreground adapter validation passed, but the LaunchAgent failed closed with exit code `126` because launchd could not execute the adapter script from the `Documents` repo path. The service is unloaded and stopped; the plist remains installed on disk.
 
 ## Approved Surfaces
 
@@ -64,6 +66,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AN proved one harmless prompt can use the persistent config through the localhost adapter
 - Phase 5AO keeps resident mode proposal-only and adapter-service-first
 - Phase 5AP keeps service installation proposal-only with `RunAtLoad=false`, `KeepAlive=false`, rollback defined, and no plist created
+- Phase 5AQ proves the foreground adapter remains healthy but launchd service execution from the `Documents` repo path is blocked by macOS permissions
 
 ## Credential Deferral Boundary
 
@@ -110,9 +113,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AP, the safest next step is either:
+After Phase 5AQ, the safest next step is either:
 
-- explicitly approve a separate adapter-service install validation phase that creates the reviewed plist, keeps `RunAtLoad=false` and `KeepAlive=false`, bootstraps/kickstarts only with approval, proves health checks, and verifies rollback, or
+- explicitly approve a narrow service path remediation plan that compares a non-`Documents` runner location with an explicit macOS privacy permission decision, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.
