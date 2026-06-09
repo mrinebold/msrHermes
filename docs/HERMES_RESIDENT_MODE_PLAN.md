@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO-5AR
-Status: resident design plus adapter service install attempt failed closed and remediation proposed
+Phase: 5AO-5AS
+Status: adapter LaunchAgent service validated manually; Hermes resident mode disabled
 
 ## Purpose
 
@@ -14,6 +14,8 @@ Phase 5AP adds `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md` as the exact future
 Phase 5AQ approved one controlled user LaunchAgent install validation. The foreground adapter validated successfully, but the LaunchAgent could not execute the adapter script from the `Documents` repo path and exited `126` before binding. The service was unloaded and stopped; no resident Hermes mode was created.
 
 Phase 5AR proposes remediating the launchd path failure with a minimal no-secret wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`. Phase 5AR does not create the wrapper, modify the plist, retry launchd, start the adapter, or enable resident Hermes mode.
+
+Phase 5AS created the wrapper and a self-contained adapter runtime outside `Documents` under `~/Library/Application Support/Helio/hermes-adapter-service/`. The LaunchAgent started manually, served health and model metadata on `127.0.0.1:8088`, and was stopped/unloaded after validation. Hermes resident/autonomous mode remains disabled.
 
 ## Proposed Resident Architecture
 
@@ -52,12 +54,12 @@ No plist is created in Phase 5AO or Phase 5AP. A later approved phase may create
 | --- | --- |
 | Label | `com.msr.hermes.model-router-adapter` |
 | Plist path | `~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` |
-| ProgramArguments | `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` |
-| WorkingDirectory | `/Users/michaelrinebold/Documents/Helio/helio-command-center` |
+| ProgramArguments | `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` |
+| WorkingDirectory | `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current` |
 | RunAtLoad | `false` for first service install so loading the plist does not auto-start the adapter |
 | KeepAlive | `false` for first service install; consider `true` only after foreground and one-shot background validation are stable |
-| StandardOutPath | `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log` |
-| StandardErrorPath | `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log` |
+| StandardOutPath | `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log` |
+| StandardErrorPath | `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log` |
 
 Proposed environment variables:
 
@@ -164,7 +166,7 @@ Adapter logs must not include:
 
 Recommended log handling:
 
-- write stdout/stderr under `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/`
+- write stdout/stderr under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/`
 - keep log permissions owner-readable only where possible
 - add rotation before long-running resident use
 - cap file size or use periodic rotation
@@ -244,3 +246,11 @@ Resident mode remains blocked. Hermes remains manually invoked only. The next re
 Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` and recommends a minimal wrapper outside `Documents` instead of broad macOS privacy permissions or moving the entire repo. The wrapper option keeps the service adapter-only, preserves localhost-only behavior through the existing runner, avoids real credentials, and keeps Hermes resident/autonomous mode disabled.
 
 No remediation was applied in Phase 5AR. Resident mode remains blocked until a later explicit phase creates the wrapper, updates the plist, and validates launchd start/stop behavior.
+
+## Phase 5AS Wrapper Validation Result
+
+Phase 5AS created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`, moved the minimal adapter runtime to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`, updated the adapter LaunchAgent to use that non-`Documents` runtime, and attempted one manual launchctl start. The wrapper passed shell syntax validation, and the plist passed `plutil`.
+
+The service started successfully. `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`. The service was then stopped and unloaded; no `8088` listener remains.
+
+Adapter service mechanics are validated for manual start/stop. Hermes remains manually invoked only, and Hermes resident/autonomous mode remains disabled. The next resident-related phase should decide whether manual adapter service start is allowed as an operational procedure, not enable RunAtLoad or KeepAlive by default.

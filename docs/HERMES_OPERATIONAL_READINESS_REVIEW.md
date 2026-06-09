@@ -58,7 +58,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | GitHub | Not ready | No token use approved for Hermes | Token rotation/review and repository/action scope |
 | Credential rotation | Deferred, not complete | Phase 5AI deferral recorded | Owner confirms rotation, revocation, review, or narrower deferral |
 | Logging/audit | Partially ready locally | Adapter metadata logging avoids prompt text, file contents, model output, and secrets | Durable audit design before resident/integration use |
-| Resident mode | Install attempted; service failed closed; remediation proposed | Phase 5AQ installed the user LaunchAgent plist and validated foreground runner health, but launchd could not execute from the `Documents` repo path and exited `126`; Phase 5AR recommends a minimal wrapper outside `Documents` | Separate wrapper/remediation approval |
+| Resident mode | Adapter service manually validated; Hermes resident disabled | Phase 5AS validates a user LaunchAgent adapter service from a self-contained Application Support runtime; service is stopped/unloaded after validation | Separate approval for operational service start policy, RunAtLoad, KeepAlive, or Hermes resident mode |
 
 ## Required Gates Before Narrow Capabilities
 
@@ -209,3 +209,11 @@ Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as proposal-on
 The recommended remediation is the minimal wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`. This avoids broad macOS privacy permissions, avoids moving the whole repo, keeps adapter logic in the reviewed runner, preserves localhost-only enforcement, and keeps real credentials out of the wrapper and plist.
 
 No wrapper was created, no plist was modified, no launchd operation was retried, no adapter or Hermes process was started, no privacy permissions were granted, no repo move occurred, no integrations or credentials were used, and no `~/.hermes` file was modified.
+
+## Phase 5AS Adapter LaunchAgent Wrapper Service Result
+
+Phase 5AS created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`, copied the minimal adapter runtime to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`, and updated the LaunchAgent to use that non-`Documents` runtime. The plist retained `RunAtLoad=false`, `KeepAlive=false`, localhost-only environment variables, and no real credentials.
+
+The first wrapper-only attempt failed closed because the service still depended on the `Documents` repo path. The final self-contained runtime fix succeeded: manual `launchctl kickstart` started the adapter, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+
+The service was stopped and unloaded after validation. No `8088` listener remains, no adapter/Hermes/Desktop/resident process remains, no `~/.hermes` file was modified, no credentials or integrations were used, and no Agent Bus read/write occurred.

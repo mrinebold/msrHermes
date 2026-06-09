@@ -1,7 +1,7 @@
 # Hermes Adapter Service Path Remediation
 
-Phase: 5AR
-Status: proposal only
+Phase: 5AR-5AS
+Status: wrapper plus self-contained runtime validated; service stopped
 
 ## Purpose
 
@@ -10,6 +10,8 @@ Choose the safest remediation for the Phase 5AQ LaunchAgent failure.
 Phase 5AQ proved the foreground adapter works, but launchd could not execute `/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh` from the `Documents` repo path and exited `126` with `Operation not permitted`.
 
 Phase 5AR does not create a wrapper, modify the LaunchAgent plist, load or start a service, grant macOS privacy permissions, move the repo, start the adapter, run Hermes, connect external services, use credentials, launch Desktop, or modify `~/.hermes`.
+
+Phase 5AS first created the proposed wrapper and updated only the LaunchAgent `ProgramArguments`. That wrapper-only attempt still failed closed with exit code `126` because launchd still depended on the protected `Documents` repo path. The final 5AS fix created a minimal self-contained adapter runtime under `~/Library/Application Support/Helio/hermes-adapter-service/`, updated the LaunchAgent working directory and log paths to that runtime, validated `/health` and `/v1/models`, then stopped and unloaded the service.
 
 ## Current Boundary
 
@@ -226,3 +228,172 @@ Phase 5AR does not approve:
 ## Conclusion
 
 The safest remediation is a minimal, no-secret wrapper in `/Users/michaelrinebold/.local/bin/` with only `ProgramArguments` changed in a future approved phase. Broad macOS privacy permissions and moving the full repo should remain fallback options only if the wrapper path fails under controlled validation.
+
+## Phase 5AS Wrapper Validation Result
+
+Phase 5AS applied the Phase 5AR wrapper recommendation under explicit approval.
+
+Preflight passed:
+
+- no `127.0.0.1:8088` listener
+- no adapter process
+- no Hermes Desktop process
+- no Hermes resident/autonomous process
+- DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`
+- LaunchAgent service was not loaded before the retry
+
+Created wrapper:
+
+```text
+/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter
+```
+
+Wrapper permissions:
+
+```text
+-rwx------ michaelrinebold staff
+```
+
+Wrapper content:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /Users/michaelrinebold/Documents/Helio/helio-command-center
+exec /Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh
+```
+
+Updated plist:
+
+```text
+/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist
+```
+
+Only `ProgramArguments` changed:
+
+```text
+/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter
+```
+
+Kept unchanged:
+
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- localhost-only adapter environment
+- no real credentials
+- repo-local stdout/stderr log paths
+
+Validation result:
+
+- `bash -n /Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` passed
+- `plutil -lint` passed
+- `launchctl bootstrap` loaded the service
+- `launchctl kickstart` attempted one manual start
+- service exited `126` before binding
+- `/health` did not become available
+- `/v1/models` did not become available
+- no `8088` listener was created
+
+Stderr log:
+
+```text
+shell-init: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+chdir: error retrieving current directory: getcwd: cannot access parent directories: Operation not permitted
+bash: /Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh: Operation not permitted
+```
+
+Final state:
+
+- wrapper installed: yes
+- plist installed: yes
+- plist loaded: no
+- service running: no
+- no `8088` listener remains
+- no adapter, Hermes, Hermes Desktop, or Hermes resident/autonomous process remains
+- stdout log is empty
+- stderr log records the macOS permission failure
+- `~/.hermes` was not modified
+- no real credentials, cloud providers, Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, Desktop, or Hermes live run was involved
+
+Rollback command:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" || true
+mv "$HOME/.local/bin/msr-hermes-model-router-adapter" "$HOME/.local/bin/msr-hermes-model-router-adapter.disabled.$(date +%Y%m%dT%H%M%S)"
+```
+
+Warning: the minimal wrapper alone was insufficient while the plist still used the `Documents` repo path as `WorkingDirectory` and the wrapper still executed a script from `Documents`.
+
+## Phase 5AS Self-Contained Runtime Fix Result
+
+The final Phase 5AS fix moved only the adapter service runtime out of `Documents`:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current/
+```
+
+Copied runtime modules:
+
+```text
+services/model_router_adapter/
+services/model_router/
+```
+
+Final wrapper content:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+RUNTIME_DIR="/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current"
+cd "${RUNTIME_DIR}"
+export PYTHONPATH="${RUNTIME_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
+exec /usr/bin/python3 -m services.model_router_adapter.server
+```
+
+Final plist state:
+
+- `ProgramArguments=/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`
+- `WorkingDirectory=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`
+- `StandardOutPath=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log`
+- `StandardErrorPath=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log`
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- localhost-only adapter environment preserved
+- no real credentials
+
+Successful validation:
+
+- `bash -n /Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` passed
+- `plutil -lint /Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` passed
+- `launchctl bootstrap` loaded the service
+- `launchctl kickstart` started the service manually
+- `launchctl print` showed state `running`, PID `10026`, and wrapper program path
+- `/health` returned `{"status": "ok", "service": "model_router_adapter", "host": "127.0.0.1", "port": 8088}`
+- `/v1/models` returned model metadata including `gemma4:26b`
+- listener inspection showed only `TCP 127.0.0.1:8088 (LISTEN)`
+- no Hermes Desktop process was present
+- no Hermes resident/autonomous process was present
+
+Final stopped state:
+
+- service unloaded: yes
+- service running: no
+- no `8088` listener remains
+- no adapter, Hermes, Hermes Desktop, or Hermes resident/autonomous process remains
+- LaunchAgent plist remains installed for future approved manual start
+- wrapper remains installed
+- self-contained runtime remains installed
+- `~/.hermes` was not modified
+
+Rollback command:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" || true
+mv "$HOME/.local/bin/msr-hermes-model-router-adapter" "$HOME/.local/bin/msr-hermes-model-router-adapter.disabled.$(date +%Y%m%dT%H%M%S)"
+mv "$HOME/Library/Application Support/Helio/hermes-adapter-service/current" "$HOME/Library/Application Support/Helio/hermes-adapter-service/current.disabled.$(date +%Y%m%dT%H%M%S)"
+lsof -nP -iTCP:8088 -sTCP:LISTEN
+```
+
+Recommended next action: Phase 5AT should define the policy for manual service start/stop versus keeping the adapter foreground-only by default. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without a new explicit approval.

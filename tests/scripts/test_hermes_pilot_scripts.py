@@ -289,7 +289,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = RESIDENT_MODE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: resident design plus adapter service install attempt failed closed and remediation proposed", content)
+        self.assertIn("Status: adapter LaunchAgent service validated manually; Hermes resident mode disabled", content)
         self.assertIn("Adapter service only first", content)
         self.assertIn("Hermes remains manually invoked at first", content)
         self.assertIn("Future Hermes resident/autonomous mode requires a separate approval phase", content)
@@ -331,7 +331,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = ADAPTER_SERVICE_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: proposal created; controlled install failed closed; path remediation proposed", content)
+        self.assertIn("Status: adapter LaunchAgent wrapper service validated and stopped", content)
         self.assertIn("The future service is adapter-only", content)
         self.assertIn("Hermes remains manually invoked", content)
         self.assertIn("Hermes autonomous resident mode is not approved", content)
@@ -346,13 +346,13 @@ class HermesPilotScriptsTest(unittest.TestCase):
 
         self.assertIn("com.msr.hermes.model-router-adapter", content)
         self.assertIn("~/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist", content)
-        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh", content)
-        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center", content)
+        self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current", content)
         self.assertIn("<key>RunAtLoad</key>", content)
         self.assertIn("<false/>", content)
         self.assertIn("<key>KeepAlive</key>", content)
-        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log", content)
-        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log", content)
         self.assertIn("<key>MODEL_ROUTER_ADAPTER_HOST</key>", content)
         self.assertIn("<string>127.0.0.1</string>", content)
         self.assertIn("<key>MODEL_ROUTER_ADAPTER_PORT</key>", content)
@@ -370,7 +370,8 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("launchctl bootout", content)
         self.assertIn("Rollback/removal commands", content)
         self.assertIn("$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist.disabled.$(date +%Y%m%dT%H%M%S)", content)
-        self.assertIn("Operation not permitted", content)
+        self.assertIn("health result: passed during manual start", content)
+        self.assertIn("models result: passed during manual start and included `gemma4:26b`", content)
         self.assertIn("no `8088` listener remains", content)
 
     def test_adapter_service_plan_keeps_desktop_and_integrations_frozen(self):
@@ -389,12 +390,14 @@ class HermesPilotScriptsTest(unittest.TestCase):
         content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: proposal only", content)
+        self.assertIn("Status: wrapper plus self-contained runtime validated; service stopped", content)
         self.assertIn("Recommend Option A", content)
         self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter", content)
         self.assertIn("avoids broad macOS privacy permissions", content)
         self.assertIn("avoids moving the entire repo", content)
-        self.assertIn("No remediation was applied", RESIDENT_MODE_PLAN.read_text(encoding="utf-8"))
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current", content)
+        self.assertIn("Successful validation", content)
+        self.assertIn("service unloaded: yes", content)
         self.assertNotIn("full disk access is approved", lower_content)
         self.assertNotIn("move the whole repo is approved", lower_content)
 
@@ -406,6 +409,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("MODEL_ROUTER_ADAPTER_HOST=127.0.0.1", content)
         self.assertIn("MODEL_ROUTER_ADAPTER_PORT=8088", content)
         self.assertIn("service binds only `127.0.0.1:8088`", content)
+        self.assertIn("listener inspection showed only `TCP 127.0.0.1:8088 (LISTEN)`", content)
 
     def test_adapter_service_remediation_keeps_hermes_resident_disabled(self):
         content = ADAPTER_SERVICE_REMEDIATION.read_text(encoding="utf-8")

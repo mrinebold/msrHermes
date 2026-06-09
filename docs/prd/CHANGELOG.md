@@ -2,6 +2,18 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AS adapter LaunchAgent wrapper service validation.
+- Confirmed clean preflight: no `127.0.0.1:8088` listener, no adapter process, no Hermes Desktop process, no Hermes resident/autonomous process, DevMonster `0.30.4`, and LaunchAgent initially unloaded.
+- Created `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` with permissions `-rwx------`.
+- Copied the minimal adapter service runtime outside `Documents` to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current/`, including only `services/model_router_adapter/` and `services/model_router/`.
+- Updated the LaunchAgent to use the wrapper, working directory `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`, and logs under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/`.
+- Preserved `RunAtLoad=false`, `KeepAlive=false`, localhost-only adapter environment, DevMonster `gemma4:26b`, provider timeout `120`, metadata-only logging, and no real credentials.
+- Validated `bash -n` for the wrapper and `plutil -lint` for the plist.
+- Recorded that the first wrapper-only attempt still failed closed because launchd depended on the protected `Documents` repo path.
+- Validated the final self-contained runtime fix: manual `launchctl kickstart` started the service, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Stopped/unloaded the service after validation. Final state: LaunchAgent plist installed, wrapper installed, Application Support runtime installed, service unloaded, service not running, no `8088` listener, no adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md`, `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AS result.
+- Confirmed Phase 5AS did not create Hermes resident mode, create a Hermes launchd service, start Hermes live, leave the adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AR adapter LaunchAgent path remediation proposal only.
 - Added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` comparing five remediation options after the Phase 5AQ launchd path failure: minimal wrapper under `/Users/michaelrinebold/.local/bin/`, moving the whole repo outside `Documents`, granting macOS privacy/Full Disk Access/Files and Folders permission, using foreground-only mode, and another user-owned non-protected service directory.
 - Recommended the minimal no-secret wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` over broad macOS privacy permissions or moving the entire repo.

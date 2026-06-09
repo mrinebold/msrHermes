@@ -1,7 +1,7 @@
 # Hermes Adapter Service Install Plan
 
-Phase: 5AP-5AR
-Status: proposal created; controlled install failed closed; path remediation proposed
+Phase: 5AP-5AS
+Status: adapter LaunchAgent wrapper service validated and stopped
 
 ## Purpose
 
@@ -12,6 +12,8 @@ Phase 5AP did not create a plist, install, load, start, or stop a service. It di
 Phase 5AQ created the user LaunchAgent plist and attempted one controlled launchctl validation. The foreground runner validated successfully, but the LaunchAgent start failed closed with exit code `126` because launchd could not execute the adapter script from the `Documents` repo path. The service was unloaded and stopped; the plist remains installed on disk for inspection.
 
 Phase 5AR added `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md` as a proposal-only remediation plan. It recommends a minimal no-secret wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` over broad macOS privacy permissions, moving the whole repo, or retrying launchd unchanged.
+
+Phase 5AS created that wrapper, then fixed the remaining launchd path issue by creating a self-contained runtime under `~/Library/Application Support/Helio/hermes-adapter-service/`. The LaunchAgent started manually, served `/health` and `/v1/models` on `127.0.0.1:8088`, and was stopped/unloaded after validation.
 
 ## Service Scope
 
@@ -45,11 +47,11 @@ Future plist content:
 
   <key>ProgramArguments</key>
   <array>
-    <string>/Users/michaelrinebold/Documents/Helio/helio-command-center/scripts/run_model_router_adapter.sh</string>
+    <string>/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter</string>
   </array>
 
   <key>WorkingDirectory</key>
-  <string>/Users/michaelrinebold/Documents/Helio/helio-command-center</string>
+  <string>/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current</string>
 
   <key>RunAtLoad</key>
   <false/>
@@ -58,10 +60,10 @@ Future plist content:
   <false/>
 
   <key>StandardOutPath</key>
-  <string>/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log</string>
+  <string>/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log</string>
 
   <key>StandardErrorPath</key>
-  <string>/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log</string>
+  <string>/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log</string>
 
   <key>EnvironmentVariables</key>
   <dict>
@@ -100,7 +102,7 @@ Prepare paths:
 
 ```sh
 mkdir -p "$HOME/Library/LaunchAgents"
-mkdir -p "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs"
+mkdir -p "/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs"
 ```
 
 Write plist path:
@@ -136,8 +138,8 @@ launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.mode
 Log tail commands:
 
 ```sh
-tail -n 100 "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stdout.log"
-tail -n 100 "/Users/michaelrinebold/Documents/Helio/helio-command-center/logs/model-router-adapter.stderr.log"
+tail -n 100 "/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log"
+tail -n 100 "/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log"
 ```
 
 Health check commands:
@@ -164,7 +166,8 @@ Before any future service install:
 - confirm no existing `8088` listener
 - confirm DevMonster is reachable through the foreground adapter path
 - review exact plist content with the human operator
-- ensure `/Users/michaelrinebold/Documents/Helio/helio-command-center/logs` exists
+- ensure `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current` exists
+- ensure `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs` exists
 - confirm plist contains no secrets
 - confirm no broad filesystem or accessibility permissions are required
 - confirm no Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, or Desktop access is enabled
@@ -291,3 +294,48 @@ The recommended next path is a minimal wrapper at:
 The proposed wrapper contains no secrets and delegates to the existing reviewed runner. The future plist change would only replace `ProgramArguments` with the wrapper path while preserving `RunAtLoad=false`, `KeepAlive=false`, localhost-only adapter environment variables, repo-local logs, and no Hermes resident mode.
 
 Phase 5AR did not create the wrapper, edit the plist, load or start launchd, grant privacy permissions, move the repo, start the adapter, run Hermes, connect external services, use credentials, launch Desktop, or modify `~/.hermes`.
+
+## Phase 5AS Wrapper Service Validation Result
+
+Phase 5AS created the approved wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter` with permissions `-rwx------`. The first wrapper-only attempt still failed because launchd could not use the `Documents` repo path.
+
+The final fix copied only the required adapter runtime modules to:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current/
+```
+
+The LaunchAgent plist at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist` now uses:
+
+- `ProgramArguments=/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`
+- `WorkingDirectory=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`
+- `StandardOutPath=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stdout.log`
+- `StandardErrorPath=/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/model-router-adapter.stderr.log`
+- `RunAtLoad=false`
+- `KeepAlive=false`
+
+`plutil -lint` passed. Manual `launchctl kickstart` started the service successfully. `/health` returned status `ok`; `/v1/models` returned model metadata including `gemma4:26b`; listener inspection showed only `127.0.0.1:8088`.
+
+Final state:
+
+- wrapper installed: yes
+- self-contained runtime installed: yes
+- plist installed: yes
+- service loaded: no
+- service running: no
+- logs path: `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/logs/`
+- health result: passed during manual start
+- models result: passed during manual start and included `gemma4:26b`
+- no `8088` listener remains
+- no adapter, Hermes, Hermes Desktop, or Hermes resident/autonomous process remains
+- `~/.hermes` was not modified
+
+Rollback command:
+
+```sh
+launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist" || true
+mv "$HOME/.local/bin/msr-hermes-model-router-adapter" "$HOME/.local/bin/msr-hermes-model-router-adapter.disabled.$(date +%Y%m%dT%H%M%S)"
+mv "$HOME/Library/Application Support/Helio/hermes-adapter-service/current" "$HOME/Library/Application Support/Helio/hermes-adapter-service/current.disabled.$(date +%Y%m%dT%H%M%S)"
+```
+
+Recommended next action: define operating policy for manual service start/stop. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without separate approval.
