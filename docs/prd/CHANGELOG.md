@@ -2,6 +2,13 @@
 
 ## 2026-06-08
 
+- Completed Phase 5AM persistent local Hermes config application with backup and rollback path.
+- Inspected current `~/.hermes` metadata without printing file contents or secret values; identified `~/.hermes/config.yaml` and `~/.hermes/.env` as candidate config files and reported secret-like names by name only.
+- Created timestamped backup `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak` before modifying `~/.hermes/config.yaml`.
+- Applied persistent local config with `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, `model.api_key=dummy-local-adapter-key`, and `platform_toolsets.cli=[]`.
+- Validated YAML syntax, localhost-only base URL, dummy local key, disabled CLI platform toolset, owner-only config mode, and no real-looking secret markers in the modified config.
+- Updated `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AM result and rollback path.
+- Confirmed Phase 5AM did not modify `~/.hermes/.env`, start the adapter, run Hermes live, create launchd/background services, launch Desktop, use real credentials, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, perform live Agent Bus reads/writes, modify credentials, or broaden Hermes authority.
 - Completed Phase 5AL persistent Hermes local config proposal only.
 - Added `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md` defining the future localhost-only persistent config scope, proposed `config.yaml`, future `~/.hermes` files and backup paths, backup plan, validation steps, rollback steps, non-goals, and explicit approval requirements.
 - Proposed future Hermes config uses only `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, dummy/local syntactic API key only if required, and disabled platform tools.

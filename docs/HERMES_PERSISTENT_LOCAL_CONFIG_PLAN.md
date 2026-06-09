@@ -1,13 +1,13 @@
 # Hermes Persistent Local Config Plan
 
-Phase: 5AL
-Status: proposal only
+Phase: 5AM
+Status: persistent local config applied
 
 ## Purpose
 
-Define the exact persistent local Hermes configuration plan needed for a future resident-readiness path without applying it.
+Define and record the persistent local Hermes configuration needed for a future resident-readiness path.
 
-Phase 5AL does not modify `~/.hermes`, run Hermes, start the adapter, create background services, launch Desktop, use credentials, connect integrations, or broaden Hermes authority.
+Phase 5AM applied only the approved local adapter config to `~/.hermes/config.yaml`. It did not run Hermes, start the adapter, create background services, launch Desktop, use real credentials, connect integrations, modify credential files, or broaden Hermes authority.
 
 ## Proposed Persistent Scope
 
@@ -33,7 +33,7 @@ No real provider or integration credentials are allowed:
 
 ## Proposed Config Content
 
-Future persistent Hermes `config.yaml` candidate:
+Persistent Hermes `config.yaml` target:
 
 ```yaml
 model:
@@ -49,16 +49,20 @@ If Hermes supports a local model alias later, a future phase may replace `gemma4
 
 ## Future Files And Paths
 
-Future application phase may create or modify only these paths after explicit approval:
+Phase 5AM created or modified only these paths:
 
-| Path | Future action | Notes |
+| Path | Action | Notes |
 | --- | --- | --- |
-| `~/.hermes/config.yaml` | Create or update | Primary persistent Hermes config candidate. Must be backed up first if present. |
-| `~/.hermes/config.yaml.<timestamp>.bak` | Create | Timestamped backup of existing config before modification. |
-| `~/.hermes/.env` | Prefer no change | Should not be created unless a later phase proves Hermes requires it. Must not contain real cloud/integration credentials. |
-| `~/.hermes/.env.<timestamp>.bak` | Create only if `.env` would be modified | Backup before any approved modification. |
-| `~/.local/bin/hermes-local` | Optional wrapper proposal only | Future wrapper could set isolated local env, but should not be created in this phase. |
-| `~/.local/bin/hermes-local.<timestamp>.bak` | Create only if wrapper already exists and would be modified | Backup before any approved modification. |
+| `~/.hermes/config.yaml` | Modified | Primary persistent Hermes config. Mode set to owner read/write. |
+| `~/.hermes/backups/phase5am-20260608T232816/config.yaml.bak` | Created | Timestamped backup of pre-Phase 5AM config. |
+
+Phase 5AM did not modify:
+
+- `~/.hermes/.env`
+- `~/.local/bin/hermes-local`
+- launchd plists
+- Desktop app files
+- Google, Supabase, GitHub, Home Assistant, or Helio credential files
 
 Do not modify:
 
@@ -68,53 +72,74 @@ Do not modify:
 - Desktop app files
 - Google, Supabase, GitHub, Home Assistant, or Helio credential files
 
-## Backup Plan Before Future Application
+## Phase 5AM Inspection Result
 
-Before any future persistent config application:
+Metadata-only inspection found:
 
-1. List current `~/.hermes` state without printing file contents.
-2. Identify each file that would be created or modified.
-3. Create timestamped backups for existing files before modification.
-4. Use owner-only permissions for backup and config files.
-5. Never print secrets, tokens, OAuth material, config contents that may contain credentials, or environment dumps.
-6. Abort if unexpected credential material is detected in a file that would be copied, edited, or logged.
+- `~/.hermes/config.yaml` existed before modification.
+- `~/.hermes/.env` existed and was not modified.
+- Candidate config files included `~/.hermes/config.yaml` and `~/.hermes/.env`.
+- Secret-like names appeared by name only in inspected files; no values were printed.
+- `~/.hermes/config.yaml` name matches included `ANTHROPIC_API_KEY`, `GITHUB_PERSONAL_ACCESS_TOKEN`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `api_key`, `credential`, `password`, `secret`, and `token`.
+- `~/.hermes/.env` name matches included `OPENROUTER_API_KEY`, `credential`, `password`, `secret`, and `token`.
 
-Example backup naming convention:
+Because `.env` had secret-like names, Phase 5AM did not read, print, copy into the repo, edit, or replace `.env`.
+
+## Backup Plan Used
+
+Before modifying `~/.hermes/config.yaml`, Phase 5AM:
+
+1. Listed current `~/.hermes` state without printing file contents.
+2. Identified `~/.hermes/config.yaml` as the only file to modify.
+3. Created `~/.hermes/backups/phase5am-20260608T232816/config.yaml.bak`.
+4. Set backup directory permissions to owner-only.
+5. Avoided printing secrets, tokens, OAuth material, config contents, or environment dumps.
+6. Left `~/.hermes/.env` untouched.
+
+Backup metadata:
 
 ```text
-~/.hermes/config.yaml.20260608T230000.bak
+backup_file=/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak
+backup_size=60646
 ```
 
-## Future Application Validation
+## Phase 5AM Validation Result
 
-After a separately approved future application, validate:
+Phase 5AM validated:
 
-- config file exists at the approved path only
-- config syntax is valid YAML if a parser is available
+- config syntax is valid YAML
 - `model.provider` is `custom`
-- `model.default` is `gemma4:26b` or an approved local alias
+- `model.default` is `gemma4:26b`
 - `model.base_url` is exactly `http://127.0.0.1:8088/v1`
-- `model.api_key` is dummy/local-only, not a real cloud or integration key
-- `platform_toolsets.cli` remains disabled
-- Hermes can run one harmless prompt only after explicit approval
-- only the localhost adapter is called
-- no cloud provider, Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus integration is contacted
-- DevMonster is reached only through the localhost adapter path
-- no background or resident process is started
-- Hermes Desktop is not launched
-- no credentials are added, modified, printed, or stored
-- no files outside approved paths are modified
-- no `8088` listener remains unless the adapter is intentionally still running in the foreground for that approved validation
+- `model.api_key` is `dummy-local-adapter-key`
+- `platform_toolsets.cli` is disabled with `[]`
+- modified config mode is owner read/write only
+- no real-looking secret markers were detected in the modified config
+- no adapter or Hermes live run was started
+- no cloud provider, Google, Supabase, Home Assistant, GitHub, Helio, or Agent Bus integration was contacted
+- no background or resident process was started
+- Hermes Desktop was not launched
+- no credentials were added, modified, printed, or stored
+- no files outside `~/.hermes/config.yaml` and the timestamped backup were modified
+- no `8088` listener remained after validation
 
-## Future Rollback
+Config metadata after application:
 
-Rollback steps for a future application phase:
+```text
+config_file=/Users/michaelrinebold/.hermes/config.yaml
+config_mode=-rw-------
+config_size=4670
+```
+
+## Rollback
+
+Rollback steps:
 
 1. Stop the adapter if it was manually running in the foreground.
 2. Confirm no Hermes process remains.
-3. Restore timestamped backups for modified files.
-4. Remove newly created persistent config files if no prior file existed.
-5. Remove any optional wrapper file created by the future phase.
+3. Restore `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak` to `/Users/michaelrinebold/.hermes/config.yaml`.
+4. Confirm config file permissions are owner-only or match the restored backup policy.
+5. Remove no optional wrapper file; none was created in Phase 5AM.
 6. Confirm no `8088` listener remains.
 7. Confirm no Desktop launch occurred.
 8. Confirm no Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, or cloud-provider credentials were added.
@@ -122,7 +147,7 @@ Rollback steps for a future application phase:
 
 ## Non-Goals
 
-Phase 5AL and the future persistent-config proposal do not approve:
+Phase 5AM does not approve:
 
 - launchd
 - background service
@@ -142,14 +167,14 @@ Phase 5AL and the future persistent-config proposal do not approve:
 
 ## Approval Required Before Applying
 
-A future application phase must include explicit human approval for:
+Any future change beyond the applied local adapter config requires explicit human approval for:
 
 - exact file paths
-- exact config content or patch
+- exact config content or patch beyond the Phase 5AM local adapter config
 - backup paths
 - whether the adapter may be started manually
 - whether one harmless Hermes prompt may be run
 - validation evidence to capture
 - rollback trigger and rollback command sequence
 
-Until then, this document is planning only.
+The applied persistent config is limited to local adapter inference only.

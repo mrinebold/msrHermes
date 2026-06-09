@@ -223,12 +223,13 @@ class HermesPilotScriptsTest(unittest.TestCase):
     def test_persistent_config_plan_preserves_localhost_only_adapter(self):
         content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
 
-        self.assertIn("Status: proposal only", content)
+        self.assertIn("Status: persistent local config applied", content)
         self.assertIn("http://127.0.0.1:8088/v1", content)
         self.assertIn("gemma4:26b", content)
         self.assertIn("provider: custom", content)
         self.assertIn("platform_toolsets:", content)
         self.assertIn("cli: []", content)
+        self.assertIn("phase5am-20260608T232816", content)
 
     def test_persistent_config_plan_excludes_credentials_and_live_integrations(self):
         content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
@@ -244,7 +245,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             "no home assistant token",
             "no helio gateway or dispatcher token",
             "no cloud provider",
-            "no cloud provider, google, supabase, home assistant, github, helio, or agent bus integration is contacted",
+            "no cloud provider, google, supabase, home assistant, github, helio, or agent bus integration was contacted",
         )
         for phrase in required_phrases:
             self.assertIn(phrase, lower_content)
@@ -252,10 +253,10 @@ class HermesPilotScriptsTest(unittest.TestCase):
     def test_persistent_config_plan_includes_backup_and_rollback(self):
         content = PERSISTENT_CONFIG_PLAN.read_text(encoding="utf-8")
 
-        self.assertIn("## Backup Plan Before Future Application", content)
-        self.assertIn("## Future Rollback", content)
-        self.assertIn("~/.hermes/config.yaml.<timestamp>.bak", content)
-        self.assertIn("restore timestamped backups", content.lower())
+        self.assertIn("## Backup Plan Used", content)
+        self.assertIn("## Rollback", content)
+        self.assertIn("/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak", content)
+        self.assertIn("Restore `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak`", content)
         self.assertIn("Confirm no `8088` listener remains", content)
 
     def test_persistent_config_plan_keeps_desktop_and_resident_modes_blocked(self):
@@ -263,7 +264,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         lower_content = content.lower()
 
         self.assertIn("Desktop dependency: none", content)
-        self.assertIn("Hermes Desktop is not launched", content)
+        self.assertIn("Hermes Desktop was not launched", content)
         self.assertIn("launchd", content)
         self.assertIn("background service", content)
         self.assertIn("resident mode", content)

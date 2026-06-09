@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AL
-Status: local-only validation checklist and proposal input
+Phase: 5AJ-5AM
+Status: local-only validation checklist and persistent config application record
 
 ## Purpose
 
@@ -12,6 +12,8 @@ This checklist does not approve credential use, live Agent Bus reads/writes, int
 Phase 5AK uses this checklist as an input to the operational readiness review in `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`.
 
 Phase 5AL uses this checklist as an input to the proposal-only persistent local config plan in `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md`.
+
+Phase 5AM applied the approved persistent local config to `~/.hermes/config.yaml` with backup and validation. This checklist still does not approve live Hermes runs, adapter start, background services, integrations, Agent Bus reads/writes, Desktop launch, or broader Hermes authority.
 
 ## Approved Surfaces
 
@@ -48,6 +50,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Helio/Agent Bus writes remain disabled
 - Hermes Desktop remains fail-closed and is not launched
 - no launchd plist, background service, or resident mode is created
+- persistent config points only to the localhost adapter and does not add real credentials
 - Hermes receives no broad filesystem authority
 - every boundary-crossing action still requires a new explicit human-approved phase
 
@@ -96,9 +99,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AL, the safest next step is either:
+After Phase 5AM, the safest next step is either:
 
 - continue local-only hardening of tests/docs/config examples, or
-- prepare a separate, human-approved persistent-config application phase that states exact paths, backup files, validation commands, rollback steps, and whether any live adapter/Hermes run is approved.
+- prepare a separate, human-approved live local validation phase that states whether the adapter may be started manually and whether one harmless Hermes prompt may be run against the localhost adapter.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

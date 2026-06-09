@@ -50,7 +50,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
 | Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets | Separate approval for live pilot prompts |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
-| Hermes CLI | Ready for isolated pilot use | Installed CLI works with isolated pilot home and custom localhost provider | Persistent config approval |
+| Hermes CLI | Ready for local adapter config; not resident | Persistent `~/.hermes/config.yaml` now points to localhost adapter with dummy local key | Live Hermes run or resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
 | Google Workspace | Not ready | No OAuth run, no token grant, no scopes approved | Credential review/rotation gate plus read-only OAuth phase |
 | Supabase Agent Bus | Not ready for live access | Prior anon-key read-only validation completed, but exposed credentials remain deferred | Credential-family-specific approval and read-only scope |
@@ -166,3 +166,9 @@ Hermes is ready only for continued local-only planning, documentation, tests, an
 ## Phase 5AL Proposal Result
 
 Phase 5AL added `docs/HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md` as a proposal-only plan for future persistent Hermes local configuration. The plan keeps Hermes pointed only at `http://127.0.0.1:8088/v1`, uses `gemma4:26b`, permits only a dummy/local syntactic key if required, keeps platform tools disabled, defines future `~/.hermes` backup and rollback paths, and preserves Desktop fail-closed status. It does not apply persistent config or approve live Hermes runs, launchd, resident mode, credentials, Agent Bus access, integrations, or Desktop launch.
+
+## Phase 5AM Application Result
+
+Phase 5AM applied the approved persistent local config to `~/.hermes/config.yaml` after creating `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak`. The applied config uses `model.provider=custom`, `model.default=gemma4:26b`, `model.base_url=http://127.0.0.1:8088/v1`, `model.api_key=dummy-local-adapter-key`, and `platform_toolsets.cli=[]`.
+
+No `~/.hermes/.env` change was made. No adapter, Hermes live run, Desktop launch, credentialed operation, integration, Agent Bus read/write, launchd plist, background service, resident mode, or authority broadening occurred. Hermes remains not ready for resident operation until a later explicit phase approves a live validation and resident-mode design.
