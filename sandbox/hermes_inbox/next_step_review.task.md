@@ -1,0 +1,1 @@
+Using the provided local context only, recommend the next safest local-only Hermes phase. Do not ask for external integrations. Do not request credentials. Do not suggest Desktop launch. Return a short recommendation.

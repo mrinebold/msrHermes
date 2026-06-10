@@ -2,6 +2,13 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AW local Hermes task inbox scaffold.
+- Added `sandbox/hermes_inbox/`, `sandbox/hermes_outbox/`, `sandbox/hermes_archive/`, and `sandbox/hermes_inbox/next_step_review.task.md`.
+- Added `scripts/run_hermes_local_task.sh`, which refuses paths outside `sandbox/hermes_inbox/`, checks `http://127.0.0.1:8088/health`, uses persistent localhost-only Hermes config, strips the child environment with `env -i`, writes stdout/stderr/metrics only under `sandbox/hermes_outbox/`, and does not start or stop the adapter automatically.
+- Added `docs/HERMES_LOCAL_TASK_INBOX.md` documenting local-only task rules, runner behavior, sample task, acceptance criteria, and non-goals.
+- Added tests covering task-runner path refusal, adapter-health requirement, outbox-only output paths, sanitized env behavior, blocked external integrations, blocked shell execution by Hermes, and local-only sample task wording.
+- Updated `docs/HERMES_PILOT_MODE.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AW result.
+- Confirmed Phase 5AW did not run a live inbox task, start the adapter, run Hermes live, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AV local PRD review through the manual adapter service.
 - Added `scripts/build_hermes_pilot_context_prompt.py --phase5av` and a unit test for the bounded local setup review prompt.
 - Generated `sandbox/output/hermes_phase5av_prd_review_prompt.md` from bounded excerpts of the master PRD, changelog, operational readiness review, local validation checklist, and adapter service runbook.

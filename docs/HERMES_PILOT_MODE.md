@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AV
-Status: local-only PRD review through manual adapter service complete
+Phase: 5AW
+Status: local-only task inbox scaffold complete
 
 ## Purpose
 
@@ -18,6 +18,9 @@ Pilot mode is not resident mode, not autonomous execution, and not Desktop valid
 | Example env | `config/hermes-pilot.example.env` | Documents safe pilot variables with dummy local key only. |
 | Next-action prompt | `sandbox/input/hermes_pilot_next_action_prompt.md` | Template prompt for the PRD/changelog summary run. |
 | Local validation checklist | `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` | Records local-only readiness checks under the credential deferral boundary. |
+| Local task runner | `scripts/run_hermes_local_task.sh` | Runs one explicit inbox task through persistent localhost-only Hermes config when the adapter is already healthy. |
+| Local task inbox | `sandbox/hermes_inbox/` | Holds approved local-only task files. |
+| Local task outbox | `sandbox/hermes_outbox/` | Receives task stdout, stderr, and metrics. |
 
 ## Adapter Runner
 
@@ -543,6 +546,47 @@ Guardrail review:
 Recommendation:
 
 Treat Phase 5AV as a successful bounded local PRD-review run, with the stale task-inbox statement documented as a caveat. The next phase may create the local-only task inbox scaffold without granting Hermes new authority to execute shell commands, edit files outside approved sandbox outputs, connect integrations, launch Desktop, or use credentials.
+
+## Phase 5AW Local Task Inbox Scaffold
+
+Phase 5AW added a local-only task inbox/outbox scaffold. It did not run Hermes live and did not start the adapter service.
+
+Created paths:
+
+- `sandbox/hermes_inbox/`
+- `sandbox/hermes_outbox/`
+- `sandbox/hermes_archive/`
+- `sandbox/hermes_inbox/next_step_review.task.md`
+- `scripts/run_hermes_local_task.sh`
+- `docs/HERMES_LOCAL_TASK_INBOX.md`
+
+The local task runner:
+
+- accepts only task files under `sandbox/hermes_inbox/`
+- refuses paths outside the inbox
+- requires `http://127.0.0.1:8088/health` before invoking Hermes
+- does not start or stop the adapter service
+- uses persistent Hermes config
+- runs Hermes with a sanitized `env -i` child environment
+- writes stdout only to `sandbox/hermes_outbox/<task-name>.out.md`
+- writes stderr and metrics beside the output
+- does not pass real credentials
+- does not launch Desktop
+
+Guardrail review:
+
+- no live Hermes task was run in Phase 5AW
+- no adapter service was started
+- no external integration was connected
+- no real credential was used
+- no Agent Bus read/write occurred
+- no Desktop launch occurred
+- no `~/.hermes` file was modified
+- no RunAtLoad, KeepAlive, resident mode, or background service was enabled
+
+Recommendation:
+
+Treat Phase 5AW as a scaffold-only completion. The next phase may run exactly one sample inbox task through the manual adapter service procedure, then stop the adapter and verify no listener or process remains.
 
 ## First Pilot Task Template
 

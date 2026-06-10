@@ -19,9 +19,12 @@ RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
+LOCAL_TASK_INBOX_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_TASK_INBOX.md"
 ADAPTER_SERVICE_START = REPO_ROOT / "scripts" / "adapter_service_start.sh"
 ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
+LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
+LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -42,7 +45,14 @@ SENSITIVE_ENV_VARS = {
 
 class HermesPilotScriptsTest(unittest.TestCase):
     def test_shell_scripts_pass_syntax_check(self):
-        for script in (ADAPTER_RUNNER, PILOT_RUNNER, ADAPTER_SERVICE_START, ADAPTER_SERVICE_STOP, ADAPTER_SERVICE_STATUS):
+        for script in (
+            ADAPTER_RUNNER,
+            PILOT_RUNNER,
+            ADAPTER_SERVICE_START,
+            ADAPTER_SERVICE_STOP,
+            ADAPTER_SERVICE_STATUS,
+            LOCAL_TASK_RUNNER,
+        ):
             with self.subTest(script=script.name):
                 result = subprocess.run(
                     ["bash", "-n", str(script)],
@@ -512,6 +522,63 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("desktop launch is approved", lower_content)
         self.assertNotIn("agent bus writes are approved", lower_content)
 
+    def test_local_task_runner_refuses_paths_outside_inbox(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            outside_task = Path(temp_dir) / "outside.task.md"
+            outside_task.write_text("local reasoning only", encoding="utf-8")
+            result = subprocess.run(
+                ["bash", str(LOCAL_TASK_RUNNER), str(outside_task)],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Refusing task path outside sandbox/hermes_inbox", result.stderr)
+
+    def test_local_task_runner_requires_adapter_health_and_outbox_outputs(self):
+        content = LOCAL_TASK_RUNNER.read_text(encoding="utf-8")
+
+        self.assertIn('INBOX_DIR="${REPO_ROOT}/sandbox/hermes_inbox"', content)
+        self.assertIn('OUTBOX_DIR="${REPO_ROOT}/sandbox/hermes_outbox"', content)
+        self.assertIn('ADAPTER_HEALTH_URL="http://127.0.0.1:8088/health"', content)
+        self.assertIn('curl -fsS --max-time 10 "${ADAPTER_HEALTH_URL}"', content)
+        self.assertIn('OUTPUT_PATH="${OUTBOX_ABS}/${TASK_NAME}.out.md"', content)
+        self.assertIn('STDERR_PATH="${OUTBOX_ABS}/${TASK_NAME}.stderr"', content)
+        self.assertIn('METRICS_PATH="${OUTBOX_ABS}/${TASK_NAME}.metrics"', content)
+        self.assertIn('env -i', content)
+        self.assertIn('"${HERMES_BIN}" --ignore-rules -z "${PROMPT_TEXT}"', content)
+        self.assertNotIn("sudo", content)
+        self.assertNotIn("launchctl", content)
+        self.assertNotIn("RunAtLoad=true", content)
+        self.assertNotIn("KeepAlive=true", content)
+
+    def test_local_task_docs_keep_external_integrations_and_shell_execution_blocked(self):
+        content = LOCAL_TASK_INBOX_DOC.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("sandbox/hermes_inbox/", content)
+        self.assertIn("sandbox/hermes_outbox/", content)
+        self.assertIn("sandbox/hermes_archive/", content)
+        self.assertIn("Hermes may read only the task file passed to the runner", content)
+        self.assertIn("Hermes may write output only through the runner to `sandbox/hermes_outbox/`", content)
+        self.assertIn("Hermes may not execute shell commands independently", content)
+        self.assertIn("Hermes may not launch Desktop", content)
+        self.assertIn("No external integrations", content)
+        self.assertIn("Phase 5AW does not approve", content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("real credentials are approved", lower_content)
+
+    def test_local_task_sample_stays_local_only(self):
+        content = LOCAL_TASK_SAMPLE.read_text(encoding="utf-8")
+
+        self.assertIn("next safest local-only Hermes phase", content)
+        self.assertIn("Do not ask for external integrations", content)
+        self.assertIn("Do not request credentials", content)
+        self.assertIn("Do not suggest Desktop launch", content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -527,9 +594,12 @@ class HermesPilotScriptsTest(unittest.TestCase):
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
+            LOCAL_TASK_INBOX_DOC,
             ADAPTER_SERVICE_START,
             ADAPTER_SERVICE_STOP,
             ADAPTER_SERVICE_STATUS,
+            LOCAL_TASK_RUNNER,
+            LOCAL_TASK_SAMPLE,
         ]
         disallowed_markers = (
             "sk-live-",

@@ -49,6 +49,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | --- | --- | --- | --- |
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
 | Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets; Phase 5AV produced usable local PRD review output through the manual adapter service | Separate approval for each live pilot prompt |
+| Local task inbox | Scaffold ready; live sample task not yet run | Phase 5AW added inbox/outbox/archive directories, sample task, docs, and fail-closed runner | Phase 5AX approval and manual adapter service start |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
 | Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through foreground adapter and Phase 5AU stdout through manual adapter service | Resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
@@ -245,3 +246,13 @@ Caveat: Hermes prematurely listed "Task inbox usage" as ready even though the lo
 The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
 
 Readiness position: bounded local review is viable through the manual adapter service, but Hermes output still requires Codex review before it informs the next phase. The next narrow capability should be a local-only task inbox/outbox scaffold with strict path and output controls.
+
+## Phase 5AW Local Task Inbox Scaffold Result
+
+Phase 5AW created `sandbox/hermes_inbox/`, `sandbox/hermes_outbox/`, `sandbox/hermes_archive/`, `sandbox/hermes_inbox/next_step_review.task.md`, `scripts/run_hermes_local_task.sh`, and `docs/HERMES_LOCAL_TASK_INBOX.md`.
+
+The runner refuses task paths outside `sandbox/hermes_inbox/`, requires `http://127.0.0.1:8088/health` before invoking Hermes, uses persistent localhost-only Hermes config, strips sensitive environment variables through `env -i`, writes stdout only to `sandbox/hermes_outbox/<task-name>.out.md`, and writes stderr/metrics beside that output. It does not start or stop the adapter automatically.
+
+No live inbox task was run in Phase 5AW. No adapter service was started, no Hermes live prompt was run, no external integration or real credential was used, no Agent Bus read/write occurred, no Desktop launch occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
+
+Readiness position: the local task scaffold is ready for exactly one Phase 5AX sample task run through the manual adapter service procedure.
