@@ -2,6 +2,15 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AX local Hermes task inbox execution.
+- Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Ran `scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_step_review.task.md`.
+- Captured `sandbox/hermes_outbox/next_step_review.out.md`, `sandbox/hermes_outbox/next_step_review.stderr`, and `sandbox/hermes_outbox/next_step_review.metrics`.
+- Recorded runner exit code `0`, elapsed time `65` seconds, stdout `148` bytes, stderr `0` bytes, selected model `gemma4:26b`, response content length `147`, and successful chat completion in `64.204` seconds.
+- Hermes returned a safe fail-closed answer because the sample task contained no embedded local context; it did not fabricate a next-phase recommendation.
+- Stopped/unloaded the adapter service through `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no `8088` listener and no matching adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_LOCAL_TASK_INBOX.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AX result.
+- Confirmed Phase 5AX did not run additional live tasks, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AW local Hermes task inbox scaffold.
 - Added `sandbox/hermes_inbox/`, `sandbox/hermes_outbox/`, `sandbox/hermes_archive/`, and `sandbox/hermes_inbox/next_step_review.task.md`.
 - Added `scripts/run_hermes_local_task.sh`, which refuses paths outside `sandbox/hermes_inbox/`, checks `http://127.0.0.1:8088/health`, uses persistent localhost-only Hermes config, strips the child environment with `env -i`, writes stdout/stderr/metrics only under `sandbox/hermes_outbox/`, and does not start or stop the adapter automatically.

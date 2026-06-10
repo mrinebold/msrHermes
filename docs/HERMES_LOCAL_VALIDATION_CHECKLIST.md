@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AW
-Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, and local task inbox scaffold
+Phase: 5AJ-5AX
+Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, local task inbox scaffold, and first inbox task validation
 
 ## Purpose
 
@@ -34,6 +34,8 @@ Phase 5AU used the manual adapter service procedure for one harmless Hermes prom
 Phase 5AV ran one bounded local PRD review through the manual adapter service and locked-down pilot harness. The output was usable but included one stale statement that task inbox usage was ready before the inbox existed; that statement is not authority or readiness evidence. Phase 5AV does not approve additional live prompts, automatic service start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
 Phase 5AW added a scaffold-only local task inbox/outbox/archive and a runner that refuses paths outside `sandbox/hermes_inbox/`, requires adapter health, writes only under `sandbox/hermes_outbox/`, and uses a sanitized child environment. It does not approve running a live inbox task until Phase 5AX, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
+
+Phase 5AX ran one sample inbox task through the manual adapter service procedure. The runner exited `0`, wrote only to `sandbox/hermes_outbox/`, and Hermes produced a fail-closed result because the sample task contained no embedded local context. The adapter service was stopped/unloaded afterward. Phase 5AX does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
 ## Approved Surfaces
 
@@ -87,6 +89,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AU validates one harmless Hermes prompt through the manual adapter service and leaves the service stopped
 - Phase 5AV validates one bounded PRD review through the manual adapter service and leaves the service stopped
 - Phase 5AW creates a local-only task inbox scaffold but does not run a live inbox task
+- Phase 5AX validates one sample inbox task through the manual adapter service and leaves the service stopped
 
 ## Credential Deferral Boundary
 
@@ -133,9 +136,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AW, the safest next step is either:
+After Phase 5AX, the safest next step is either:
 
-- run exactly one local inbox task through the manual adapter service procedure and stop the adapter afterward, or
+- define a context-bearing local inbox task template so future task runs include bounded PRD/changelog context when a recommendation is expected, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

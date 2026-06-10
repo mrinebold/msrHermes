@@ -1,7 +1,7 @@
 # Hermes Local Task Inbox
 
-Phase: 5AW
-Status: local-only task inbox scaffold
+Phase: 5AW-5AX
+Status: local-only task inbox scaffold and first sample task validated
 
 ## Purpose
 
@@ -100,3 +100,44 @@ Phase 5AW does not approve:
 - Hermes shell execution
 - Hermes file edits outside `sandbox/hermes_outbox/`
 - modification of `~/.hermes`
+
+## Phase 5AX Sample Task Result
+
+Phase 5AX ran exactly one local inbox task through the manual adapter service procedure:
+
+```sh
+scripts/adapter_service_start.sh
+scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_step_review.task.md
+scripts/adapter_service_stop.sh
+```
+
+Output artifacts:
+
+```text
+sandbox/hermes_outbox/next_step_review.out.md
+sandbox/hermes_outbox/next_step_review.stderr
+sandbox/hermes_outbox/next_step_review.metrics
+```
+
+Observed result:
+
+- adapter service started manually and listened only on `127.0.0.1:8088`
+- runner accepted the approved inbox task path
+- runner wrote only to `sandbox/hermes_outbox/`
+- Hermes exited `0`
+- elapsed time was `65` seconds
+- stdout was `148` bytes
+- stderr was `0` bytes
+- adapter metadata showed selected model `gemma4:26b`
+- adapter response content length was `147`
+- adapter chat-completions request completed with status `200` in `64.204` seconds
+- `scripts/adapter_service_stop.sh` stopped/unloaded the service
+- final status showed no `8088` listener and no matching adapter, Hermes, Desktop, or resident process
+
+Hermes output was usable as a fail-closed local task result. Because the sample task contained no embedded PRD or changelog context, Hermes did not fabricate a recommendation and returned:
+
+```text
+The provided local context does not contain information regarding Hermes phases or their safety levels; therefore, I cannot recommend a next phase.
+```
+
+Phase 5AX does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.
