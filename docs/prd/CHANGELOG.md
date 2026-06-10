@@ -2,6 +2,13 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AY context-bearing Hermes local inbox task builder.
+- Added `scripts/build_hermes_local_task.py` for deterministic local task generation under `sandbox/hermes_inbox/`.
+- Generated `sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md` with bounded excerpts from the master PRD, changelog, operational readiness review, local task inbox doc, local validation checklist, and adapter service runbook.
+- The builder refuses output paths outside `sandbox/hermes_inbox/`, labels every source path, includes character limits per source, refuses env/secret/token/key/credential-like source paths, and refuses real-looking secret markers before writing a task.
+- Added tests covering inbox-only output, secret-like source refusal, approved context labels, character limits, real-looking secret avoidance, and local-only recommendation wording.
+- Updated `docs/HERMES_LOCAL_TASK_INBOX.md`, `docs/HERMES_PILOT_MODE.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 5AY result.
+- Confirmed Phase 5AY did not start the adapter, run Hermes live, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AX local Hermes task inbox execution.
 - Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
 - Ran `scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_step_review.task.md`.

@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 ADAPTER_RUNNER = REPO_ROOT / "scripts" / "run_model_router_adapter.sh"
 PILOT_RUNNER = REPO_ROOT / "scripts" / "run_hermes_pilot.sh"
 PILOT_PROMPT_BUILDER = REPO_ROOT / "scripts" / "build_hermes_pilot_context_prompt.py"
+LOCAL_TASK_BUILDER = REPO_ROOT / "scripts" / "build_hermes_local_task.py"
 PILOT_ENV = REPO_ROOT / "config" / "hermes-pilot.example.env"
 PILOT_MODE_DOC = REPO_ROOT / "docs" / "HERMES_PILOT_MODE.md"
 SECURITY_DOC = REPO_ROOT / "docs" / "HERMES_SECURITY_MODEL.md"
@@ -25,6 +26,7 @@ ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
+LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -579,6 +581,72 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Do not request credentials", content)
         self.assertIn("Do not suggest Desktop launch", content)
 
+    def test_local_task_builder_writes_only_under_inbox(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            outside_output = Path(temp_dir) / "outside.task.md"
+            result = subprocess.run(
+                ["python3", str(LOCAL_TASK_BUILDER), "--output", str(outside_output)],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Refusing output outside sandbox/hermes_inbox", result.stderr)
+
+    def test_local_task_builder_refuses_secret_like_source_files(self):
+        inbox_output = REPO_ROOT / "sandbox" / "hermes_inbox" / "test_secret_refusal.task.md"
+        result = subprocess.run(
+            [
+                "python3",
+                str(LOCAL_TASK_BUILDER),
+                "--output",
+                str(inbox_output),
+                "--source",
+                "config/hermes-pilot.example.env:100",
+            ],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Refusing secret-like source path", result.stderr)
+
+    def test_local_task_builder_includes_approved_context_labels_and_limits(self):
+        content = LOCAL_TASK_WITH_CONTEXT.read_text(encoding="utf-8")
+        for label in (
+            "## Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md",
+            "## Source: docs/prd/CHANGELOG.md",
+            "## Source: docs/HERMES_OPERATIONAL_READINESS_REVIEW.md",
+            "## Source: docs/HERMES_LOCAL_TASK_INBOX.md",
+            "## Source: docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md",
+            "## Source: docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md",
+        ):
+            self.assertIn(label, content)
+        for limit in ("Character limit: 1800", "Character limit: 1300", "Character limit: 1200", "Character limit: 1000", "Character limit: 900"):
+            self.assertIn(limit, content)
+        self.assertIn("Using only the embedded local context below", content)
+        self.assertIn("recommended phase name", content)
+        self.assertIn("acceptance criteria", content)
+
+    def test_generated_context_task_stays_local_only_and_has_no_real_looking_secrets(self):
+        content = LOCAL_TASK_WITH_CONTEXT.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Using only the embedded local context below", content)
+        self.assertIn("recommend the next safest local-only Hermes phase", content)
+        self.assertIn("Do not request external integrations", content)
+        self.assertIn("Do not ask to read files. Do not use tools.", content)
+        self.assertIn("required human approval", content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+        self.assertNotIn("real credentials are approved", lower_content)
+        for marker in ("sk-live-", "sk-proj-", "sk-ant-", "xoxb-", "ghp_", "github_pat_"):
+            self.assertNotIn(marker, content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -599,7 +667,9 @@ class HermesPilotScriptsTest(unittest.TestCase):
             ADAPTER_SERVICE_STOP,
             ADAPTER_SERVICE_STATUS,
             LOCAL_TASK_RUNNER,
+            LOCAL_TASK_BUILDER,
             LOCAL_TASK_SAMPLE,
+            LOCAL_TASK_WITH_CONTEXT,
         ]
         disallowed_markers = (
             "sk-live-",

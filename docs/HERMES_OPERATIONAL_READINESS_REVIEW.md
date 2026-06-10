@@ -49,7 +49,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | --- | --- | --- | --- |
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
 | Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets; Phase 5AV produced usable local PRD review output through the manual adapter service | Separate approval for each live pilot prompt |
-| Local task inbox | Ready for bounded context-bearing task trials | Phase 5AW added inbox/outbox/archive directories, sample task, docs, and fail-closed runner; Phase 5AX validated one sample task and stopped the service | Future task must include bounded local context if a recommendation is expected |
+| Local task inbox | Ready for bounded context-bearing task trials | Phase 5AW added inbox/outbox/archive directories, sample task, docs, and fail-closed runner; Phase 5AX validated one sample task and stopped the service; Phase 5AY added a context-bearing task builder | Separate approval to run the generated context-bearing task |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
 | Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through foreground adapter and Phase 5AU stdout through manual adapter service | Resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
@@ -270,3 +270,15 @@ Hermes output was a safe fail-closed answer: it did not recommend a phase becaus
 The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
 
 Readiness position: the local inbox/outbox path is validated for a single bounded task. The next improvement should be a context-bearing task template, not resident mode or external integrations.
+
+## Phase 5AY Context-Bearing Task Builder Result
+
+Phase 5AY added `scripts/build_hermes_local_task.py` and generated `sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md`.
+
+The builder writes only under `sandbox/hermes_inbox/`, refuses output paths outside the inbox, includes bounded excerpts from approved local docs, labels every source path, records character limits per source, refuses env/secret/token/key/credential-like source paths, and refuses real-looking secret markers before writing a task.
+
+The generated default task asks Hermes to recommend the next safest local-only Hermes phase using only embedded context and explicitly forbids external integrations, credentials, Desktop launch, Agent Bus access, Google, Supabase, Home Assistant, GitHub, and Helio.
+
+No adapter service was started, no Hermes live task was run, no external integration or real credential was used, no Agent Bus read/write occurred, no Desktop launch occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
+
+Readiness position: the inbox now has a context-bearing task ready for a later separately approved single live task run.

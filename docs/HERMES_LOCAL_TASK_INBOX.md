@@ -1,7 +1,7 @@
 # Hermes Local Task Inbox
 
-Phase: 5AW-5AX
-Status: local-only task inbox scaffold and first sample task validated
+Phase: 5AW-5AY
+Status: local-only task inbox scaffold, first sample task validated, and context-bearing task builder added
 
 ## Purpose
 
@@ -69,6 +69,44 @@ sandbox/hermes_inbox/next_step_review.task.md
 ```
 
 The sample task asks for the next safest local-only Hermes phase and explicitly forbids external integrations, credentials, and Desktop launch.
+
+## Context-Bearing Task Builder
+
+Phase 5AY added:
+
+```text
+scripts/build_hermes_local_task.py
+sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md
+```
+
+Build the default context-bearing task:
+
+```sh
+python3 scripts/build_hermes_local_task.py --output sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md
+```
+
+The builder:
+
+- writes task files only under `sandbox/hermes_inbox/`
+- refuses output paths outside `sandbox/hermes_inbox/`
+- supports default task type `next_phase_recommendation`
+- embeds only bounded excerpts from approved local files
+- labels every embedded source path
+- records the character limit for every source
+- refuses source paths that look like env, secret, token, key, or credential files
+- refuses real-looking secret markers before writing the generated task
+- asks Hermes to use only embedded context and not browse files or use tools
+- does not start the adapter service
+- does not run Hermes
+
+Default approved context sources:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
+- `docs/HERMES_LOCAL_TASK_INBOX.md`
+- `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`
+- `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`
 
 ## Acceptance Criteria
 
@@ -141,3 +179,20 @@ The provided local context does not contain information regarding Hermes phases 
 ```
 
 Phase 5AX does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.
+
+## Phase 5AY Context-Bearing Builder Result
+
+Phase 5AY created `scripts/build_hermes_local_task.py` and generated `sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md`.
+
+The generated task asks Hermes to recommend the next safest local-only Hermes phase using only embedded context and to return:
+
+- recommended phase name
+- objective
+- why it is safe
+- required human approval
+- non-goals
+- acceptance criteria
+
+No adapter service was started, no Hermes live task was run, no external integration or real credential was used, no Agent Bus read/write occurred, no Desktop launch occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
+
+Phase 5AY makes the inbox ready for a later separately approved context-bearing task run. It does not approve running that task.

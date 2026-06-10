@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AW
-Status: local-only task inbox scaffold complete
+Phase: 5AY
+Status: context-bearing local task builder complete
 
 ## Purpose
 
@@ -19,6 +19,7 @@ Pilot mode is not resident mode, not autonomous execution, and not Desktop valid
 | Next-action prompt | `sandbox/input/hermes_pilot_next_action_prompt.md` | Template prompt for the PRD/changelog summary run. |
 | Local validation checklist | `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md` | Records local-only readiness checks under the credential deferral boundary. |
 | Local task runner | `scripts/run_hermes_local_task.sh` | Runs one explicit inbox task through persistent localhost-only Hermes config when the adapter is already healthy. |
+| Local task builder | `scripts/build_hermes_local_task.py` | Builds context-bearing inbox task files from bounded approved local docs. |
 | Local task inbox | `sandbox/hermes_inbox/` | Holds approved local-only task files. |
 | Local task outbox | `sandbox/hermes_outbox/` | Receives task stdout, stderr, and metrics. |
 
@@ -587,6 +588,37 @@ Guardrail review:
 Recommendation:
 
 Treat Phase 5AW as a scaffold-only completion. The next phase may run exactly one sample inbox task through the manual adapter service procedure, then stop the adapter and verify no listener or process remains.
+
+## Phase 5AY Context-Bearing Local Task Builder
+
+Phase 5AY added `scripts/build_hermes_local_task.py` and generated `sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md`.
+
+The builder creates inbox task files that embed bounded local context so Hermes does not need to browse files or use tools. The default task type is `next_phase_recommendation`.
+
+Default context sources:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
+- `docs/HERMES_LOCAL_TASK_INBOX.md`
+- `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`
+- `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`
+
+Builder guardrails:
+
+- output must be under `sandbox/hermes_inbox/`
+- source excerpts are bounded and source-labeled
+- source character limits are included in the generated task
+- env, secret, token, key, and credential-like source paths are refused
+- real-looking secret markers are refused
+- generated task asks for a local-only recommendation
+- generated task forbids external integrations, credentials, Desktop launch, Agent Bus access, Google, Supabase, Home Assistant, GitHub, and Helio
+
+Phase 5AY did not start the adapter, run Hermes, connect integrations, use credentials, launch Desktop, perform Agent Bus reads/writes, modify `~/.hermes`, create services, or broaden authority.
+
+Recommendation:
+
+Treat Phase 5AY as a builder-only completion. A later phase can run exactly one generated context-bearing inbox task through the existing manual adapter service procedure.
 
 ## First Pilot Task Template
 
