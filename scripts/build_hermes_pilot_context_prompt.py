@@ -12,6 +12,9 @@ DEFAULT_CHANGELOG = Path("docs/prd/CHANGELOG.md")
 DEFAULT_PILOT_MODE = Path("docs/HERMES_PILOT_MODE.md")
 DEFAULT_SECURITY_MODEL = Path("docs/HERMES_SECURITY_MODEL.md")
 DEFAULT_MODEL_PROVIDER = Path("docs/HERMES_MODEL_PROVIDER_PLAN.md")
+DEFAULT_READINESS = Path("docs/HERMES_OPERATIONAL_READINESS_REVIEW.md")
+DEFAULT_LOCAL_VALIDATION = Path("docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md")
+DEFAULT_ADAPTER_RUNBOOK = Path("docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md")
 DEFAULT_OUTPUT = Path("sandbox/output/hermes_pilot_next_action_phase5ae_prompt.md")
 
 
@@ -251,6 +254,95 @@ def build_phase5ag_prompt(
     )
 
 
+def build_phase5av_prompt(
+    prd_text: str,
+    changelog_text: str,
+    readiness_text: str,
+    local_validation_text: str,
+    adapter_runbook_text: str,
+) -> str:
+    prd_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                first_paragraphs(extract_section(prd_text, "## Status"), 2),
+                matching_lines(prd_text, ("| Phase 5AU |", "Phase 5AV should"), 320),
+            )
+            if part
+        ),
+        360,
+    )
+    changelog_today = extract_section(changelog_text, "## 2026-06-09")
+    changelog_excerpt = bounded_text(
+        leading_block_until(changelog_today, "- Completed Phase 5AT manual adapter service operating procedure."),
+        320,
+    )
+    readiness_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                extract_section(readiness_text, "## Current Proven Capabilities"),
+                excerpt_from_marker(readiness_text, "## Phase 5AU Manual-Service Hermes Validation Result", 620),
+            )
+            if part
+        ),
+        360,
+    )
+    validation_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                extract_section(local_validation_text, "## Local-Only Invariants"),
+                extract_section(local_validation_text, "## Next Gate"),
+            )
+            if part
+        ),
+        330,
+    )
+    runbook_excerpt = bounded_text(
+        "\n\n".join(
+            part
+            for part in (
+                extract_section(adapter_runbook_text, "## Phase 5AU Hermes Validation Result"),
+                extract_section(adapter_runbook_text, "## Non-Goals"),
+            )
+            if part
+        ),
+        330,
+    )
+
+    return (
+        "Review the current Hermes local-only operating setup.\n"
+        "Use only the bounded local context below. Do not ask to read files. Do not use tools. "
+        "Do not recommend external integrations, credentials, Desktop launch, Agent Bus activity, "
+        "resident mode, RunAtLoad, or KeepAlive.\n"
+        "Return only recommendation text with these labels:\n"
+        "what is ready\n"
+        "what is not ready\n"
+        "top 5 risks\n"
+        "next safest phase\n"
+        "exact non-goals\n"
+        "whether human approval is required\n\n"
+        "Document/context:\n"
+        "# Bounded local context for Phase 5AV\n\n"
+        "## Master PRD excerpt\n"
+        "Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md\n"
+        f"{prd_excerpt}\n\n"
+        "## Changelog excerpt\n"
+        "Source: docs/prd/CHANGELOG.md\n"
+        f"{changelog_excerpt}\n\n"
+        "## Operational readiness excerpt\n"
+        "Source: docs/HERMES_OPERATIONAL_READINESS_REVIEW.md\n"
+        f"{readiness_excerpt}\n\n"
+        "## Local validation excerpt\n"
+        "Source: docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md\n"
+        f"{validation_excerpt}\n\n"
+        "## Adapter service runbook excerpt\n"
+        "Source: docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md\n"
+        f"{runbook_excerpt}\n"
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prd", type=Path, default=DEFAULT_PRD)
@@ -258,11 +350,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pilot-mode", type=Path, default=DEFAULT_PILOT_MODE)
     parser.add_argument("--security-model", type=Path, default=DEFAULT_SECURITY_MODEL)
     parser.add_argument("--model-provider", type=Path, default=DEFAULT_MODEL_PROVIDER)
+    parser.add_argument("--readiness", type=Path, default=DEFAULT_READINESS)
+    parser.add_argument("--local-validation", type=Path, default=DEFAULT_LOCAL_VALIDATION)
+    parser.add_argument("--adapter-runbook", type=Path, default=DEFAULT_ADAPTER_RUNBOOK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-prd-chars", type=int, default=700)
     parser.add_argument("--max-changelog-chars", type=int, default=600)
     parser.add_argument("--phase5af", action="store_true", help="Build the forward-looking Phase 5AF prompt.")
     parser.add_argument("--phase5ag", action="store_true", help="Build the bounded PRD-review Phase 5AG prompt.")
+    parser.add_argument("--phase5av", action="store_true", help="Build the local setup review Phase 5AV prompt.")
     return parser.parse_args()
 
 
@@ -270,7 +366,18 @@ def main() -> int:
     args = parse_args()
     prd_text = args.prd.read_text(encoding="utf-8")
     changelog_text = args.changelog.read_text(encoding="utf-8")
-    if args.phase5ag:
+    if args.phase5av:
+        readiness_text = args.readiness.read_text(encoding="utf-8")
+        local_validation_text = args.local_validation.read_text(encoding="utf-8")
+        adapter_runbook_text = args.adapter_runbook.read_text(encoding="utf-8")
+        prompt = build_phase5av_prompt(
+            prd_text,
+            changelog_text,
+            readiness_text,
+            local_validation_text,
+            adapter_runbook_text,
+        )
+    elif args.phase5ag:
         pilot_mode_text = args.pilot_mode.read_text(encoding="utf-8")
         security_model_text = args.security_model.read_text(encoding="utf-8")
         model_provider_text = args.model_provider.read_text(encoding="utf-8")

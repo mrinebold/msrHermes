@@ -48,7 +48,7 @@ Phase 5AK is local-only. It does not approve live credentials, live Agent Bus re
 | Area | Readiness | Evidence | Blocked Until |
 | --- | --- | --- | --- |
 | Local adapter | Ready for manual local-only pilot runs | Runner binds `127.0.0.1:8088`, refuses non-localhost/non-8088 settings, logs metadata only | Separate approval for each live run; no background service |
-| Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets | Separate approval for live pilot prompts |
+| Local pilot harness | Ready for bounded local reasoning | Isolated `HERMES_HOME`, dummy key, localhost base URL, sanitized env, no CLI toolsets; Phase 5AV produced usable local PRD review output through the manual adapter service | Separate approval for each live pilot prompt |
 | DevMonster Gemma worker | Conditionally ready for local reasoning | Prior adapter phases selected `gemma4:26b` and produced usable output with explicit local context | Explicit run scope, timeout, cleanup checks |
 | Hermes CLI | Ready for bounded local prompt use; not resident | Persistent config produced the exact approved Phase 5AN stdout through foreground adapter and Phase 5AU stdout through manual adapter service | Resident operation approval |
 | Hermes Desktop | Not ready; fail-closed | Official setup bundle remains `com.nousresearch.hermes.setup` version `0.0.1` with invalid strict code-signature behavior | Release-channel clarification or explicit risk acceptance |
@@ -233,3 +233,15 @@ Phase 5AU validated the approved manual adapter service procedure with one harml
 Hermes exited `0` after `28` seconds, wrote `49` stdout bytes, wrote `0` stderr bytes, and returned exactly `Hermes works through the manual adapter service.` The service was stopped with `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no matching adapter, Hermes, Desktop, or resident process remaining.
 
 Readiness position: the manual adapter service is now validated for bounded local Hermes prompt execution. Additional prompts, PRD review, task inbox usage, resident mode, automatic RunAtLoad, KeepAlive, Desktop, credentials, integrations, and Agent Bus activity still require explicit phase approval.
+
+## Phase 5AV Local PRD Review Result
+
+Phase 5AV ran one bounded local PRD review through the manual adapter service and locked-down pilot harness. `scripts/adapter_service_start.sh` started the adapter service, `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+
+Hermes exited `0` after `227` seconds, wrote `1587` stdout bytes, wrote `471` stderr bytes, and returned structured review text under the requested labels. Adapter metadata showed one provider timeout at `120.011` seconds followed by a successful `gemma4:26b` response with content length `1586` in `102.852` seconds.
+
+Caveat: Hermes prematurely listed "Task inbox usage" as ready even though the local task inbox is not created until Phase 5AW. Codex treats that as a stale statement, not as approval or readiness evidence.
+
+The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
+
+Readiness position: bounded local review is viable through the manual adapter service, but Hermes output still requires Codex review before it informs the next phase. The next narrow capability should be a local-only task inbox/outbox scaffold with strict path and output controls.

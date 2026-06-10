@@ -126,6 +126,33 @@ class HermesPilotScriptsTest(unittest.TestCase):
             self.assertNotIn("Read these local repo documents only", prompt)
             self.assertNotIn("Task:", prompt)
 
+    def test_pilot_prompt_builder_creates_phase5av_local_setup_review_prompt(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            output = Path(temp_dir) / "phase5av_prompt.md"
+            result = subprocess.run(
+                ["python3", str(PILOT_PROMPT_BUILDER), "--phase5av", "--output", str(output)],
+                cwd=REPO_ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            prompt = output.read_text(encoding="utf-8")
+            self.assertIn("Document/context:", prompt)
+            self.assertIn("# Bounded local context for Phase 5AV", prompt)
+            self.assertIn("Source: docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md", prompt)
+            self.assertIn("Source: docs/prd/CHANGELOG.md", prompt)
+            self.assertIn("Source: docs/HERMES_OPERATIONAL_READINESS_REVIEW.md", prompt)
+            self.assertIn("Source: docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md", prompt)
+            self.assertIn("Source: docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md", prompt)
+            self.assertIn("what is ready", prompt)
+            self.assertIn("top 5 risks", prompt)
+            self.assertIn("whether human approval is required", prompt)
+            self.assertIn("Do not ask to read files. Do not use tools.", prompt)
+            self.assertNotIn("Read these local repo documents only", prompt)
+            self.assertNotIn("Task:", prompt)
+
     def test_adapter_runner_refuses_non_localhost_bind(self):
         env = os.environ.copy()
         env["MODEL_ROUTER_ADAPTER_HOST"] = "0.0.0.0"

@@ -2,6 +2,16 @@
 
 ## 2026-06-09
 
+- Completed Phase 5AV local PRD review through the manual adapter service.
+- Added `scripts/build_hermes_pilot_context_prompt.py --phase5av` and a unit test for the bounded local setup review prompt.
+- Generated `sandbox/output/hermes_phase5av_prd_review_prompt.md` from bounded excerpts of the master PRD, changelog, operational readiness review, local validation checklist, and adapter service runbook.
+- Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Ran one locked-down Hermes pilot harness invocation and captured `sandbox/output/hermes_phase5av_prd_review.md`, `sandbox/output/hermes_phase5av_prd_review.stderr`, and `sandbox/output/hermes_phase5av_prd_review.metrics`.
+- Recorded Hermes exit code `0`, elapsed time `227` seconds, stdout `1587` bytes, stderr `471` bytes, selected model `gemma4:26b`, one provider timeout at `120.011` seconds, and one successful model response with content length `1586` in `102.852` seconds.
+- Hermes returned structured local-only review text and stayed within guardrails, but prematurely listed "Task inbox usage" as ready before the inbox exists; Codex records that statement as stale and not as authority or readiness evidence.
+- Stopped/unloaded the adapter service through `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no `8088` listener and no matching adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_PILOT_MODE.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AV result.
+- Confirmed Phase 5AV did not set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AU manual-service Hermes validation.
 - Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
 - Confirmed DevMonster responded at `http://100.93.120.124:11434/api/version` with version `0.30.4`.

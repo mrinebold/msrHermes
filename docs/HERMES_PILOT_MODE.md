@@ -1,7 +1,7 @@
 # Hermes Pilot Mode
 
-Phase: 5AJ
-Status: local-only validation/configuration checks complete
+Phase: 5AV
+Status: local-only PRD review through manual adapter service complete
 
 ## Purpose
 
@@ -466,6 +466,83 @@ Recommendation:
 Treat Phase 5AG as a successful bounded PRD-review pilot. The next phase should be documentation-only: clarify authority re-enable gates and credential-rotation requirements in the PRD/security docs before any broader Hermes authority, Agent Bus activity, Desktop retry, or resident-mode work.
 
 Phase 5AH completed that documentation-only clarification. Future pilot phases must preserve the explicit-context, `local_summary`, no-tools, no-integrations, foreground-only baseline unless a later phase explicitly changes the pilot boundary.
+
+## Phase 5AV Local PRD Review Through Manual Adapter Service
+
+Phase 5AV ran one bounded local-only Hermes PRD review on 2026-06-10 using the manual adapter service procedure and the locked-down pilot harness.
+
+Phase 5AV updated:
+
+- `scripts/build_hermes_pilot_context_prompt.py --phase5av`
+- `sandbox/output/hermes_phase5av_prd_review_prompt.md`
+
+The Phase 5AV prompt includes bounded context from:
+
+- `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
+- `docs/prd/CHANGELOG.md`
+- `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`
+- `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`
+- `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`
+
+It asked Hermes to review the current local-only operating setup and return only:
+
+- what is ready
+- what is not ready
+- top 5 risks
+- next safest phase
+- exact non-goals
+- whether human approval is required
+
+Capture files:
+
+- `sandbox/output/hermes_phase5av_prd_review.md`
+- `sandbox/output/hermes_phase5av_prd_review.stderr`
+- `sandbox/output/hermes_phase5av_prd_review.metrics`
+- `sandbox/output/hermes_phase5av_prd_review_prompt.md`
+
+Observed result:
+
+| Check | Result |
+| --- | --- |
+| Adapter start | `scripts/adapter_service_start.sh` |
+| Adapter bind | `127.0.0.1:8088` only |
+| DevMonster endpoint | `http://100.93.120.124:11434` |
+| Adapter prompt mode | LaunchAgent default `instruction_context` |
+| Selected model | `gemma4:26b` |
+| Cloud fallback | none configured |
+| Adapter model calls | yes |
+| First model call | status `502`, provider timeout after `120.011s` |
+| Successful model call | status `200`, response content length `1586`, elapsed `102.852s` |
+| Pilot exit code | 0 |
+| Pilot elapsed time | 227 seconds |
+| Pilot stdout bytes | 1587 |
+| Pilot stderr bytes | 471 |
+| Pilot output usable | yes, with one stale readiness caveat |
+| Adapter shutdown | stopped immediately after pilot run |
+| Post-run listener | no `8088` listener remained |
+| Residual Hermes process | none observed |
+| Desktop launch | none observed |
+| External integrations | not touched |
+| Real API keys | not used |
+| Hermes file writes | no Hermes-generated writes outside `sandbox/output` observed |
+
+Hermes returned structured review text within the requested labels. It correctly kept non-goals around sensitive prompts, shell/file-edit authority expansion, Hermes resident mode, Agent Bus activity, real credentials, Desktop launch, `~/.hermes` modification, sudo, cloud-provider integrations, RunAtLoad, and KeepAlive.
+
+Caveat: Hermes listed "Task inbox usage" under ready capabilities even though the local task inbox is not created until Phase 5AW. Codex records that statement as stale and does not treat it as authority or readiness evidence.
+
+Guardrail review:
+
+- Hermes stayed within pilot boundaries.
+- The harness used isolated `HERMES_HOME=/private/tmp/hermes-pilot-home`.
+- The harness used the localhost adapter URL only.
+- The child process used a dummy local API key.
+- `platform_toolsets.cli` remained disabled.
+- Adapter metadata showed selected model `gemma4:26b`.
+- No Google, Supabase, Home Assistant, GitHub, Helio, Agent Bus, cloud provider, message send, Desktop launch, install, permission grant, credential modification, background service, resident mode, RunAtLoad, or KeepAlive occurred.
+
+Recommendation:
+
+Treat Phase 5AV as a successful bounded local PRD-review run, with the stale task-inbox statement documented as a caveat. The next phase may create the local-only task inbox scaffold without granting Hermes new authority to execute shell commands, edit files outside approved sandbox outputs, connect integrations, launch Desktop, or use credentials.
 
 ## First Pilot Task Template
 
