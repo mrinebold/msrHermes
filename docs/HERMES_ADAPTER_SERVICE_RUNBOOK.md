@@ -237,6 +237,18 @@ Observed result:
 
 The service was not left running after validation.
 
+## Phase 5AZ Service Cleanup Result
+
+Phase 5AZ started the adapter service manually for one generated context-bearing inbox task. The task did not complete with usable output after a `gemma4:26b` provider timeout and a second in-flight model call, so Codex terminated the local task process fail-closed and stopped the adapter service.
+
+Cleanup result:
+
+- `scripts/adapter_service_stop.sh` passed
+- final `scripts/adapter_service_status.sh` reported `loaded=false` and `listener=false`
+- no `8088` listener remained
+- no matching adapter, Hermes, Hermes Desktop, or resident process remained
+- no external integration, real credential, Agent Bus read/write, Desktop launch, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred
+
 ## Non-Goals
 
 Phase 5AT does not approve automatic service policy changes, and Phase 5AU does not approve:

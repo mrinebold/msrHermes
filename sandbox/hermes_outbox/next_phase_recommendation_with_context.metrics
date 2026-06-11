@@ -1,0 +1,9 @@
+exit_code=terminated
+elapsed_seconds=>180
+stdout_bytes=0
+stderr_bytes=0
+output_path=/Users/michaelrinebold/Documents/Helio/helio-command-center/sandbox/hermes_outbox/next_phase_recommendation_with_context.out.md
+usable_output=false
+selected_model=gemma4:26b
+response_content_length=none
+adapter_result=first_model_call_timeout_120s_second_call_terminated

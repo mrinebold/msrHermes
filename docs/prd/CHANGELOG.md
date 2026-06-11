@@ -2,6 +2,15 @@
 
 ## 2026-06-09
 
+- Attempted Phase 5AZ generated context-bearing Hermes inbox task and failed closed.
+- Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Ran exactly one generated context-bearing task: `scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md`.
+- The task did not produce usable output. Outbox stdout and stderr were both `0` bytes.
+- Adapter metadata showed selected model `gemma4:26b`, first model call status `502` after `120.016` seconds, and a second model call still in flight when Codex terminated the hanging local task fail-closed after more than 180 seconds.
+- Captured `sandbox/hermes_outbox/next_phase_recommendation_with_context.out.md`, `sandbox/hermes_outbox/next_phase_recommendation_with_context.stderr`, and `sandbox/hermes_outbox/next_phase_recommendation_with_context.metrics`.
+- Stopped/unloaded the adapter service through `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no `8088` listener and no matching adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_LOCAL_TASK_INBOX.md`, `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AZ fail-closed result.
+- Confirmed Phase 5AZ did not continue to Phase 5BA, run additional live tasks, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5AY context-bearing Hermes local inbox task builder.
 - Added `scripts/build_hermes_local_task.py` for deterministic local task generation under `sandbox/hermes_inbox/`.
 - Generated `sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md` with bounded excerpts from the master PRD, changelog, operational readiness review, local task inbox doc, local validation checklist, and adapter service runbook.

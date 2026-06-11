@@ -196,3 +196,40 @@ The generated task asks Hermes to recommend the next safest local-only Hermes ph
 No adapter service was started, no Hermes live task was run, no external integration or real credential was used, no Agent Bus read/write occurred, no Desktop launch occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
 
 Phase 5AY makes the inbox ready for a later separately approved context-bearing task run. It does not approve running that task.
+
+## Phase 5AZ Context-Bearing Task Attempt
+
+Phase 5AZ attempted exactly one generated context-bearing inbox task through the manual adapter service procedure:
+
+```sh
+scripts/adapter_service_start.sh
+scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_with_context.task.md
+scripts/adapter_service_stop.sh
+```
+
+Output artifacts:
+
+```text
+sandbox/hermes_outbox/next_phase_recommendation_with_context.out.md
+sandbox/hermes_outbox/next_phase_recommendation_with_context.stderr
+sandbox/hermes_outbox/next_phase_recommendation_with_context.metrics
+```
+
+Observed result:
+
+- adapter service started manually and listened only on `127.0.0.1:8088`
+- `/health` and `/v1/models` worked before the task run
+- runner accepted the approved inbox task path
+- runner wrote only to `sandbox/hermes_outbox/`
+- the task did not complete with usable output
+- stdout was `0` bytes
+- stderr was `0` bytes
+- adapter metadata showed selected model `gemma4:26b`
+- first model call timed out at `120.016` seconds with status `502`
+- a second model call was still in flight when Codex terminated the hanging local task fail-closed
+- `scripts/adapter_service_stop.sh` stopped/unloaded the service
+- final status showed no `8088` listener and no matching adapter, Hermes, Desktop, or resident process
+
+Phase 5AZ did not meet the continuation gate because output was not usable. The likely next fix is to reduce the generated task context size or build a more compact task-specific context prompt before retrying in a separately approved phase.
+
+Phase 5AZ does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.

@@ -282,3 +282,13 @@ The generated default task asks Hermes to recommend the next safest local-only H
 No adapter service was started, no Hermes live task was run, no external integration or real credential was used, no Agent Bus read/write occurred, no Desktop launch occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
 
 Readiness position: the inbox now has a context-bearing task ready for a later separately approved single live task run.
+
+## Phase 5AZ Context-Bearing Task Attempt Result
+
+Phase 5AZ attempted one generated context-bearing inbox task through the manual adapter service. The adapter service started manually, `/health` worked, `/v1/models` worked, and listener inspection showed only `127.0.0.1:8088`.
+
+The task did not complete with usable output. Outbox stdout and stderr were both `0` bytes. Adapter metadata showed selected model `gemma4:26b`, first chat-completions call timed out after `120.016` seconds with status `502`, and a second model call was still in flight when Codex terminated the hanging local task fail-closed after more than 180 seconds.
+
+The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
+
+Readiness position: local-only operations remain safe but Phase 5AZ did not validate the generated context-bearing task as usable. Do not continue to operational runbook/readiness certification until a compact context-bearing task retry succeeds in a separately approved phase.

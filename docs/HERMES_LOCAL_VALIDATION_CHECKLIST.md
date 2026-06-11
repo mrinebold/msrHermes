@@ -37,6 +37,8 @@ Phase 5AW added a scaffold-only local task inbox/outbox/archive and a runner tha
 
 Phase 5AX ran one sample inbox task through the manual adapter service procedure. The runner exited `0`, wrote only to `sandbox/hermes_outbox/`, and Hermes produced a fail-closed result because the sample task contained no embedded local context. The adapter service was stopped/unloaded afterward. Phase 5AX does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
+Phase 5AZ attempted one generated context-bearing inbox task, but it did not produce usable output. The local model path timed out once and the second call was terminated fail-closed after more than 180 seconds. The adapter service was stopped/unloaded afterward. Phase 5AZ does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -90,6 +92,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AV validates one bounded PRD review through the manual adapter service and leaves the service stopped
 - Phase 5AW creates a local-only task inbox scaffold but does not run a live inbox task
 - Phase 5AX validates one sample inbox task through the manual adapter service and leaves the service stopped
+- Phase 5AZ failed closed for the generated context-bearing inbox task and leaves the service stopped
 
 ## Credential Deferral Boundary
 
@@ -136,9 +139,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AX, the safest next step is either:
+After Phase 5AZ, the safest next step is either:
 
-- define a context-bearing local inbox task template so future task runs include bounded PRD/changelog context when a recommendation is expected, or
+- reduce the generated context-bearing task size and retry in a separately approved phase, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.
