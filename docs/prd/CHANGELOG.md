@@ -2,6 +2,14 @@
 
 ## 2026-06-12
 
+- Completed Phase 5BB final local-only readiness certification.
+- Added `docs/HERMES_LOCAL_ONLY_READY_REPORT.md` certifying Hermes for manual local-only use only.
+- Documented proven capabilities: persistent localhost config, manual adapter start/stop, localhost-only binding, DevMonster Gemma4 through adapter, useful bounded prompt output, local inbox/outbox workflow, context-bearing task builder, compact task remediation, and passing tests.
+- Documented approved operating mode: manual adapter service start/stop only, Hermes CLI local-only, context-bearing or compact inbox tasks only, no Desktop, no external integrations, and no resident Hermes mode.
+- Documented not-approved capabilities, final expected stopped state, blockers before resident operation, and recommended next five phases.
+- Added tests confirming the ready report says local-only, keeps resident mode and integrations unapproved, includes final state expectations, includes remaining blockers, and contains no real-looking secret markers.
+- Updated `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, and the master PRD with the Phase 5BB result.
+- Confirmed Phase 5BB did not start the adapter service, run Hermes live, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5BA local operations runbook phase.
 - Added `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` documenting the approved manual local-only Hermes workflow: start adapter service, check status, build compact context-bearing task, run local task, review outbox, stop service, and verify cleanup.
 - Documented current approved mode: manual adapter service only, Hermes CLI local-only inference, compact context-bearing inbox tasks, no Desktop, no external integrations, no resident Hermes mode, no real credentials, and no Agent Bus activity.

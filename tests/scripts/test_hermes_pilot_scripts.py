@@ -29,6 +29,7 @@ LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.t
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
 LOCAL_TASK_COMPACT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_compact.task.md"
 LOCAL_OPERATIONS_RUNBOOK = REPO_ROOT / "docs" / "HERMES_LOCAL_OPERATIONS_RUNBOOK.md"
+LOCAL_ONLY_READY_REPORT = REPO_ROOT / "docs" / "HERMES_LOCAL_ONLY_READY_REPORT.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -700,6 +701,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_TASK_WITH_CONTEXT,
             LOCAL_TASK_COMPACT,
             LOCAL_OPERATIONS_RUNBOOK,
+            LOCAL_ONLY_READY_REPORT,
         ]
         disallowed_markers = (
             "sk-live-",
@@ -753,6 +755,40 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("no `8088` listener remains", content)
         self.assertIn("no Hermes Desktop process remains", content)
         self.assertIn("no Hermes resident/autonomous process remains", content)
+
+    def test_local_only_ready_report_certifies_narrow_manual_mode(self):
+        content = LOCAL_ONLY_READY_REPORT.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("manual local-only use", content)
+        self.assertIn("manual adapter service start/stop only", content)
+        self.assertIn("Hermes CLI local-only", content)
+        self.assertIn("context-bearing or compact inbox tasks only", content)
+        self.assertIn("no Desktop", content)
+        self.assertIn("no external integrations", content)
+        self.assertIn("no resident Hermes mode", content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("external integrations are approved", lower_content)
+        self.assertNotIn("resident hermes is approved", lower_content)
+
+    def test_local_only_ready_report_includes_final_state_and_blockers(self):
+        content = LOCAL_ONLY_READY_REPORT.read_text(encoding="utf-8")
+
+        for expected in (
+            "LaunchAgent installed but stopped/unloaded",
+            "No `8088` listener",
+            "No Hermes process",
+            "No adapter process",
+            "No Desktop process",
+            "Repo clean",
+            "Decide resident authority model",
+            "Decide `RunAtLoad` and `KeepAlive` policy",
+            "Define audit log storage",
+            "Decide credential rotation",
+            "Define Hermes-to-Helio delegation boundary",
+            "Define approved shell/file-operation gate",
+        ):
+            self.assertIn(expected, content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

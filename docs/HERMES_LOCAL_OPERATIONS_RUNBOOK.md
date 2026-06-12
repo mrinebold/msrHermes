@@ -1,7 +1,7 @@
 # Hermes Local Operations Runbook
 
 Phase: 5BA
-Status: manual local-only operations documented
+Status: manual local-only operations documented; local-only readiness certified in Phase 5BB
 
 ## Current Approved Mode
 
@@ -198,6 +198,7 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - compact context-bearing inbox task completed successfully
 - local outbox artifacts capture stdout, stderr, and metrics
 - service cleanup after local tasks is validated
+- final local-only readiness is certified in `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`
 
 ## What Is Not Ready
 
@@ -213,4 +214,4 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with local-only readiness certification. That phase should document the final approved operating state, remaining blockers before resident mode, and recommended Phase 6 work without enabling new authority.
+Proceed with a read-only local status command. That phase should give the operator a quick status check without starting services, modifying files, launching Desktop, connecting integrations, or enabling resident mode.

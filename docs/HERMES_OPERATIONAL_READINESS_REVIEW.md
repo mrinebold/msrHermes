@@ -322,3 +322,26 @@ The documented operating loop is:
 The runbook also documents troubleshooting, credential-free boundaries, rollback, what is ready, and what is not ready. Phase 5BA did not start the adapter service, run Hermes live, launch Desktop, use credentials, connect integrations, perform Agent Bus reads/writes, modify `~/.hermes`, enable RunAtLoad, enable KeepAlive, create resident mode, or broaden authority.
 
 Readiness position: manual local-only operations are now documented for human use. The next phase may produce final local-only readiness certification, but resident mode and external integrations remain frozen.
+
+## Phase 5BB Local-Only Readiness Certification Result
+
+Phase 5BB added `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`.
+
+The report certifies Hermes for manual local-only use only. The certified operating mode is manual adapter service start/stop, Hermes CLI local-only inference, context-bearing or compact inbox tasks, outbox review, and cleanup verification.
+
+The report explicitly keeps these capabilities unapproved:
+
+- resident Hermes
+- `RunAtLoad=true`
+- `KeepAlive=true`
+- Desktop launch
+- Google, Supabase, GitHub, Home Assistant, Helio, Agent Bus, or cloud-provider integrations
+- real credentials
+- broad filesystem authority
+- shell execution by Hermes
+
+The report also records the expected final state: LaunchAgent installed but stopped/unloaded, no `8088` listener, no Hermes process, no adapter process, no Desktop process, and repo clean.
+
+Phase 5BB did not start the adapter service, run Hermes live, launch Desktop, use credentials, connect integrations, perform Agent Bus reads/writes, modify `~/.hermes`, enable RunAtLoad, enable KeepAlive, create resident mode, or broaden authority.
+
+Readiness position: the manual local-only milestone is certified. The next step may add a read-only local status command for operator checks without starting services or widening authority.
