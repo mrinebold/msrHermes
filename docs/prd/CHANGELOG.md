@@ -1,5 +1,21 @@
 # PRD Changelog
 
+## 2026-06-11
+
+- Completed Phase 5AZ-R compact context-bearing Hermes inbox task remediation and retry.
+- Updated `scripts/build_hermes_local_task.py` with `--compact` support for `next_phase_recommendation`.
+- Generated `sandbox/hermes_inbox/next_phase_recommendation_compact.task.md`, reducing the generated task from `8099` bytes to `1628` bytes and limiting embedded context to an `1100` character budget.
+- Added tests confirming compact task size, compact context budget, single next-phase wording, non-goals, real-looking secret avoidance, and continued secret-like source refusal.
+- Static checks passed before live retry: required shell syntax checks, `python3 -m unittest discover` with `111` tests, and `git diff --check`.
+- Started the adapter service through `scripts/adapter_service_start.sh`; `/health` returned status `ok`, `/v1/models` returned model metadata including `gemma4:26b`, and listener inspection showed only `127.0.0.1:8088`.
+- Ran exactly one compact context-bearing task: `scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_compact.task.md`.
+- Captured `sandbox/hermes_outbox/next_phase_recommendation_compact.out.md`, `sandbox/hermes_outbox/next_phase_recommendation_compact.stderr`, and `sandbox/hermes_outbox/next_phase_recommendation_compact.metrics`.
+- Recorded runner exit code `0`, elapsed time `101` seconds, stdout `548` bytes, stderr `0` bytes, selected model `gemma4:26b`, response content length `547`, and successful chat completion in `99.079` seconds.
+- Hermes returned usable structured output as a conservative local-only recommendation requiring Codex/human review.
+- Stopped/unloaded the adapter service through `scripts/adapter_service_stop.sh`; final status reported `loaded=false` and `listener=false`, with no `8088` listener and no matching adapter/Hermes/Desktop/resident process.
+- Updated `docs/HERMES_LOCAL_TASK_INBOX.md`, `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5AZ-R result.
+- Confirmed Phase 5AZ-R did not run additional live tasks, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
+
 ## 2026-06-09
 
 - Attempted Phase 5AZ generated context-bearing Hermes inbox task and failed closed.

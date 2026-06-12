@@ -39,6 +39,8 @@ Phase 5AX ran one sample inbox task through the manual adapter service procedure
 
 Phase 5AZ attempted one generated context-bearing inbox task, but it did not produce usable output. The local model path timed out once and the second call was terminated fail-closed after more than 180 seconds. The adapter service was stopped/unloaded afterward. Phase 5AZ does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
+Phase 5AZ-R added compact task generation and ran one compact context-bearing inbox task. The runner exited `0`, wrote only to `sandbox/hermes_outbox/`, and produced usable structured output with a conservative validation-style recommendation. The adapter service was stopped/unloaded afterward. Phase 5AZ-R does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -93,6 +95,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AW creates a local-only task inbox scaffold but does not run a live inbox task
 - Phase 5AX validates one sample inbox task through the manual adapter service and leaves the service stopped
 - Phase 5AZ failed closed for the generated context-bearing inbox task and leaves the service stopped
+- Phase 5AZ-R validates one compact context-bearing inbox task through the manual adapter service and leaves the service stopped
 
 ## Credential Deferral Boundary
 
@@ -139,9 +142,9 @@ Record:
 
 ## Next Gate
 
-After Phase 5AZ, the safest next step is either:
+After Phase 5AZ-R, the safest next step is either:
 
-- reduce the generated context-bearing task size and retry in a separately approved phase, or
+- create a human local operations runbook for the validated manual adapter and compact inbox workflow, or
 - defer background service work and continue local-only hardening of tests/docs/config examples.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

@@ -1,7 +1,7 @@
 # Hermes Local Task Inbox
 
-Phase: 5AW-5AY
-Status: local-only task inbox scaffold, first sample task validated, and context-bearing task builder added
+Phase: 5AW-5AZ-R
+Status: local-only task inbox scaffold, first sample task validated, context-bearing task builder added, and compact retry validated
 
 ## Purpose
 
@@ -98,6 +98,7 @@ The builder:
 - asks Hermes to use only embedded context and not browse files or use tools
 - does not start the adapter service
 - does not run Hermes
+- supports compact mode with `--compact`
 
 Default approved context sources:
 
@@ -233,3 +234,48 @@ Observed result:
 Phase 5AZ did not meet the continuation gate because output was not usable. The likely next fix is to reduce the generated task context size or build a more compact task-specific context prompt before retrying in a separately approved phase.
 
 Phase 5AZ does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.
+
+## Phase 5AZ-R Compact Context-Bearing Retry
+
+Phase 5AZ-R added compact mode to `scripts/build_hermes_local_task.py` and generated:
+
+```text
+sandbox/hermes_inbox/next_phase_recommendation_compact.task.md
+```
+
+The compact task is much smaller than the prior generated context task. It uses a compact embedded context budget of `1100` characters, asks for one next-phase recommendation only, and asks for an answer under `250` words.
+
+Phase 5AZ-R then ran exactly one compact inbox task through the manual adapter service procedure:
+
+```sh
+scripts/adapter_service_start.sh
+scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_compact.task.md
+scripts/adapter_service_stop.sh
+```
+
+Output artifacts:
+
+```text
+sandbox/hermes_outbox/next_phase_recommendation_compact.out.md
+sandbox/hermes_outbox/next_phase_recommendation_compact.stderr
+sandbox/hermes_outbox/next_phase_recommendation_compact.metrics
+```
+
+Observed result:
+
+- adapter service started manually and listened only on `127.0.0.1:8088`
+- runner accepted the approved compact inbox task path
+- runner wrote only to `sandbox/hermes_outbox/`
+- Hermes exited `0`
+- elapsed time was `101` seconds
+- stdout was `548` bytes
+- stderr was `0` bytes
+- adapter metadata showed selected model `gemma4:26b`
+- adapter response content length was `547`
+- adapter chat-completions request completed with status `200` in `99.079` seconds
+- `scripts/adapter_service_stop.sh` stopped/unloaded the service
+- final status showed no `8088` listener and no matching adapter, Hermes, Desktop, or resident process
+
+Hermes output was usable as a compact local-only recommendation, with one caveat: it recommended a conservative validation-style phase rather than broader local-only readiness certification. Treat that as advisory text requiring Codex/human review, not as autonomous authority.
+
+Phase 5AZ-R does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.

@@ -1,0 +1,9 @@
+exit_code=0
+elapsed_seconds=101
+stdout_bytes=     548
+stderr_bytes=       0
+output_path=/Users/michaelrinebold/Documents/Helio/helio-command-center/sandbox/hermes_outbox/next_phase_recommendation_compact.out.md
+usable_output=true
+selected_model=gemma4:26b
+response_content_length=547
+adapter_chat_completion_seconds=99.079

@@ -249,6 +249,22 @@ Cleanup result:
 - no matching adapter, Hermes, Hermes Desktop, or resident process remained
 - no external integration, real credential, Agent Bus read/write, Desktop launch, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred
 
+## Phase 5AZ-R Compact Task Cleanup Result
+
+Phase 5AZ-R started the adapter service manually for one compact context-bearing inbox task. The compact task completed successfully, and the adapter service was stopped immediately afterward.
+
+Cleanup result:
+
+- compact task exited `0`
+- compact task elapsed time was `101` seconds
+- adapter metadata showed selected model `gemma4:26b`
+- adapter response content length was `547`
+- `scripts/adapter_service_stop.sh` passed
+- final `scripts/adapter_service_status.sh` reported `loaded=false` and `listener=false`
+- no `8088` listener remained
+- no matching adapter, Hermes, Hermes Desktop, or resident process remained
+- no external integration, real credential, Agent Bus read/write, Desktop launch, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred
+
 ## Non-Goals
 
 Phase 5AT does not approve automatic service policy changes, and Phase 5AU does not approve:

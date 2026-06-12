@@ -292,3 +292,15 @@ The task did not complete with usable output. Outbox stdout and stderr were both
 The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
 
 Readiness position: local-only operations remain safe but Phase 5AZ did not validate the generated context-bearing task as usable. Do not continue to operational runbook/readiness certification until a compact context-bearing task retry succeeds in a separately approved phase.
+
+## Phase 5AZ-R Compact Context-Bearing Retry Result
+
+Phase 5AZ-R remediated the Phase 5AZ timeout by adding compact mode to `scripts/build_hermes_local_task.py` and generating `sandbox/hermes_inbox/next_phase_recommendation_compact.task.md`. The compact task used a `1100` character embedded context budget and asked for one next-phase recommendation under `250` words.
+
+The compact inbox task ran through the manual adapter service and exited `0`. Metrics recorded `101` elapsed seconds, `548` stdout bytes, `0` stderr bytes, selected model `gemma4:26b`, response content length `547`, and adapter chat-completions time `99.079` seconds.
+
+Hermes returned structured output with the requested fields. The recommendation was conservative: another validation-style local-only phase rather than readiness certification. Treat that output as useful but advisory; Codex/human review remains required before promoting the local-only loop to final readiness.
+
+The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
+
+Readiness position: compact context-bearing inbox tasks are now viable. The next phase may create the human operations runbook, while still keeping resident mode and integrations frozen.

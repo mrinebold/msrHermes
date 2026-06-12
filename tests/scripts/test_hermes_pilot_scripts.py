@@ -27,6 +27,7 @@ ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
+LOCAL_TASK_COMPACT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_compact.task.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -647,6 +648,32 @@ class HermesPilotScriptsTest(unittest.TestCase):
         for marker in ("sk-live-", "sk-proj-", "sk-ant-", "xoxb-", "ghp_", "github_pat_"):
             self.assertNotIn(marker, content)
 
+    def test_compact_context_task_is_smaller_and_budgeted(self):
+        compact = LOCAL_TASK_COMPACT.read_text(encoding="utf-8")
+        full = LOCAL_TASK_WITH_CONTEXT.read_text(encoding="utf-8")
+
+        self.assertLess(LOCAL_TASK_COMPACT.stat().st_size, LOCAL_TASK_WITH_CONTEXT.stat().st_size)
+        self.assertIn("Compact embedded context budget: 1100 chars", compact)
+        context = compact.split("Compact local context:\n", 1)[1]
+        self.assertLessEqual(len(context), 1200)
+
+    def test_compact_context_task_asks_for_one_local_only_next_phase(self):
+        content = LOCAL_TASK_COMPACT.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("recommend the single next safest local-only Hermes phase", content)
+        self.assertIn("Keep the answer under 250 words", content)
+        self.assertIn("- non-goals", content)
+        self.assertIn("- acceptance criteria", content)
+        self.assertIn("Do not request external integrations", content)
+        self.assertIn("Do not ask to read files. Do not use tools.", content)
+        self.assertNotIn("broad PRD review", content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+        self.assertNotIn("real credentials are approved", lower_content)
+        for marker in ("sk-live-", "sk-proj-", "sk-ant-", "xoxb-", "ghp_", "github_pat_"):
+            self.assertNotIn(marker, content)
+
     def test_local_validation_surfaces_do_not_contain_real_looking_secrets(self):
         surfaces = [
             PILOT_ENV,
@@ -670,6 +697,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_TASK_BUILDER,
             LOCAL_TASK_SAMPLE,
             LOCAL_TASK_WITH_CONTEXT,
+            LOCAL_TASK_COMPACT,
         ]
         disallowed_markers = (
             "sk-live-",
