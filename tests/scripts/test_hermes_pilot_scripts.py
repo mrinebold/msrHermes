@@ -19,6 +19,7 @@ PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PL
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
+EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -694,6 +695,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_MODE_PLAN,
             RESIDENT_AUTHORITY_MODEL,
             AUDIT_LOG_DESIGN,
+            EMERGENCY_STOP_DESIGN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -891,6 +893,31 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("no secret values", content)
         self.assertNotIn("resident hermes is enabled", lower_content)
         self.assertNotIn("audit writes are implemented", lower_content)
+
+    def test_emergency_stop_design_keeps_runtime_disabled(self):
+        content = EMERGENCY_STOP_DESIGN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("proposal only; emergency stop not implemented yet", content)
+        self.assertIn("resident mode not enabled yet", content)
+        self.assertIn("stop adapter service", content)
+        self.assertIn("require no sudo", content)
+        self.assertIn("no deletion", content)
+        self.assertIn("safe to run repeatedly", content)
+        self.assertIn("Do not create this script in Phase 6C", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
+        self.assertNotIn("emergency stop script is implemented", lower_content)
+
+    def test_emergency_stop_design_has_triggers_and_acceptance(self):
+        content = EMERGENCY_STOP_DESIGN.read_text(encoding="utf-8")
+
+        self.assertIn("non-localhost listener", content)
+        self.assertIn("credential exposure suspicion", content)
+        self.assertIn("Desktop unexpectedly running", content)
+        self.assertIn("resident-like process unexpectedly running", content)
+        self.assertIn("scripts/hermes_emergency_stop.sh", content)
+        self.assertIn("audit log records `emergency_stop`", content)
+        self.assertIn("resident service can be disabled without deleting artifacts", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

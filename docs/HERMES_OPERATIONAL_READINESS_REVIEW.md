@@ -388,3 +388,13 @@ The design explicitly requires no secrets in logs, prompt/file contents redacted
 Phase 6B did not create audit directories, implement audit writes, enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden authority.
 
 Readiness position: audit logging is designed but not implemented. The next safe phase is emergency stop design, still proposal-only.
+
+## Phase 6C Emergency Stop Design Result
+
+Phase 6C created `docs/HERMES_EMERGENCY_STOP_DESIGN.md`.
+
+The design defines emergency stop goals, triggers, stop levels, future command proposal, required behavior, audit interaction, and acceptance criteria before resident mode. It explicitly requires no sudo, no deletion, no credential printing, no external calls, safe repeated runs, preserved logs/artifacts/backups, adapter stop capability, resident process stop only after resident mode exists, inbox freeze behavior, and `emergency_stop` audit events after audit logging is implemented.
+
+Phase 6C did not create `scripts/hermes_emergency_stop.sh`, create freeze flags, stop services, start services, enable resident mode, create a Hermes launchd service, change RunAtLoad/KeepAlive, launch Desktop, connect integrations, use credentials, perform Agent Bus reads/writes, modify `~/.hermes`, or broaden authority.
+
+Readiness position: emergency stop is designed but not implemented. The next safe phase is resident service design, proposal-only.

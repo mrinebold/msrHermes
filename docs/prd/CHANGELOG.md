@@ -2,6 +2,12 @@
 
 ## 2026-06-12
 
+- Completed Phase 6C Hermes emergency stop design.
+- Added `docs/HERMES_EMERGENCY_STOP_DESIGN.md`.
+- Defined emergency stop goals, triggers, stop levels, future command proposal for `scripts/hermes_emergency_stop.sh`, required no-sudo/no-deletion/no-secret/no-external-call behavior, audit interaction, and acceptance criteria before resident mode.
+- Added tests confirming the emergency stop design exists, says no sudo, says no deletion, says adapter stop, says resident mode is not enabled yet, and includes repeated-safe behavior.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, and the master PRD with the Phase 6C result.
+- Confirmed Phase 6C did not create `scripts/hermes_emergency_stop.sh`, create freeze flags, stop services, start services, enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6B Hermes audit log design.
 - Added `docs/HERMES_AUDIT_LOG_DESIGN.md`.
 - Defined audit principles, event categories, required event fields, local append-only JSONL storage under `logs/hermes_audit/`, rotation/retention policy, redaction rules, approval logging, fail-closed logging, rollback logging, human/raw/daily/phase audit views, and acceptance criteria before resident mode.
