@@ -1,5 +1,16 @@
 # PRD Changelog
 
+## 2026-06-12
+
+- Completed Phase 5BA local operations runbook phase.
+- Added `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` documenting the approved manual local-only Hermes workflow: start adapter service, check status, build compact context-bearing task, run local task, review outbox, stop service, and verify cleanup.
+- Documented current approved mode: manual adapter service only, Hermes CLI local-only inference, compact context-bearing inbox tasks, no Desktop, no external integrations, no resident Hermes mode, no real credentials, and no Agent Bus activity.
+- Added troubleshooting guidance for `8088` listener conflicts, DevMonster reachability, Gemma timeouts, empty output, service start failures, and credential freeze reminders.
+- Added rollback guidance for stopping/unloading the adapter service and preserving existing persistent config backups.
+- Added tests confirming the operations runbook keeps Desktop fail-closed, blocks external integrations and resident mode, includes start/status/build/run/stop commands, documents cleanup verification, and contains no real-looking secret markers.
+- Updated `docs/HERMES_LOCAL_TASK_INBOX.md`, `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 5BA result.
+- Confirmed Phase 5BA did not start the adapter service, run Hermes live, set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
+
 ## 2026-06-11
 
 - Completed Phase 5AZ-R compact context-bearing Hermes inbox task remediation and retry.

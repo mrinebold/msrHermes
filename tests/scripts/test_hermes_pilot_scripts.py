@@ -28,6 +28,7 @@ LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
 LOCAL_TASK_COMPACT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_compact.task.md"
+LOCAL_OPERATIONS_RUNBOOK = REPO_ROOT / "docs" / "HERMES_LOCAL_OPERATIONS_RUNBOOK.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -698,6 +699,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_TASK_SAMPLE,
             LOCAL_TASK_WITH_CONTEXT,
             LOCAL_TASK_COMPACT,
+            LOCAL_OPERATIONS_RUNBOOK,
         ]
         disallowed_markers = (
             "sk-live-",
@@ -718,6 +720,39 @@ class HermesPilotScriptsTest(unittest.TestCase):
                 content = path.read_text(encoding="utf-8")
                 for marker in disallowed_markers:
                     self.assertNotIn(marker, content)
+
+    def test_local_operations_runbook_keeps_local_only_boundaries(self):
+        content = LOCAL_OPERATIONS_RUNBOOK.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("manual adapter service start and stop only", content)
+        self.assertIn("Hermes CLI local-only inference through `http://127.0.0.1:8088/v1`", content)
+        self.assertIn("context-bearing inbox tasks only", content)
+        self.assertIn("Hermes Desktop; it remains fail-closed", content)
+        self.assertIn("external integrations", content)
+        self.assertIn("Hermes resident/autonomous mode", content)
+        self.assertIn("RunAtLoad=true", content)
+        self.assertIn("KeepAlive=true", content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("external integrations are approved", lower_content)
+        self.assertNotIn("resident mode is approved", lower_content)
+
+    def test_local_operations_runbook_documents_commands_and_cleanup(self):
+        content = LOCAL_OPERATIONS_RUNBOOK.read_text(encoding="utf-8")
+
+        for command in (
+            "scripts/adapter_service_start.sh",
+            "scripts/adapter_service_status.sh",
+            "scripts/build_hermes_local_task.py",
+            "scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_compact.task.md",
+            "scripts/adapter_service_stop.sh",
+        ):
+            self.assertIn(command, content)
+
+        self.assertIn("Verify cleanup", content)
+        self.assertIn("no `8088` listener remains", content)
+        self.assertIn("no Hermes Desktop process remains", content)
+        self.assertIn("no Hermes resident/autonomous process remains", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

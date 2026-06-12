@@ -1,7 +1,7 @@
 # Hermes Adapter Service Runbook
 
-Phase: 5AT-5AU
-Status: manual adapter service operating procedure and bounded Hermes validation
+Phase: 5AT-5BA
+Status: manual adapter service operating procedure, bounded Hermes validation, compact inbox validation, and daily local operations documentation
 
 ## Purpose
 
@@ -58,6 +58,14 @@ scripts/adapter_service_status.sh
 scripts/adapter_service_start.sh
 scripts/adapter_service_stop.sh
 ```
+
+For end-to-end local Hermes task use, follow:
+
+```text
+docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md
+```
+
+That runbook documents the validated daily sequence: start service, verify status, build a compact context-bearing task, run the local inbox task, review outbox output, stop service, and verify cleanup.
 
 The helper scripts:
 
@@ -265,9 +273,29 @@ Cleanup result:
 - no matching adapter, Hermes, Hermes Desktop, or resident process remained
 - no external integration, real credential, Agent Bus read/write, Desktop launch, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred
 
+## Phase 5BA Local Operations Runbook Result
+
+Phase 5BA added `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` as the human-facing procedure for safe daily manual use.
+
+The service policy remains unchanged:
+
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- manual start only
+- manual stop after use
+- adapter binds only to `127.0.0.1:8088`
+- Hermes remains manually invoked
+- Hermes resident/autonomous mode remains disabled
+- Hermes Desktop remains fail-closed
+- credentialed integrations remain frozen
+
+No adapter service was started during Phase 5BA, and no live Hermes prompt was run. The runbook documents only the already validated workflow and cleanup checks.
+
 ## Non-Goals
 
-Phase 5AT does not approve automatic service policy changes, and Phase 5AU does not approve:
+Phase 5AT through Phase 5BA do not approve automatic service policy changes, and do not approve:
+
+Phase 5AT does not approve automatic service policy changes; Phase 5BA only documents the validated manual workflow.
 
 - `RunAtLoad=true`
 - `KeepAlive=true`

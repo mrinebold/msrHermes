@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5AX
-Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, local task inbox scaffold, and first inbox task validation
+Phase: 5AJ-5BA
+Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, local task inbox scaffold, first inbox task validation, compact task validation, and local operations runbook documentation
 
 ## Purpose
 
@@ -41,6 +41,8 @@ Phase 5AZ attempted one generated context-bearing inbox task, but it did not pro
 
 Phase 5AZ-R added compact task generation and ran one compact context-bearing inbox task. The runner exited `0`, wrote only to `sandbox/hermes_outbox/`, and produced usable structured output with a conservative validation-style recommendation. The adapter service was stopped/unloaded afterward. Phase 5AZ-R does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
+Phase 5BA added `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` for safe daily manual local-only use. The runbook documents manual adapter start/status/stop, compact context-bearing task generation, local task execution, outbox review, cleanup verification, troubleshooting, safe boundaries, rollback, and ready/not-ready status. Phase 5BA does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -58,7 +60,9 @@ Inspect only:
 - `docs/HERMES_RESIDENT_MODE_PLAN.md`
 - `docs/HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md`
 - `docs/HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md`
+- `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md`
 - `docs/HERMES_LOCAL_TASK_INBOX.md`
+- `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`
 - `docs/prd/PRD_MSR_HERMES_OPERATING_SYSTEM.md`
 - `docs/prd/CHANGELOG.md`
 
@@ -96,6 +100,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AX validates one sample inbox task through the manual adapter service and leaves the service stopped
 - Phase 5AZ failed closed for the generated context-bearing inbox task and leaves the service stopped
 - Phase 5AZ-R validates one compact context-bearing inbox task through the manual adapter service and leaves the service stopped
+- Phase 5BA documents the safe daily manual local-only operations loop without starting the adapter or Hermes
 
 ## Credential Deferral Boundary
 
@@ -142,9 +147,8 @@ Record:
 
 ## Next Gate
 
-After Phase 5AZ-R, the safest next step is either:
+After Phase 5BA, the safest next step is:
 
-- create a human local operations runbook for the validated manual adapter and compact inbox workflow, or
-- defer background service work and continue local-only hardening of tests/docs/config examples.
+- produce final local-only readiness certification for manual Hermes use, without enabling resident mode, automatic adapter start, Desktop, credentials, integrations, or Agent Bus activity.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

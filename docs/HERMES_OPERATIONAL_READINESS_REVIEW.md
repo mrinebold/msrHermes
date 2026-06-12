@@ -304,3 +304,21 @@ Hermes returned structured output with the requested fields. The recommendation 
 The service was stopped immediately afterward. No `8088` listener, adapter, Hermes, Desktop, or resident process remained. No external integration, real credential, Agent Bus read/write, Desktop launch, background service, RunAtLoad, KeepAlive, `~/.hermes` modification, or authority broadening occurred.
 
 Readiness position: compact context-bearing inbox tasks are now viable. The next phase may create the human operations runbook, while still keeping resident mode and integrations frozen.
+
+## Phase 5BA Local Operations Runbook Result
+
+Phase 5BA created `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` as the human-facing runbook for safe manual local-only Hermes use.
+
+The documented operating loop is:
+
+1. start the adapter service manually
+2. verify status and localhost-only binding
+3. build a compact context-bearing inbox task
+4. run the local task through Hermes
+5. review outbox output and metrics
+6. stop the adapter service
+7. verify no `8088` listener or adapter/Hermes/Desktop/resident process remains
+
+The runbook also documents troubleshooting, credential-free boundaries, rollback, what is ready, and what is not ready. Phase 5BA did not start the adapter service, run Hermes live, launch Desktop, use credentials, connect integrations, perform Agent Bus reads/writes, modify `~/.hermes`, enable RunAtLoad, enable KeepAlive, create resident mode, or broaden authority.
+
+Readiness position: manual local-only operations are now documented for human use. The next phase may produce final local-only readiness certification, but resident mode and external integrations remain frozen.

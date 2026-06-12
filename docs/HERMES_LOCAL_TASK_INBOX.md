@@ -1,7 +1,7 @@
 # Hermes Local Task Inbox
 
-Phase: 5AW-5AZ-R
-Status: local-only task inbox scaffold, first sample task validated, context-bearing task builder added, and compact retry validated
+Phase: 5AW-5BA
+Status: local-only task inbox scaffold, first sample task validated, context-bearing task builder added, compact retry validated, and daily operations runbook documented
 
 ## Purpose
 
@@ -61,6 +61,26 @@ The runner:
 - writes metrics to `sandbox/hermes_outbox/<task-name>.metrics`
 - prints simple terminal-compatible status
 - fails closed if the adapter health check fails
+
+## Daily Operations Runbook
+
+Phase 5BA added:
+
+```text
+docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md
+```
+
+Use the operations runbook for safe daily local-only Hermes use. The approved workflow remains:
+
+1. manually start the adapter service
+2. check service status and localhost-only binding
+3. build a compact context-bearing inbox task
+4. run the task through `scripts/run_hermes_local_task.sh`
+5. review `sandbox/hermes_outbox/`
+6. stop the adapter service
+7. verify no `8088` listener, adapter process, Hermes Desktop process, or Hermes resident/autonomous process remains
+
+The runbook does not broaden authority. It does not approve automatic adapter start/stop, resident mode, Desktop launch, external integrations, Agent Bus reads/writes, credentials, shell execution by Hermes, or file writes outside `sandbox/hermes_outbox/`.
 
 ## Sample Task
 
@@ -279,3 +299,19 @@ Observed result:
 Hermes output was usable as a compact local-only recommendation, with one caveat: it recommended a conservative validation-style phase rather than broader local-only readiness certification. Treat that as advisory text requiring Codex/human review, not as autonomous authority.
 
 Phase 5AZ-R does not broaden authority. It does not approve additional live tasks, automatic adapter start/stop, resident mode, Desktop launch, credentials, integrations, Agent Bus reads/writes, shell execution by Hermes, or file writes outside the local task outbox.
+
+## Phase 5BA Operations Runbook Result
+
+Phase 5BA created `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` to document the validated manual local-only workflow for the adapter service and compact inbox tasks.
+
+The runbook covers:
+
+- current approved local-only operating mode
+- daily/manual usage sequence
+- exact start, status, task build, task run, outbox review, stop, and cleanup commands
+- troubleshooting for port conflicts, DevMonster reachability, Gemma timeouts, empty output, and service start failures
+- safe operating boundaries
+- rollback guidance
+- what is ready and what is not ready
+
+Phase 5BA is documentation-only. No adapter service was started, no live Hermes prompt was run, no Desktop launch occurred, no external integration or credential was used, no Agent Bus read/write occurred, no `~/.hermes` file was modified, and no RunAtLoad, KeepAlive, resident mode, background service, or authority broadening occurred.
