@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
-Phase: 5AO-5AT
-Status: manual adapter service operation validated; Hermes resident mode disabled
+Phase: 5AO-6A
+Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority model proposed
 
 ## Purpose
 
@@ -18,6 +18,8 @@ Phase 5AR proposes remediating the launchd path failure with a minimal no-secret
 Phase 5AS created the wrapper and a self-contained adapter runtime outside `Documents` under `~/Library/Application Support/Helio/hermes-adapter-service/`. The LaunchAgent started manually, served health and model metadata on `127.0.0.1:8088`, and was stopped/unloaded after validation. Hermes resident/autonomous mode remains disabled.
 
 Phase 5AT defines manual adapter service operation with helper scripts and a runbook. The validated policy is manual start/stop only; `RunAtLoad=false`, `KeepAlive=false`, and Hermes resident/autonomous mode remain unchanged.
+
+Phase 6A adds `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md` as the proposal-only authority model for future resident Hermes. It defines authority tiers 0 through 7, human approval rules, audit log requirements, emergency stop requirements, file zones, command allowlist/denylist concepts, credential handling, network access, service management, Hermes-to-Helio boundaries, Hermes-to-DevMonster boundaries, Desktop fail-closed rules, and minimum acceptance criteria before resident mode. It does not enable resident mode.
 
 ## Proposed Resident Architecture
 
@@ -195,7 +197,7 @@ Before creating any service:
 Before Hermes resident/autonomous operation:
 
 - complete adapter service validation first
-- create a separate Hermes resident-mode PRD
+- create and approve the Hermes resident authority model
 - define exact authority classes Hermes may use
 - define audit fields, approval IDs, and refusal behavior
 - define stop and rollback procedures
@@ -262,3 +264,11 @@ Adapter service mechanics are validated for manual start/stop. Hermes remains ma
 Phase 5AT added `docs/HERMES_ADAPTER_SERVICE_RUNBOOK.md` and helper scripts for manual service start, stop, and status. `scripts/adapter_service_start.sh` successfully started the existing adapter LaunchAgent, validated `/health`, validated `/v1/models`, and confirmed only `127.0.0.1:8088` was listening. `scripts/adapter_service_stop.sh` stopped/unloaded the service and confirmed no `8088` listener remained. Final `scripts/adapter_service_status.sh` reported `loaded=false` and `listener=false`.
 
 Manual adapter service start/stop is now documented as the safe operating procedure. Automatic start and keepalive remain disabled.
+
+## Phase 6A Resident Authority Model Result
+
+Phase 6A adds `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md` as the proposal-only authority model for future resident Hermes.
+
+The proposal defines tiers from observe-only through resident delegated operator, plus human approval rules, audit logs, emergency stop, allowed and forbidden file zones, command allowlist/denylist concepts, credential handling, network access, service management, Hermes-to-Helio delegation, Hermes-to-DevMonster inference boundaries, Desktop fail-closed behavior, and minimum acceptance criteria before resident mode.
+
+No resident runtime was enabled. `RunAtLoad=false`, `KeepAlive=false`, adapter manual start/stop only, Hermes manually invoked only, Desktop fail-closed, and credentialed integrations frozen remain the active policy.

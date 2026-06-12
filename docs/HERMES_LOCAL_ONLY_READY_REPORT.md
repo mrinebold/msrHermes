@@ -1,7 +1,7 @@
 # Hermes Local-Only Ready Report
 
-Phase: 5BB-5BC
-Status: certified for manual local-only use; read-only status command added; not certified for resident or integrated operation
+Phase: 5BB-6A
+Status: certified for manual local-only use; read-only status command added; resident authority model proposed; not certified for resident or integrated operation
 
 ## Certification
 
@@ -114,7 +114,8 @@ scripts/hermes_local_status.sh
 
 ## Remaining Blockers Before Hermes Resident Operation
 
-- Decide resident authority model.
+- Approve and implement the resident authority model proposed in `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`.
+- Decide resident authority model implementation and approval path.
 - Decide `RunAtLoad` and `KeepAlive` policy.
 - Define audit log storage for Hermes actions.
 - Decide credential rotation.
@@ -125,11 +126,11 @@ scripts/hermes_local_status.sh
 
 ## Recommended Next 5 Phases
 
-- Phase 6A: resident Hermes authority model proposal.
 - Phase 6B: audit log design for Hermes actions.
 - Phase 6C: read-only Google plan refresh.
 - Phase 6D: Agent Bus credential rotation decision.
 - Phase 6E: Helio delegation interface proposal.
+- Phase 6F: command allowlist and denylist proposal.
 
 ## Final Boundary
 

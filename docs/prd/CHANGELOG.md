@@ -2,6 +2,13 @@
 
 ## 2026-06-12
 
+- Completed Phase 6A resident Hermes authority model proposal.
+- Added `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`.
+- Defined authority tiers 0 through 7: observe only, recommend, draft, local approved execution, external read-only, external draft/propose, external approved action, and resident delegated operator.
+- Documented human approval rules, audit log requirements, emergency stop requirements, allowed and forbidden file zones, command allowlist and denylist concepts, credential handling, network access, process/service management, Hermes-to-Helio delegation boundary, Hermes-to-DevMonster inference boundary, Desktop fail-closed rule, future RunAtLoad/KeepAlive consideration, and minimum acceptance criteria before resident mode.
+- Updated `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, and the master PRD with the Phase 6A result.
+- Added tests confirming the authority model defines tiers 0 through 7, keeps resident mode disabled, includes emergency stop and audit logs, keeps Desktop fail-closed, keeps external integrations frozen until approval, distinguishes Hermes from Helio/ANO, and preserves DevMonster as inference worker rather than operator.
+- Confirmed Phase 6A did not enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5BC final cleanup and read-only status command.
 - Added executable `scripts/hermes_local_status.sh`.
 - The status command prints simple terminal-compatible status for repo path, git branch/clean state, adapter LaunchAgent loaded state, local `8088` listener state, local `/health` and `/v1/models` when a listener is present, Hermes CLI path/version, Hermes/Desktop/resident-like process presence, localhost config booleans, and forbidden environment variable names only.

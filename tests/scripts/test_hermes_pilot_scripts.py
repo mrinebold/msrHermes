@@ -17,6 +17,7 @@ LOCAL_VALIDATION_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_VALIDATION_CHECKLIST.m
 READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
+RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -690,6 +691,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             READINESS_DOC,
             PERSISTENT_CONFIG_PLAN,
             RESIDENT_MODE_PLAN,
+            RESIDENT_AUTHORITY_MODEL,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -821,6 +823,47 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("set_forbidden_names+=(\"$env_name\")", content)
         self.assertNotIn("printenv", content)
         self.assertNotIn("env |", content)
+
+    def test_resident_authority_model_defines_all_tiers(self):
+        content = RESIDENT_AUTHORITY_MODEL.read_text(encoding="utf-8")
+
+        for tier in (
+            "Tier 0: Observe Only",
+            "Tier 1: Recommend",
+            "Tier 2: Draft",
+            "Tier 3: Local Approved Execution",
+            "Tier 4: External Read-Only",
+            "Tier 5: External Draft/Propose",
+            "Tier 6: External Approved Action",
+            "Tier 7: Resident Delegated Operator",
+        ):
+            self.assertIn(tier, content)
+
+    def test_resident_authority_model_keeps_runtime_disabled(self):
+        content = RESIDENT_AUTHORITY_MODEL.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("resident mode not enabled yet", content)
+        self.assertIn("This phase does not enable resident mode", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("Hermes Desktop remains fail-closed", content)
+        self.assertIn("external integrations remain frozen", content)
+        self.assertIn("Emergency Stop Requirements", content)
+        self.assertIn("Audit Log Requirements", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
+        self.assertNotIn("desktop launch is approved", lower_content)
+        self.assertNotIn("external integrations are approved", lower_content)
+
+    def test_resident_authority_model_preserves_boundaries(self):
+        content = RESIDENT_AUTHORITY_MODEL.read_text(encoding="utf-8")
+
+        self.assertIn("Hermes is Michael's Mac mini personal agent", content)
+        self.assertIn("Helio/ANO is the governed agent coordination layer", content)
+        self.assertIn("Hermes does not own, command, or bypass Helio/ANO governance", content)
+        self.assertIn("DevMonster provides model inference through Gemma", content)
+        self.assertIn("DevMonster is not an operator", content)
+        self.assertIn("Hermes may use DevMonster for local reasoning only", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

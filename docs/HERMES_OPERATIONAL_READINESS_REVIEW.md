@@ -355,3 +355,24 @@ The status command is read-only. It reports repo state, adapter LaunchAgent stat
 The command does not start or stop services, modify files, launch Desktop, connect integrations, print secret values, create launchd files, or broaden authority.
 
 Readiness position: the local-only milestone now has an operator status check. The next phase should be a proposal-only resident Hermes authority model, not runtime enablement.
+
+## Phase 6A Resident Authority Model Result
+
+Phase 6A created `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`.
+
+The authority model is proposal-only. It defines tiers 0 through 7:
+
+- observe only
+- recommend
+- draft
+- local approved execution
+- external read-only
+- external draft/propose
+- external approved action
+- resident delegated operator
+
+It also defines human approval rules, audit log requirements, emergency stop requirements, allowed and forbidden file zones, command allowlist and denylist concepts, credential handling, network access, process/service management, Hermes-to-Helio delegation boundaries, Hermes-to-DevMonster inference boundaries, Desktop fail-closed behavior, later RunAtLoad/KeepAlive consideration, and minimum acceptance criteria before resident mode.
+
+Phase 6A did not enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden Hermes authority in code.
+
+Readiness position: resident authority is now defined as a tiered proposal. The next safe phase is audit log design for Hermes actions, still proposal-only unless separately approved.
