@@ -24,6 +24,7 @@ LOCAL_TASK_INBOX_DOC = REPO_ROOT / "docs" / "HERMES_LOCAL_TASK_INBOX.md"
 ADAPTER_SERVICE_START = REPO_ROOT / "scripts" / "adapter_service_start.sh"
 ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
+HERMES_LOCAL_STATUS = REPO_ROOT / "scripts" / "hermes_local_status.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
@@ -56,6 +57,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             ADAPTER_SERVICE_START,
             ADAPTER_SERVICE_STOP,
             ADAPTER_SERVICE_STATUS,
+            HERMES_LOCAL_STATUS,
             LOCAL_TASK_RUNNER,
         ):
             with self.subTest(script=script.name):
@@ -702,6 +704,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_TASK_COMPACT,
             LOCAL_OPERATIONS_RUNBOOK,
             LOCAL_ONLY_READY_REPORT,
+            HERMES_LOCAL_STATUS,
         ]
         disallowed_markers = (
             "sk-live-",
@@ -745,6 +748,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
         for command in (
             "scripts/adapter_service_start.sh",
             "scripts/adapter_service_status.sh",
+            "scripts/hermes_local_status.sh",
             "scripts/build_hermes_local_task.py",
             "scripts/run_hermes_local_task.sh sandbox/hermes_inbox/next_phase_recommendation_compact.task.md",
             "scripts/adapter_service_stop.sh",
@@ -789,6 +793,34 @@ class HermesPilotScriptsTest(unittest.TestCase):
             "Define approved shell/file-operation gate",
         ):
             self.assertIn(expected, content)
+
+    def test_hermes_local_status_script_is_read_only(self):
+        content = HERMES_LOCAL_STATUS.read_text(encoding="utf-8")
+
+        self.assertNotIn("sudo", content)
+        self.assertNotIn("adapter_service_start.sh", content)
+        self.assertNotIn("adapter_service_stop.sh", content)
+        self.assertNotIn("launchctl bootstrap", content)
+        self.assertNotIn("launchctl kickstart", content)
+        self.assertNotIn("launchctl bootout", content)
+        self.assertNotIn("RunAtLoad=true", content)
+        self.assertNotIn("KeepAlive=true", content)
+        self.assertIn("launchctl print", content)
+        self.assertIn("http://127.0.0.1:8088/health", content)
+        self.assertIn("http://127.0.0.1:8088/v1/models", content)
+
+    def test_hermes_local_status_script_checks_config_and_warnings(self):
+        content = HERMES_LOCAL_STATUS.read_text(encoding="utf-8")
+
+        self.assertIn("hermes_config_base_url_localhost", content)
+        self.assertIn("base_url:[[:space:]]*http://127\\.0\\.0\\.1:8088/v1", content)
+        self.assertIn("forbidden_env_vars_set", content)
+        self.assertIn("warning_adapter_non_localhost_listener", content)
+        self.assertIn("warning_desktop_running", content)
+        self.assertIn("warning_hermes_resident_like_process", content)
+        self.assertIn("set_forbidden_names+=(\"$env_name\")", content)
+        self.assertNotIn("printenv", content)
+        self.assertNotIn("env |", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

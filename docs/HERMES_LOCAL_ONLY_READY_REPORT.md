@@ -1,7 +1,7 @@
 # Hermes Local-Only Ready Report
 
-Phase: 5BB
-Status: certified for manual local-only use; not certified for resident or integrated operation
+Phase: 5BB-5BC
+Status: certified for manual local-only use; read-only status command added; not certified for resident or integrated operation
 
 ## Certification
 
@@ -19,6 +19,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - The local inbox/outbox workflow exists under `sandbox/hermes_inbox/` and `sandbox/hermes_outbox/`.
 - The context-bearing task builder exists at `scripts/build_hermes_local_task.py`.
 - Compact task remediation is validated: Phase 5AZ-R succeeded with `sandbox/hermes_inbox/next_phase_recommendation_compact.task.md` after the larger generated task timed out in Phase 5AZ.
+- A read-only local status command exists at `scripts/hermes_local_status.sh`.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
@@ -47,6 +48,12 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - shell execution by Hermes
 
 ## Current Operational Procedure
+
+0. Check local status:
+
+```sh
+scripts/hermes_local_status.sh
+```
 
 1. Start adapter service manually:
 
@@ -98,6 +105,12 @@ scripts/adapter_service_status.sh
 - No adapter process.
 - No Desktop process.
 - Repo clean.
+
+Confirm with:
+
+```sh
+scripts/hermes_local_status.sh
+```
 
 ## Remaining Blockers Before Hermes Resident Operation
 

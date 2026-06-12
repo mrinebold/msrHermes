@@ -1,7 +1,7 @@
 # Hermes Local Validation Checklist
 
-Phase: 5AJ-5BB
-Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, local task inbox scaffold, first inbox task validation, compact task validation, local operations runbook documentation, and local-only readiness certification
+Phase: 5AJ-5BC
+Status: local validation checklist, resident design, adapter service validation, manual runbook input, bounded manual-service Hermes validation, bounded local PRD review, local task inbox scaffold, first inbox task validation, compact task validation, local operations runbook documentation, local-only readiness certification, and read-only status command
 
 ## Purpose
 
@@ -45,6 +45,8 @@ Phase 5BA added `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` for safe daily manual 
 
 Phase 5BB added `docs/HERMES_LOCAL_ONLY_READY_REPORT.md` and certifies Hermes for manual local-only use only. It records proven capabilities, approved operating mode, unapproved capabilities, final expected state, resident-mode blockers, and recommended next phases. Phase 5BB does not approve additional live tasks, automatic adapter start, keepalive, Hermes resident mode, Desktop, credentials, integrations, Agent Bus activity, or `~/.hermes` modification.
 
+Phase 5BC added `scripts/hermes_local_status.sh`, a read-only operator status command. It reports local state without starting services, stopping services, modifying files, launching Desktop, connecting integrations, printing secret values, or broadening authority.
+
 ## Approved Surfaces
 
 Inspect only:
@@ -52,6 +54,7 @@ Inspect only:
 - `config/hermes-pilot.example.env`
 - `scripts/run_model_router_adapter.sh`
 - `scripts/run_hermes_pilot.sh`
+- `scripts/hermes_local_status.sh`
 - `services/model_router_adapter/README.md`
 - `docs/HERMES_PILOT_MODE.md`
 - `docs/HERMES_SECURITY_MODEL.md`
@@ -105,6 +108,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5AZ-R validates one compact context-bearing inbox task through the manual adapter service and leaves the service stopped
 - Phase 5BA documents the safe daily manual local-only operations loop without starting the adapter or Hermes
 - Phase 5BB certifies manual local-only readiness without starting the adapter or Hermes
+- Phase 5BC adds a read-only local status command without starting services or changing runtime state
 
 ## Credential Deferral Boundary
 
@@ -151,8 +155,8 @@ Record:
 
 ## Next Gate
 
-After Phase 5BB, the safest next step is:
+After Phase 5BC, the safest next step is:
 
-- add a read-only local status command for quick operator checks, without starting services, modifying files, enabling resident mode, launching Desktop, using credentials, connecting integrations, or touching Agent Bus.
+- draft a resident Hermes authority model proposal, without starting services, modifying runtime configs, enabling resident mode, launching Desktop, using credentials, connecting integrations, or touching Agent Bus.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.

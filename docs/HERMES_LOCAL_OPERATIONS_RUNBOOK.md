@@ -1,7 +1,7 @@
 # Hermes Local Operations Runbook
 
-Phase: 5BA
-Status: manual local-only operations documented; local-only readiness certified in Phase 5BB
+Phase: 5BA-5BC
+Status: manual local-only operations documented; local-only readiness certified; read-only local status command added
 
 ## Current Approved Mode
 
@@ -30,6 +30,12 @@ Not approved:
 ## Daily Manual Workflow
 
 Use this sequence when a local-only Hermes recommendation is explicitly approved.
+
+0. Check current local state:
+
+```sh
+scripts/hermes_local_status.sh
+```
 
 1. Start the adapter service:
 
@@ -111,6 +117,27 @@ Hermes may not:
 - modify files outside `sandbox/hermes_outbox/`
 
 ## Troubleshooting
+
+### Quick Status Check
+
+Run:
+
+```sh
+scripts/hermes_local_status.sh
+```
+
+The status command is read-only. It does not start or stop services, does not modify files, does not launch Desktop, does not connect integrations, and does not print secret values.
+
+It reports:
+
+- repo path and git clean/dirty state
+- adapter LaunchAgent loaded state
+- `127.0.0.1:8088` listener state
+- local `/health` and `/v1/models` checks only when a listener is present
+- Hermes CLI path and version
+- Hermes, Desktop, and resident-like process presence
+- whether `~/.hermes/config.yaml` points to the localhost adapter, without printing secrets
+- forbidden environment variable names that are currently set, without values
 
 ### Port 8088 Already In Use
 
@@ -199,6 +226,7 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - local outbox artifacts capture stdout, stderr, and metrics
 - service cleanup after local tasks is validated
 - final local-only readiness is certified in `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`
+- read-only local status command exists at `scripts/hermes_local_status.sh`
 
 ## What Is Not Ready
 
@@ -214,4 +242,4 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with a read-only local status command. That phase should give the operator a quick status check without starting services, modifying files, launching Desktop, connecting integrations, or enabling resident mode.
+Proceed with the Phase 6 resident Hermes authority model proposal. That phase should remain proposal-only unless separately approved to change runtime state.

@@ -2,6 +2,14 @@
 
 ## 2026-06-12
 
+- Completed Phase 5BC final cleanup and read-only status command.
+- Added executable `scripts/hermes_local_status.sh`.
+- The status command prints simple terminal-compatible status for repo path, git branch/clean state, adapter LaunchAgent loaded state, local `8088` listener state, local `/health` and `/v1/models` when a listener is present, Hermes CLI path/version, Hermes/Desktop/resident-like process presence, localhost config booleans, and forbidden environment variable names only.
+- The status command does not use sudo, does not start or stop services, does not modify files, does not launch Desktop, does not connect integrations, and does not print secret values.
+- Documented `scripts/hermes_local_status.sh` in `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md` and `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`.
+- Added tests confirming the status script contains no sudo, does not start services, checks localhost adapter config, warns on Desktop/resident-like processes, and avoids printing secret values.
+- Updated the master PRD with the Phase 5BC result and next recommended Phase 6A resident authority model proposal.
+- Confirmed Phase 5BC did not set `RunAtLoad=true`, set `KeepAlive=true`, create Hermes resident mode, create a Hermes launchd service, leave adapter service running, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 5BB final local-only readiness certification.
 - Added `docs/HERMES_LOCAL_ONLY_READY_REPORT.md` certifying Hermes for manual local-only use only.
 - Documented proven capabilities: persistent localhost config, manual adapter start/stop, localhost-only binding, DevMonster Gemma4 through adapter, useful bounded prompt output, local inbox/outbox workflow, context-bearing task builder, compact task remediation, and passing tests.

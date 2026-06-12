@@ -345,3 +345,13 @@ The report also records the expected final state: LaunchAgent installed but stop
 Phase 5BB did not start the adapter service, run Hermes live, launch Desktop, use credentials, connect integrations, perform Agent Bus reads/writes, modify `~/.hermes`, enable RunAtLoad, enable KeepAlive, create resident mode, or broaden authority.
 
 Readiness position: the manual local-only milestone is certified. The next step may add a read-only local status command for operator checks without starting services or widening authority.
+
+## Phase 5BC Local Status Command Result
+
+Phase 5BC added `scripts/hermes_local_status.sh`.
+
+The status command is read-only. It reports repo state, adapter LaunchAgent state, local listener state, local `/health` and `/v1/models` only when a listener is present, Hermes CLI path/version, Hermes/Desktop/resident-like process presence, localhost config booleans, and forbidden environment variable names without values.
+
+The command does not start or stop services, modify files, launch Desktop, connect integrations, print secret values, create launchd files, or broaden authority.
+
+Readiness position: the local-only milestone now has an operator status check. The next phase should be a proposal-only resident Hermes authority model, not runtime enablement.
