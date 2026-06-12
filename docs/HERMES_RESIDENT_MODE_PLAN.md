@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
 Phase: 5AO-6A
-Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority model proposed
+Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority and audit models proposed
 
 ## Purpose
 
@@ -20,6 +20,8 @@ Phase 5AS created the wrapper and a self-contained adapter runtime outside `Docu
 Phase 5AT defines manual adapter service operation with helper scripts and a runbook. The validated policy is manual start/stop only; `RunAtLoad=false`, `KeepAlive=false`, and Hermes resident/autonomous mode remain unchanged.
 
 Phase 6A adds `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md` as the proposal-only authority model for future resident Hermes. It defines authority tiers 0 through 7, human approval rules, audit log requirements, emergency stop requirements, file zones, command allowlist/denylist concepts, credential handling, network access, service management, Hermes-to-Helio boundaries, Hermes-to-DevMonster boundaries, Desktop fail-closed rules, and minimum acceptance criteria before resident mode. It does not enable resident mode.
+
+Phase 6B adds `docs/HERMES_AUDIT_LOG_DESIGN.md` as the proposal-only audit model. It defines event categories, required fields, local JSONL storage under `logs/hermes_audit/`, redaction rules, approval logging, fail-closed logging, rollback logging, audit views, and resident-mode acceptance criteria. It does not implement audit writes or create runtime state.
 
 ## Proposed Resident Architecture
 
@@ -272,3 +274,11 @@ Phase 6A adds `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md` as the proposal-only aut
 The proposal defines tiers from observe-only through resident delegated operator, plus human approval rules, audit logs, emergency stop, allowed and forbidden file zones, command allowlist/denylist concepts, credential handling, network access, service management, Hermes-to-Helio delegation, Hermes-to-DevMonster inference boundaries, Desktop fail-closed behavior, and minimum acceptance criteria before resident mode.
 
 No resident runtime was enabled. `RunAtLoad=false`, `KeepAlive=false`, adapter manual start/stop only, Hermes manually invoked only, Desktop fail-closed, and credentialed integrations frozen remain the active policy.
+
+## Phase 6B Audit Log Design Result
+
+Phase 6B added `docs/HERMES_AUDIT_LOG_DESIGN.md` as the proposal-only audit model required before resident or execution capability.
+
+The design requires metadata-first local JSONL audit logs, no secret values, prompt/file content redaction by default, approval events, fail-closed events, rollback events, emergency stop events, daily and phase rollups, and local storage under `logs/hermes_audit/`.
+
+No audit directory was created, no audit writer was implemented, no service was started, and resident mode remains disabled.

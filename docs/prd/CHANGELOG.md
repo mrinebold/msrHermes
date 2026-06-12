@@ -2,6 +2,12 @@
 
 ## 2026-06-12
 
+- Completed Phase 6B Hermes audit log design.
+- Added `docs/HERMES_AUDIT_LOG_DESIGN.md`.
+- Defined audit principles, event categories, required event fields, local append-only JSONL storage under `logs/hermes_audit/`, rotation/retention policy, redaction rules, approval logging, fail-closed logging, rollback logging, human/raw/daily/phase audit views, and acceptance criteria before resident mode.
+- Added tests confirming the audit design exists, says no secrets, includes approval events, includes `emergency_stop`, includes `fail_closed`, and keeps logs local by default with no cloud sync or external writes.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, and the master PRD with the Phase 6B result.
+- Confirmed Phase 6B did not implement audit writes, create audit directories, enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6A resident Hermes authority model proposal.
 - Added `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`.
 - Defined authority tiers 0 through 7: observe only, recommend, draft, local approved execution, external read-only, external draft/propose, external approved action, and resident delegated operator.

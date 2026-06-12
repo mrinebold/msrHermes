@@ -376,3 +376,15 @@ It also defines human approval rules, audit log requirements, emergency stop req
 Phase 6A did not enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden Hermes authority in code.
 
 Readiness position: resident authority is now defined as a tiered proposal. The next safe phase is audit log design for Hermes actions, still proposal-only unless separately approved.
+
+## Phase 6B Audit Log Design Result
+
+Phase 6B created `docs/HERMES_AUDIT_LOG_DESIGN.md`.
+
+The design defines audit principles, event categories, required event fields, local append-only JSONL storage under `logs/hermes_audit/`, rotation and retention policy, redaction rules, approval logging, fail-closed logging, rollback logging, and human/raw/daily/phase audit views.
+
+The design explicitly requires no secrets in logs, prompt/file contents redacted by default, metadata-first logging, local storage by default, no cloud sync by default, no external writes, emergency_stop events, approval events, and fail_closed events.
+
+Phase 6B did not create audit directories, implement audit writes, enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden authority.
+
+Readiness position: audit logging is designed but not implemented. The next safe phase is emergency stop design, still proposal-only.

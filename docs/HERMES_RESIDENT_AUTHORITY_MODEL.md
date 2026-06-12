@@ -1,7 +1,7 @@
 # Hermes Resident Authority Model
 
 Phase: 6A
-Status: proposal only; resident mode not enabled yet
+Status: proposal only; resident mode not enabled yet; audit model proposed in Phase 6B
 
 ## Purpose
 
@@ -163,6 +163,8 @@ Not allowed:
 ## Audit Log Requirements
 
 Audit logs must exist before any Tier 3 or higher authority is enabled.
+
+Phase 6B defines the proposed audit log model in `docs/HERMES_AUDIT_LOG_DESIGN.md`.
 
 Minimum fields:
 
@@ -360,4 +362,4 @@ Before enabling resident Hermes:
 
 ## Proposal Conclusion
 
-Hermes may become a resident personal agent only through staged, audited, tiered authority. The next safe phase is audit log design for Hermes actions. Runtime resident mode remains disabled.
+Hermes may become a resident personal agent only through staged, audited, tiered authority. Phase 6B proposed the audit log model; the next safe phase is emergency stop design. Runtime resident mode remains disabled.

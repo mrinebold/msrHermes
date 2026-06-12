@@ -1,7 +1,7 @@
 # Hermes Local-Only Ready Report
 
 Phase: 5BB-6A
-Status: certified for manual local-only use; read-only status command added; resident authority model proposed; not certified for resident or integrated operation
+Status: certified for manual local-only use; read-only status command added; resident authority and audit models proposed; not certified for resident or integrated operation
 
 ## Certification
 
@@ -116,8 +116,9 @@ scripts/hermes_local_status.sh
 
 - Approve and implement the resident authority model proposed in `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`.
 - Decide resident authority model implementation and approval path.
+- Implement the audit log design proposed in `docs/HERMES_AUDIT_LOG_DESIGN.md`.
+- Define audit log storage implementation and retention policy.
 - Decide `RunAtLoad` and `KeepAlive` policy.
-- Define audit log storage for Hermes actions.
 - Decide credential rotation.
 - Define Google, Supabase, and Home Assistant phased integration plans.
 - Decide Desktop fate after Nous Research clarification.
@@ -126,11 +127,11 @@ scripts/hermes_local_status.sh
 
 ## Recommended Next 5 Phases
 
-- Phase 6B: audit log design for Hermes actions.
-- Phase 6C: read-only Google plan refresh.
-- Phase 6D: Agent Bus credential rotation decision.
+- Phase 6C: emergency stop design.
+- Phase 6D: resident service proposal.
 - Phase 6E: Helio delegation interface proposal.
 - Phase 6F: command allowlist and denylist proposal.
+- Phase 6G: audit log implementation proposal.
 
 ## Final Boundary
 

@@ -18,6 +18,7 @@ READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
+AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -692,6 +693,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             PERSISTENT_CONFIG_PLAN,
             RESIDENT_MODE_PLAN,
             RESIDENT_AUTHORITY_MODEL,
+            AUDIT_LOG_DESIGN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -864,6 +866,31 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("DevMonster provides model inference through Gemma", content)
         self.assertIn("DevMonster is not an operator", content)
         self.assertIn("Hermes may use DevMonster for local reasoning only", content)
+
+    def test_audit_log_design_has_required_events_and_local_storage(self):
+        content = AUDIT_LOG_DESIGN.read_text(encoding="utf-8")
+
+        self.assertIn("no secrets in logs", content)
+        self.assertIn("prompt/file contents redacted by default", content)
+        self.assertIn("metadata-first logging", content)
+        self.assertIn("approval_requested", content)
+        self.assertIn("approval_granted", content)
+        self.assertIn("approval_denied", content)
+        self.assertIn("emergency_stop", content)
+        self.assertIn("fail_closed", content)
+        self.assertIn("logs/hermes_audit/", content)
+        self.assertIn("no cloud sync by default", content)
+        self.assertIn("no external writes", content)
+
+    def test_audit_log_design_is_proposal_only(self):
+        content = AUDIT_LOG_DESIGN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("proposal only; audit logging not implemented yet", content)
+        self.assertIn("Phase 6B does not approve", content)
+        self.assertIn("no secret values", content)
+        self.assertNotIn("resident hermes is enabled", lower_content)
+        self.assertNotIn("audit writes are implemented", lower_content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
