@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6V Hermes audit and approval CLI helper implementation.
+- Added `scripts/hermes_audit_event.py` for harmless local audit visibility events. It allows only `observe`, `recommend`, `dry_run`, `fail_closed`, and `emergency_stop` action types and refuses executed-command, external-write, and resident-start events.
+- Added `scripts/hermes_approval_request.py` for requested-only local approval visibility records. It creates `requested` records only, never grants approvals, and never executes actions.
+- Added tests confirming helper-created local audit events, refusal of unsafe audit event types, requested-only approval record creation, lack of grant option, no command execution, no secret-looking output, and local status visibility for latest temp audit/approval records.
+- Updated `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_APPROVAL_RECORD_MODEL.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, and the master PRD with the Phase 6V result.
+- Confirmed Phase 6V did not grant approvals, execute commands through Hermes, create a command executor, enable resident mode, create a Hermes launchd service, start or stop services, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6U Hermes local safety status refinement.
 - Updated `scripts/hermes_local_status.sh` to report audit file counts, latest audit timestamp/action/status/risk level, approval file counts, latest approval status/action/expiration, count of currently valid approvals where practical, freeze reason existence and first safe redacted line, emergency stop script presence, policy check script presence, dry-run resident loop presence, `command_execution_enabled=no`, and `resident_mode_enabled=no`.
 - Added tests confirming the richer audit, approval, freeze, and policy summaries; read-only behavior; disabled command execution and resident mode; and absence of secret-looking values in status output.

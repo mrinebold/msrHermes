@@ -1,13 +1,21 @@
 # Hermes Audit Log Design
 
 Phase: 6B
-Status: local audit writer primitive implemented in Phase 6M; emergency stop design proposed in Phase 6C
+Status: local audit writer primitive implemented in Phase 6M; audit visibility helper implemented in Phase 6V; emergency stop design proposed in Phase 6C
 
 ## Purpose
 
 This document designs the audit log model Hermes must use before any resident, local execution, external connector, or delegated operator capability is enabled.
 
 Phase 6B is documentation only. It does not create audit directories, start services, run Hermes, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
+
+Phase 6V adds `scripts/hermes_audit_event.py` as a local visibility helper. It may create harmless audit events for `observe`, `recommend`, `dry_run`, `fail_closed`, and `emergency_stop` only. It refuses executed-command, external-write, and resident-start audit events. The helper does not execute commands, grant approval, start services, run Hermes live, connect integrations, or authorize any action.
+
+Example:
+
+```sh
+python3 scripts/hermes_audit_event.py --action-type dry_run --status ok --summary "Test audit visibility" --phase 6V
+```
 
 ## Audit Principles
 

@@ -1,13 +1,21 @@
 # Hermes Approval Record Model
 
 Phase: 6H
-Status: local approval record primitive implemented in Phase 6N; execution remains disabled
+Status: local approval record primitive implemented in Phase 6N; requested-only visibility helper implemented in Phase 6V; execution remains disabled
 
 ## Purpose
 
 This document defines the approval record Hermes must require before any future execution, write, send, commit, service start, or external action.
 
 Phase 6H is documentation only. It does not implement approval storage, enable command execution, enable resident mode, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
+
+Phase 6V adds `scripts/hermes_approval_request.py` as a local requested-only visibility helper. It creates `requested` approval records only, never `granted` records, and never executes the requested action. The helper exists to test status visibility and approval log plumbing, not to authorize execution.
+
+Example:
+
+```sh
+python3 scripts/hermes_approval_request.py --action-type service_start --target adapter --scope manual-test --summary "Test approval visibility" --risk-level low --expires-minutes 15
+```
 
 Approval records exist to ensure:
 

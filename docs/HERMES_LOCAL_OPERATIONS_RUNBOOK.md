@@ -280,6 +280,22 @@ python3 scripts/hermes_policy_check.py --path docs/HERMES_LOCAL_OPERATIONS_RUNBO
 
 Exit code `0` means allowed read-only or green/yellow path classification, `2` means approval required, and `3` means denied or unknown. This command does not authorize execution; it is dry-run classification only.
 
+## Audit And Approval Visibility Helpers
+
+Create a harmless audit visibility event:
+
+```sh
+python3 scripts/hermes_audit_event.py --action-type dry_run --status ok --summary "Test audit visibility" --phase 6V
+```
+
+Create a requested-only approval visibility record:
+
+```sh
+python3 scripts/hermes_approval_request.py --action-type service_start --target adapter --scope manual-test --summary "Test approval visibility" --risk-level low --expires-minutes 15
+```
+
+These helpers are for local visibility testing only. The audit helper refuses executed-command, external-write, and resident-start events. The approval helper creates `requested` records only and cannot grant approval or execute any action.
+
 ## Dry-Run Resident Loop
 
 The dry-run loop is a one-shot local check, not resident mode:

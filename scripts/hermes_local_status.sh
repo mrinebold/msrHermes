@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 
-REPO_PATH="/Users/michaelrinebold/Documents/Helio/helio-command-center"
+REPO_PATH="${HERMES_REPO_ROOT:-/Users/michaelrinebold/Documents/Helio/helio-command-center}"
 LABEL="com.msr.hermes.model-router-adapter"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 DOMAIN="gui/$(id -u)"

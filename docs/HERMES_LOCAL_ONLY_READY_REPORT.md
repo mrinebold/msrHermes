@@ -24,6 +24,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - Phase 6Q extends the local status command to report safety module importability, audit log state, approval log state, freeze flag state, command execution disabled, and resident mode disabled without creating files or starting services.
 - Phase 6R adds a no-sudo emergency stop script that can create a local freeze flag, write reason metadata, stop the approved adapter service only if already running, and emit a metadata-only audit event.
 - Phase 6U refines the local status command to show audit file counts, latest audit risk level, approval file counts, latest approval action/expiration, valid approval count, freeze reason visibility, and emergency/policy/dry-run script presence while remaining read-only.
+- Phase 6V adds local audit and approval visibility helpers that can create harmless audit events and requested-only approval records for status testing. They do not grant approval or execute actions.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
