@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6L Hermes emergency stop and dry-run resident loop implementation plan.
+- Added `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`.
+- Planned future scripts `scripts/hermes_emergency_stop.sh` and `scripts/hermes_resident_dry_run.sh` without creating them.
+- Defined no-sudo/no-deletion emergency stop behavior, adapter stop behavior if running, Hermes/Desktop/resident-like process detection, future audit event writing, repeated-safe behavior, freeze flag proposal at `sandbox/hermes_control/FROZEN`, dry-run-only inbox scanning, outbox-only proposed action writing, and implementation prerequisites.
+- Added tests confirming the plan exists, says no sudo, says no deletion, says freeze flag, says dry-run only, says no resident mode enabled, and says no external integrations.
+- Updated `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, and the master PRD with the Phase 6L result.
+- Confirmed Phase 6L did not create emergency stop scripts, create dry-run resident scripts, create freeze flags, implement safety modules, create a command executor, execute commands through Hermes, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6K Hermes file-zone and command-policy implementation plan.
 - Added `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
 - Defined future modules `services/hermes_safety/file_zones.py`, `services/hermes_safety/command_policy.py`, and `services/hermes_safety/policy_result.py`.

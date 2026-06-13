@@ -242,6 +242,6 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with Phase 6H, human approval record model. That phase should remain proposal-only unless separately approved to change runtime state.
+Proceed with Phase 6M, the first implementation phase for local audit/approval primitives, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
 
-After Phase 6G, file access for future resident Hermes is governed by `docs/HERMES_FILE_ZONE_POLICY.md`. Daily manual local-only use remains unchanged.
+After Phase 6L, emergency stop and dry-run resident loop implementation is planned in `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`. The emergency stop script, dry-run resident loop, freeze flag, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.

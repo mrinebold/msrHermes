@@ -28,6 +28,7 @@ APPROVAL_RECORD_MODEL = REPO_ROOT / "docs" / "HERMES_APPROVAL_RECORD_MODEL.md"
 SAFETY_IMPLEMENTATION_ROADMAP = REPO_ROOT / "docs" / "HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md"
 AUDIT_APPROVAL_IMPLEMENTATION_PLAN = REPO_ROOT / "docs" / "HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md"
 POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN = REPO_ROOT / "docs" / "HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md"
+EMERGENCY_STOP_AND_DRY_RUN_PLAN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -712,6 +713,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             SAFETY_IMPLEMENTATION_ROADMAP,
             AUDIT_APPROVAL_IMPLEMENTATION_PLAN,
             POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN,
+            EMERGENCY_STOP_AND_DRY_RUN_PLAN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1142,6 +1144,29 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("refuse secret-like files and paths by default", content)
         self.assertIn("approval lookup", content)
         self.assertIn("audit log", content)
+
+    def test_emergency_stop_and_dry_run_plan_defines_safe_stop_and_freeze(self):
+        content = EMERGENCY_STOP_AND_DRY_RUN_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("scripts/hermes_emergency_stop.sh", content)
+        self.assertIn("scripts/hermes_resident_dry_run.sh", content)
+        self.assertIn("no sudo", content)
+        self.assertIn("no deletion", content)
+        self.assertIn("stop adapter service if running", content)
+        self.assertIn("sandbox/hermes_control/FROZEN", content)
+        self.assertIn("safe to run repeatedly", content)
+
+    def test_emergency_stop_and_dry_run_plan_remains_planning_only(self):
+        content = EMERGENCY_STOP_AND_DRY_RUN_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: implementation plan only", content)
+        self.assertIn("no command execution", content)
+        self.assertIn("no external integrations", content)
+        self.assertIn("scan only `sandbox/hermes_inbox/`", content)
+        self.assertIn("write only proposed actions to `sandbox/hermes_outbox/`", content)
+        self.assertIn("resident mode remains disabled", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

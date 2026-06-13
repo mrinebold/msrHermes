@@ -412,3 +412,5 @@ Implementation must proceed in order: audit, approval, file-zone, command-policy
 Phase 6J adds `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`, which expands Stage 1 and Stage 2 into a concrete future implementation plan. Phase 6J remains planning-only and does not implement safety modules, create log directories, start services, run Hermes live, or enable resident mode.
 
 Phase 6K adds `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, which expands Stage 3 and Stage 4 into a classifier-only implementation plan. Phase 6K remains planning-only and does not implement file-zone enforcement, command-policy enforcement, command execution, service control, or resident mode.
+
+Phase 6L adds `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`, which expands Stage 5 and Stage 6 into a future implementation plan. Phase 6L remains planning-only and does not create emergency stop scripts, dry-run resident scripts, freeze flags, services, live Hermes runs, command execution, or resident mode.

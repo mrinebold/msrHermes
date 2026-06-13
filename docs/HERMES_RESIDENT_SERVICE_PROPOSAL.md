@@ -181,6 +181,14 @@ Phase 6D does not approve:
 - Agent Bus reads or writes
 - `~/.hermes` modification
 
+## Phase 6L Emergency Stop And Dry-Run Plan
+
+Phase 6L adds `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`.
+
+The plan proposes future scripts `scripts/hermes_emergency_stop.sh` and `scripts/hermes_resident_dry_run.sh`, a freeze flag at `sandbox/hermes_control/FROZEN`, dry-run-only inbox scanning, outbox-only proposed action writing, adapter status checks only, and audit metadata after audit writer implementation.
+
+Phase 6L does not create `scripts/hermes_resident_dry_run.sh`, create `scripts/hermes_emergency_stop.sh`, create freeze flags, create a resident LaunchAgent, start services, run Hermes live, execute commands, connect integrations, use credentials, launch Desktop, modify `~/.hermes`, or enable resident mode.
+
 ## Proposal Conclusion
 
-Hermes resident service design is viable only after audit logging and emergency stop are implemented and tested. The next safe phase is Hermes-to-Helio delegation interface design.
+Hermes resident service design is viable only after audit logging and emergency stop are implemented and tested. Phase 6L plans the future emergency stop and dry-run loop implementation, but resident mode and resident service scripts remain unimplemented.

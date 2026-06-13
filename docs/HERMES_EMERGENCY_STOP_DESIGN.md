@@ -198,6 +198,14 @@ Phase 6C does not approve:
 - deleting files
 - modifying `~/.hermes`
 
+## Phase 6L Implementation Plan
+
+Phase 6L adds `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`.
+
+The plan proposes future scripts `scripts/hermes_emergency_stop.sh` and `scripts/hermes_resident_dry_run.sh`, no-sudo/no-deletion emergency stop behavior, adapter stop behavior, process detection, audit event writing after audit implementation, a freeze flag at `sandbox/hermes_control/FROZEN`, repeated-safe behavior, and dry-run resident loop behavior.
+
+Phase 6L does not create the emergency stop script, create the dry-run loop script, create freeze flags, stop or start services, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
+
 ## Proposal Conclusion
 
-Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation.
+Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation. Phase 6L plans the future emergency stop and dry-run loop implementation, but no script is implemented yet.
