@@ -312,3 +312,13 @@ Phase 6E added `docs/HERMES_HELIO_DELEGATION_INTERFACE.md` as the proposal-only 
 The proposal preserves the boundary that Hermes owns the Mac mini local operator role, Helio/ANO owns agent society/governance, DevMonster supplies inference only, and Agent Bus remains frozen until approved. It defines delegation types, a future message shape, staged rollout, and acceptance criteria before any Helio or Agent Bus integration.
 
 No Helio connector was enabled, no Supabase or Agent Bus read/write occurred, no credential was used, and resident mode remains disabled.
+
+## Phase 6X Resident Validation Gate Result
+
+Phase 6X adds `docs/HERMES_RESIDENT_VALIDATION_GATE.md`.
+
+The gate defines preconditions for a future manual resident dry-run validation: audit helper works, approval helper works, file-zone classifier works, command-policy classifier works, emergency stop works, dry-run resident loop works, status command reports safety state, freeze flag is absent or intentionally cleared, adapter service is stopped, no Desktop is running, and external integrations remain frozen.
+
+The proposed next validation is dry-run only: run `scripts/hermes_resident_dry_run.sh` once, write proposal outputs, write audit metadata, and check status before and after. Hermes live run, adapter start, command execution, external integration, and Desktop launch remain blocked.
+
+The future LaunchAgent proposal remains `com.msr.hermes.resident` with `RunAtLoad=false`, `KeepAlive=false`, manual start only, dry-run loop only at first, emergency stop compatibility, and human approval required before any plist creation.

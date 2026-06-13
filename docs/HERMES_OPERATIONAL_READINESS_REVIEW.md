@@ -528,3 +528,11 @@ Observed result:
 - Hermes Desktop, Hermes task, and resident-like processes remained absent
 
 Final phase state: the two Phase 6W-created freeze files were cleared after validation so Phase 6X can define a resident validation gate from an unfrozen baseline. Emergency stop remains available and validated. Resident mode and command execution remain disabled.
+
+## Phase 6X Resident Validation Gate Result
+
+Phase 6X created `docs/HERMES_RESIDENT_VALIDATION_GATE.md`.
+
+The gate defines the preconditions, proposed one-shot dry-run validation, future manual-start LaunchAgent proposal, non-goals, and acceptance criteria for a later Phase 6Y. It explicitly keeps resident mode disabled, `RunAtLoad=false`, `KeepAlive=false`, no command execution, no external integrations, no Desktop launch, and human approval required before any resident plist creation.
+
+Readiness position: Hermes is ready for a future resident dry-run validation proposal only. Actual resident operation, command execution, adapter auto-start, external integrations, and Desktop launch remain blocked.

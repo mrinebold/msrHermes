@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6X Hermes resident validation gate proposal.
+- Added `docs/HERMES_RESIDENT_VALIDATION_GATE.md`.
+- Defined preconditions for a future manual resident dry-run validation, the proposed one-shot dry-run validation sequence, a future `com.msr.hermes.resident` LaunchAgent proposal with `RunAtLoad=false` and `KeepAlive=false`, explicit non-goals, and Phase 6Y acceptance criteria.
+- Added tests confirming the validation gate exists, keeps resident mode disabled, keeps `RunAtLoad=false`, keeps `KeepAlive=false`, remains dry-run only, is emergency-stop compatible, and requires human approval.
+- Updated `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, and the master PRD with the Phase 6X result.
+- Confirmed Phase 6X did not enable resident mode, create a Hermes launchd service, create a command executor, execute commands through Hermes, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6W Hermes emergency stop freeze validation.
 - Ran `scripts/hermes_emergency_stop.sh "Phase 6W validation"` and confirmed it created `sandbox/hermes_control/FROZEN`, created `sandbox/hermes_control/FROZEN.reason`, wrote a metadata-only audit event, and reported no adapter listener, no loaded adapter LaunchAgent, no Hermes Desktop process, no Hermes task process, and no resident-like process.
 - Confirmed `scripts/hermes_local_status.sh` reported `freeze_flag_exists=yes`, `freeze_reason_exists=yes`, and latest audit action `emergency_stop`.

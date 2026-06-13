@@ -25,6 +25,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - Phase 6R adds a no-sudo emergency stop script that can create a local freeze flag, write reason metadata, stop the approved adapter service only if already running, and emit a metadata-only audit event.
 - Phase 6U refines the local status command to show audit file counts, latest audit risk level, approval file counts, latest approval action/expiration, valid approval count, freeze reason visibility, and emergency/policy/dry-run script presence while remaining read-only.
 - Phase 6V adds local audit and approval visibility helpers that can create harmless audit events and requested-only approval records for status testing. They do not grant approval or execute actions.
+- Phase 6X defines the resident validation gate for a future manual dry-run LaunchAgent validation. It does not enable resident mode or command execution.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
@@ -134,6 +135,7 @@ scripts/hermes_local_status.sh
 - Decide Desktop fate after Nous Research clarification.
 - Define Hermes-to-Helio delegation boundary.
 - Define approved shell/file-operation gate.
+- Complete an explicitly approved resident dry-run validation gate before any resident LaunchAgent or service install.
 
 ## Recommended Next 5 Phases
 

@@ -18,6 +18,7 @@ READINESS_DOC = REPO_ROOT / "docs" / "HERMES_OPERATIONAL_READINESS_REVIEW.md"
 PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PLAN.md"
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
+RESIDENT_VALIDATION_GATE = REPO_ROOT / "docs" / "HERMES_RESIDENT_VALIDATION_GATE.md"
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
@@ -708,6 +709,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             PERSISTENT_CONFIG_PLAN,
             RESIDENT_MODE_PLAN,
             RESIDENT_AUTHORITY_MODEL,
+            RESIDENT_VALIDATION_GATE,
             AUDIT_LOG_DESIGN,
             EMERGENCY_STOP_DESIGN,
             RESIDENT_SERVICE_PROPOSAL,
@@ -1094,6 +1096,20 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Allowed File Zones", content)
         self.assertIn("Forbidden Zones", content)
         self.assertIn("logs/hermes_audit/", content)
+
+    def test_resident_validation_gate_is_proposal_only_and_dry_run(self):
+        content = RESIDENT_VALIDATION_GATE.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: proposal only; resident mode is not enabled", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("dry-run loop runs once and exits", content)
+        self.assertIn("no command execution", content)
+        self.assertIn("emergency stop compatible", content)
+        self.assertIn("human approval required", content)
+        self.assertIn("Do not create this plist in Phase 6X", content)
+        self.assertNotIn("resident mode is enabled.", lower_content)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

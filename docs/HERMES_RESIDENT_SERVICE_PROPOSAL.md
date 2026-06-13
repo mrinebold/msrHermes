@@ -202,3 +202,11 @@ Phase 6L does not create `scripts/hermes_resident_dry_run.sh`, create `scripts/h
 ## Proposal Conclusion
 
 Hermes resident service design is viable only after audit logging and emergency stop are implemented and tested. Phase 6L plans the future emergency stop and dry-run loop implementation, but resident mode and resident service scripts remain unimplemented.
+
+## Phase 6X Resident Validation Gate
+
+Phase 6X adds `docs/HERMES_RESIDENT_VALIDATION_GATE.md` as the final proposal before any future resident dry-run LaunchAgent validation.
+
+The gate requires audit helper, approval helper, file-zone classifier, command-policy classifier, emergency stop, dry-run resident loop, and status visibility to work first. The proposed future resident LaunchAgent remains manual-start only with `RunAtLoad=false`, `KeepAlive=false`, dry-run loop only, no command execution, no live Hermes run unless separately approved, no external integrations, and emergency stop compatibility.
+
+Phase 6X does not create a plist, create a Hermes launchd service, start services, run Hermes live, execute commands, or enable resident mode.
