@@ -139,9 +139,11 @@ It reports:
 - whether `~/.hermes/config.yaml` points to the localhost adapter, without printing secrets
 - forbidden environment variable names that are currently set, without values
 - whether Hermes safety modules are importable
-- audit log directory state and latest audit timestamp/action/status if initialized
-- approval log directory state and latest approval timestamp/status if initialized
+- audit log directory state, file count, latest audit timestamp/action/status/risk level if initialized
+- approval log directory state, file count, latest approval timestamp/status/action/expiration, and valid approval count if initialized
 - freeze flag path and existence at `sandbox/hermes_control/FROZEN`
+- freeze reason existence and first safe redacted line when present
+- emergency stop, policy check, and dry-run resident loop script presence
 - `command_execution_enabled=no`
 - `resident_mode_enabled=no`
 
@@ -243,7 +245,7 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - service cleanup after local tasks is validated
 - final local-only readiness is certified in `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`
 - read-only local status command exists at `scripts/hermes_local_status.sh`
-- status command reports safety module, audit log, approval log, freeze flag, command execution, and resident mode state without writes
+- status command reports safety module, audit log, approval log, freeze flag/reason, policy script, dry-run loop, command execution, and resident mode state without writes
 - dry-run policy checks can classify proposed commands and file operations with `scripts/hermes_policy_check.py`
 - dry-run resident loop can inspect inbox task names and write redacted proposal files with `scripts/hermes_resident_dry_run.sh`
 

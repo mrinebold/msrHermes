@@ -11,6 +11,10 @@ HERMES_BIN="${HERMES_BIN:-$HOME/.local/bin/hermes}"
 AUDIT_DIR="$REPO_PATH/logs/hermes_audit"
 APPROVAL_DIR="$REPO_PATH/logs/hermes_approvals"
 FREEZE_FLAG="$REPO_PATH/sandbox/hermes_control/FROZEN"
+FREEZE_REASON="$REPO_PATH/sandbox/hermes_control/FROZEN.reason"
+EMERGENCY_STOP_SCRIPT="$REPO_PATH/scripts/hermes_emergency_stop.sh"
+POLICY_CHECK_SCRIPT="$REPO_PATH/scripts/hermes_policy_check.py"
+DRY_RUN_RESIDENT_SCRIPT="$REPO_PATH/scripts/hermes_resident_dry_run.sh"
 FORBIDDEN_ENV_VARS=(
   OPENAI_API_KEY
   ANTHROPIC_API_KEY
@@ -31,6 +35,10 @@ print_kv() {
   printf '%s=%s\n' "$1" "$2"
 }
 
+safe_line() {
+  printf '%s' "$1" | sed -E 's/(sk-[A-Za-z0-9_-]{4,}|g[h]p_[A-Za-z0-9_]{4,}|github[_]pat_[A-Za-z0-9_]{4,}|Bearer[[:space:]]+[A-Za-z0-9._-]{4,})/[REDACTED]/g'
+}
+
 has_command() {
   command -v "$1" >/dev/null 2>&1
 }
@@ -40,10 +48,16 @@ print_latest_jsonl_summary() {
   local dir="$2"
   if [[ ! -d "$dir" ]]; then
     print_kv "${kind}_log_dir_exists" "no"
+    print_kv "${kind}_log_file_count" "0"
     print_kv "latest_${kind}_timestamp" "not_initialized"
     print_kv "latest_${kind}_status" "not_initialized"
     if [[ "$kind" == "audit" ]]; then
       print_kv "latest_audit_action" "not_initialized"
+      print_kv "latest_audit_risk_level" "not_initialized"
+    else
+      print_kv "latest_approval_action" "not_initialized"
+      print_kv "latest_approval_expiration" "not_initialized"
+      print_kv "valid_approval_count" "0"
     fi
     return 0
   fi
@@ -58,21 +72,42 @@ from pathlib import Path
 kind = sys.argv[1]
 directory = Path(sys.argv[2])
 files = sorted(directory.glob("*.jsonl"))
+print(f"{kind}_log_file_count={len(files)}")
 if not files:
     print(f"latest_{kind}_timestamp=no_events")
     print(f"latest_{kind}_status=no_events")
     if kind == "audit":
         print("latest_audit_action=no_events")
+        print("latest_audit_risk_level=no_events")
+    else:
+        print("latest_approval_action=no_events")
+        print("latest_approval_expiration=no_events")
+        print("valid_approval_count=0")
     raise SystemExit(0)
 
 latest = None
+valid_approvals = 0
 for path in files:
     try:
         with path.open("r", encoding="utf-8") as handle:
             for line in handle:
                 stripped = line.strip()
                 if stripped:
-                    latest = json.loads(stripped)
+                    record = json.loads(stripped)
+                    latest = record
+                    if kind == "approval" and record.get("status") == "granted":
+                        try:
+                            expiration = record.get("expiration")
+                            if expiration:
+                                from datetime import datetime, timezone
+
+                                parsed = datetime.fromisoformat(str(expiration).replace("Z", "+00:00"))
+                                if parsed.tzinfo is None:
+                                    parsed = parsed.replace(tzinfo=timezone.utc)
+                                if datetime.now(timezone.utc) < parsed.astimezone(timezone.utc):
+                                    valid_approvals += 1
+                        except (TypeError, ValueError):
+                            pass
     except (OSError, json.JSONDecodeError):
         continue
 
@@ -81,22 +116,37 @@ if not isinstance(latest, dict):
     print(f"latest_{kind}_status=unreadable")
     if kind == "audit":
         print("latest_audit_action=unreadable")
+        print("latest_audit_risk_level=unreadable")
+    else:
+        print("latest_approval_action=unreadable")
+        print("latest_approval_expiration=unreadable")
+        print("valid_approval_count=0")
     raise SystemExit(0)
 
 if kind == "audit":
     print(f"latest_audit_timestamp={latest.get('timestamp', 'unknown')}")
     print(f"latest_audit_action={latest.get('action_type', 'unknown')}")
     print(f"latest_audit_status={latest.get('status', 'unknown')}")
+    print(f"latest_audit_risk_level={latest.get('risk_level', 'unknown')}")
 else:
     timestamp = latest.get("timestamp_granted") or latest.get("timestamp_requested") or "unknown"
     print(f"latest_approval_timestamp={timestamp}")
     print(f"latest_approval_status={latest.get('status', 'unknown')}")
+    print(f"latest_approval_action={latest.get('action_type', 'unknown')}")
+    print(f"latest_approval_expiration={latest.get('expiration', 'unknown')}")
+    print(f"valid_approval_count={valid_approvals}")
 PY
   else
+    print_kv "${kind}_log_file_count" "python3_unavailable"
     print_kv "latest_${kind}_timestamp" "python3_unavailable"
     print_kv "latest_${kind}_status" "python3_unavailable"
     if [[ "$kind" == "audit" ]]; then
       print_kv "latest_audit_action" "python3_unavailable"
+      print_kv "latest_audit_risk_level" "python3_unavailable"
+    else
+      print_kv "latest_approval_action" "python3_unavailable"
+      print_kv "latest_approval_expiration" "python3_unavailable"
+      print_kv "valid_approval_count" "python3_unavailable"
     fi
   fi
 }
@@ -270,6 +320,29 @@ if [[ -f "$FREEZE_FLAG" ]]; then
   print_kv "freeze_flag_exists" "yes"
 else
   print_kv "freeze_flag_exists" "no"
+fi
+if [[ -f "$FREEZE_REASON" ]]; then
+  print_kv "freeze_reason_exists" "yes"
+  first_reason_line="$(head -n 1 "$FREEZE_REASON" 2>/dev/null || true)"
+  print_kv "freeze_reason_first_line" "$(safe_line "${first_reason_line:-empty}")"
+else
+  print_kv "freeze_reason_exists" "no"
+  print_kv "freeze_reason_first_line" "not_initialized"
+fi
+if [[ -x "$EMERGENCY_STOP_SCRIPT" ]]; then
+  print_kv "emergency_stop_script_exists" "yes"
+else
+  print_kv "emergency_stop_script_exists" "no"
+fi
+if [[ -f "$POLICY_CHECK_SCRIPT" ]]; then
+  print_kv "policy_check_script_exists" "yes"
+else
+  print_kv "policy_check_script_exists" "no"
+fi
+if [[ -x "$DRY_RUN_RESIDENT_SCRIPT" ]]; then
+  print_kv "dry_run_resident_loop_exists" "yes"
+else
+  print_kv "dry_run_resident_loop_exists" "no"
 fi
 
 print_kv "command_execution_enabled" "no"

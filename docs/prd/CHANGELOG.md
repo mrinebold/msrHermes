@@ -2,6 +2,11 @@
 
 ## 2026-06-13
 
+- Completed Phase 6U Hermes local safety status refinement.
+- Updated `scripts/hermes_local_status.sh` to report audit file counts, latest audit timestamp/action/status/risk level, approval file counts, latest approval status/action/expiration, count of currently valid approvals where practical, freeze reason existence and first safe redacted line, emergency stop script presence, policy check script presence, dry-run resident loop presence, `command_execution_enabled=no`, and `resident_mode_enabled=no`.
+- Added tests confirming the richer audit, approval, freeze, and policy summaries; read-only behavior; disabled command execution and resident mode; and absence of secret-looking values in status output.
+- Updated `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6U result.
+- Confirmed Phase 6U did not create directories, write files from the status command, start or stop services, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, enable command execution, enable resident mode, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6T Hermes dry-run resident loop implementation.
 - Added executable `scripts/hermes_resident_dry_run.sh`.
 - Implemented a one-shot dry-run loop that refuses work when `sandbox/hermes_control/FROZEN` exists, scans only `sandbox/hermes_inbox/*.task.md`, writes redacted dry-run proposal files under `sandbox/hermes_outbox/`, records metadata-only local audit events when available, archives nothing, deletes nothing, and exits.

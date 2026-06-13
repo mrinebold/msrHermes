@@ -38,6 +38,7 @@ ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 HERMES_LOCAL_STATUS = REPO_ROOT / "scripts" / "hermes_local_status.sh"
 HERMES_EMERGENCY_STOP = REPO_ROOT / "scripts" / "hermes_emergency_stop.sh"
+HERMES_POLICY_CHECK = REPO_ROOT / "scripts" / "hermes_policy_check.py"
 HERMES_RESIDENT_DRY_RUN = REPO_ROOT / "scripts" / "hermes_resident_dry_run.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
@@ -858,17 +859,59 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("latest_audit_timestamp", content)
         self.assertIn("latest_audit_action", content)
         self.assertIn("latest_audit_status", content)
+        self.assertIn('${kind}_log_file_count', content)
+        self.assertIn("latest_audit_risk_level", content)
         self.assertIn('print_latest_jsonl_summary "approval"', content)
         self.assertIn("latest_approval_status", content)
+        self.assertIn('${kind}_log_file_count', content)
+        self.assertIn("latest_approval_action", content)
+        self.assertIn("latest_approval_expiration", content)
+        self.assertIn("valid_approval_count", content)
         self.assertIn("freeze_flag_exists", content)
+        self.assertIn("freeze_reason_exists", content)
+        self.assertIn("freeze_reason_first_line", content)
+        self.assertIn("emergency_stop_script_exists", content)
         self.assertIn("sandbox/hermes_control/FROZEN", content)
         self.assertIn("safety_modules_importable", content)
+        self.assertIn("policy_check_script_exists", content)
+        self.assertIn("dry_run_resident_loop_exists", content)
         self.assertIn("command_execution_enabled", content)
         self.assertIn("resident_mode_enabled", content)
         self.assertIn('"not_initialized"', content)
         self.assertNotIn("mkdir", content)
         self.assertNotIn("write_audit_event", content)
         self.assertNotIn("write_approval_record", content)
+
+    def test_hermes_local_status_output_reports_safety_summaries_without_secrets(self):
+        result = subprocess.run(
+            [str(HERMES_LOCAL_STATUS)],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = result.stdout
+        for expected in (
+            "audit_log_file_count=",
+            "latest_audit_risk_level=",
+            "approval_log_file_count=",
+            "latest_approval_action=",
+            "latest_approval_expiration=",
+            "valid_approval_count=",
+            "freeze_reason_exists=",
+            "emergency_stop_script_exists=",
+            "policy_check_script_exists=",
+            "dry_run_resident_loop_exists=",
+            "command_execution_enabled=no",
+            "resident_mode_enabled=no",
+        ):
+            self.assertIn(expected, output)
+
+        self.assertNotRegex(output, r"sk-[A-Za-z0-9_-]{8,}")
+        self.assertNotRegex(output, r"ghp_[A-Za-z0-9_]{8,}")
+        self.assertNotRegex(output, r"github_pat_[A-Za-z0-9_]{8,}")
 
     def test_hermes_emergency_stop_script_is_no_sudo_no_delete_no_start(self):
         content = HERMES_EMERGENCY_STOP.read_text(encoding="utf-8")
