@@ -1,13 +1,34 @@
 # Hermes Command Policy
 
 Phase: 6F
-Status: proposal only; Hermes command execution is not enabled; file zone and approval models proposed
+Status: command classifier primitive implemented in Phase 6P; dry-run policy check CLI implemented in Phase 6S; Hermes command execution is not enabled
 
 ## Purpose
 
 This document defines the command policy Hermes must follow before it can ever perform local approved execution.
 
 Phase 6F is documentation only. Hermes cannot execute commands yet. This phase does not create a command executor, enable resident mode, start the adapter service, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority in code.
+
+Phase 6S added `scripts/hermes_policy_check.py` as a dry-run classifier CLI. It reports command classifications and approval requirements by calling the local command-policy primitive, but it does not execute commands, start services, run Hermes, create approvals, connect integrations, or enable resident mode.
+
+## Dry-Run Policy Check
+
+Use the policy checker to classify a proposed command without running it:
+
+```sh
+python3 scripts/hermes_policy_check.py --command "git status --short"
+python3 scripts/hermes_policy_check.py --command "scripts/adapter_service_start.sh"
+python3 scripts/hermes_policy_check.py --command "sudo whoami"
+```
+
+Expected exit codes:
+
+- `0`: allowed read-only command
+- `2`: approval required
+- `3`: denied or unknown/fail-closed
+- `1`: policy-check script error
+
+The checker may also emit JSON with `--json`. It must not be treated as command authorization; it is classification only.
 
 ## Policy Principles
 

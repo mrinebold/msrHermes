@@ -1,13 +1,32 @@
 # Hermes File Zone Policy
 
 Phase: 6G
-Status: file-zone classifier primitive implemented in Phase 6O; file operation enforcement remains disabled
+Status: file-zone classifier primitive implemented in Phase 6O; dry-run path policy check implemented in Phase 6S; file operation enforcement remains disabled
 
 ## Purpose
 
 This document defines where Hermes may read and write before resident operation or approved execution can be enabled.
 
 Phase 6G is documentation only. It does not implement path enforcement, scan files, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority in code.
+
+Phase 6S added `scripts/hermes_policy_check.py` path checks. The CLI classifies a proposed path and operation without reading file contents, writing files, or enforcing access.
+
+## Dry-Run Path Check
+
+Use the policy checker to classify a path without reading or writing it:
+
+```sh
+python3 scripts/hermes_policy_check.py --path sandbox/hermes_outbox/example.md --operation write
+python3 scripts/hermes_policy_check.py --path docs/HERMES_FILE_ZONE_POLICY.md --operation read
+python3 scripts/hermes_policy_check.py --path ~/.ssh/id_rsa --operation read
+```
+
+Expected exit codes:
+
+- `0`: green allowed path or yellow read-only path
+- `2`: approval-required path
+- `3`: denied, red, or unknown path
+- `1`: policy-check script error
 
 ## Zone Classes
 

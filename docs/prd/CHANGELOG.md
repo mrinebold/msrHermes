@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6S Hermes dry-run policy check implementation.
+- Added `scripts/hermes_policy_check.py`.
+- Implemented classification-only checks for proposed commands and file operations using the local command-policy and file-zone primitives, with plain-text or JSON output and explicit exit codes for allowed, approval-required, denied, and script-error outcomes.
+- Added tests confirming denied sudo classification, allowed git status classification, approval-required adapter start classification, green outbox write classification, denied secret home key path classification, yellow docs read classification, valid JSON output, and no command execution side effects.
+- Updated `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_FILE_ZONE_POLICY.md`, `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, and the master PRD with the Phase 6S result.
+- Confirmed Phase 6S did not create a command executor, execute commands through Hermes, read or write target files, enable resident mode, create a Hermes launchd service, start or stop the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6R Hermes emergency stop script implementation.
 - Added executable `scripts/hermes_emergency_stop.sh`.
 - Implemented no-sudo, repeat-safe local emergency stop behavior that creates or refreshes `sandbox/hermes_control/FROZEN`, writes `sandbox/hermes_control/FROZEN.reason`, detects adapter/Hermes/Desktop/resident-like state, stops the approved adapter service only if already running, reports resident-like process warnings without killing arbitrary processes, and writes a metadata-only audit event when the local audit writer is importable.

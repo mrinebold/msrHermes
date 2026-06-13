@@ -1,7 +1,7 @@
 # Hermes Policy Enforcement Implementation Plan
 
 Phase: 6K
-Status: file-zone classifier primitive implemented in Phase 6O; command classifier primitive implemented in Phase 6P
+Status: file-zone classifier primitive implemented in Phase 6O; command classifier primitive implemented in Phase 6P; dry-run policy check CLI implemented in Phase 6S
 
 ## Purpose
 
@@ -24,6 +24,24 @@ Module responsibilities:
 - `policy_result.py`: define shared result types, denial reasons, risk levels, approval requirements, and audit metadata.
 
 No module is implemented in Phase 6K.
+
+Phase 6S provides the first operational integration point: `scripts/hermes_policy_check.py`. It calls the classifiers in dry-run mode and reports classifications, reasons, approval requirements, denial state, and matched policy rules. It does not enforce access, execute commands, create approvals, start services, write audit logs by default, run Hermes, or connect external systems.
+
+## Phase 6S Dry-Run CLI
+
+The dry-run CLI supports:
+
+- `--command "<command string>"`
+- `--path "<path>"`
+- `--operation read|write`
+- `--json`
+
+Exit-code contract:
+
+- `0`: allowed read-only command or allowed green/yellow path classification
+- `2`: approval-required command or path classification
+- `3`: denied, red, unknown, or fail-closed classification
+- `1`: script usage/runtime error
 
 ## File-Zone Classifier
 

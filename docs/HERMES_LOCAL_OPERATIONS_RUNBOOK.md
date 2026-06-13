@@ -244,6 +244,7 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - final local-only readiness is certified in `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`
 - read-only local status command exists at `scripts/hermes_local_status.sh`
 - status command reports safety module, audit log, approval log, freeze flag, command execution, and resident mode state without writes
+- dry-run policy checks can classify proposed commands and file operations with `scripts/hermes_policy_check.py`
 
 ## What Is Not Ready
 
@@ -257,8 +258,27 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - Hermes shell execution
 - broad filesystem authority
 
+## Dry-Run Policy Checks
+
+Classify proposed commands without running them:
+
+```sh
+python3 scripts/hermes_policy_check.py --command "git status --short"
+python3 scripts/hermes_policy_check.py --command "scripts/adapter_service_start.sh"
+python3 scripts/hermes_policy_check.py --command "sudo whoami"
+```
+
+Classify proposed file operations without reading or writing target files:
+
+```sh
+python3 scripts/hermes_policy_check.py --path sandbox/hermes_outbox/example.md --operation write
+python3 scripts/hermes_policy_check.py --path docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md --operation read
+```
+
+Exit code `0` means allowed read-only or green/yellow path classification, `2` means approval required, and `3` means denied or unknown. This command does not authorize execution; it is dry-run classification only.
+
 ## Next Recommended Phase
 
-Proceed with Phase 6S, dry-run policy check script implementation, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
+Proceed with Phase 6T, dry-run resident loop implementation, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
 
-After Phase 6R, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior. The dry-run resident loop, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.
+After Phase 6S, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior and `scripts/hermes_policy_check.py` exists for dry-run command/path classification. The dry-run resident loop, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.
