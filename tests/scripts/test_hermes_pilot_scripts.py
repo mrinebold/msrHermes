@@ -22,6 +22,7 @@ AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
 HELIO_DELEGATION_INTERFACE = REPO_ROOT / "docs" / "HERMES_HELIO_DELEGATION_INTERFACE.md"
+COMMAND_POLICY = REPO_ROOT / "docs" / "HERMES_COMMAND_POLICY.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -700,6 +701,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             EMERGENCY_STOP_DESIGN,
             RESIDENT_SERVICE_PROPOSAL,
             HELIO_DELEGATION_INTERFACE,
+            COMMAND_POLICY,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -980,6 +982,30 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("emergency stop implemented", content)
         self.assertIn("credential rotation decision complete", content)
         self.assertIn("no secrets in messages", content)
+
+    def test_command_policy_blocks_execution_until_prereqs(self):
+        content = COMMAND_POLICY.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Hermes cannot execute commands yet", content)
+        self.assertIn("Hermes may only draft or recommend commands", content)
+        self.assertIn("Future execution requires human approval, audit log, emergency stop, and allowlist match", content)
+        self.assertIn("Initial Allowlist Candidates", content)
+        self.assertIn("Initial Denylist", content)
+        self.assertNotIn("command execution is enabled", lower_content)
+
+    def test_command_policy_has_denials_and_approval_classes(self):
+        content = COMMAND_POLICY.read_text(encoding="utf-8")
+
+        self.assertIn("sudo", content)
+        self.assertIn("rm -rf", content)
+        self.assertIn("git push --force", content)
+        self.assertIn("git reset --hard", content)
+        self.assertIn("any command reading `~/.ssh`, `~/.gnupg`, Keychains, `.env`, token, key, or secret files", content)
+        self.assertIn("scripts/adapter_service_start.sh` only with explicit human approval", content)
+        self.assertIn("approval needed for `git push`", content)
+        self.assertIn("audit log implemented", content)
+        self.assertIn("emergency stop implemented", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

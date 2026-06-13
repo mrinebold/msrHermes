@@ -1,7 +1,7 @@
 # Hermes Resident Authority Model
 
 Phase: 6A
-Status: proposal only; resident mode not enabled yet; audit, emergency stop, resident service, and Helio delegation models proposed
+Status: proposal only; resident mode not enabled yet; audit, emergency stop, resident service, delegation, and command policy models proposed
 
 ## Purpose
 
@@ -244,6 +244,8 @@ Future allowlists should define:
 - output redaction
 - rollback or cleanup
 
+Phase 6F defines the proposed command allowlist and denylist in `docs/HERMES_COMMAND_POLICY.md`.
+
 Examples of future candidate read-only commands:
 
 - `git status --short`
@@ -371,3 +373,5 @@ Hermes may become a resident personal agent only through staged, audited, tiered
 Phase 6D proposes the resident service design in `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`. The service remains unimplemented and uninstalled.
 
 Phase 6E proposes the Hermes-to-Helio delegation interface. Agent Bus remains frozen until a later credential and scope approval phase.
+
+Phase 6F proposes the command policy. Hermes command execution remains disabled.

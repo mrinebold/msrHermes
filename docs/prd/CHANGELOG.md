@@ -1,5 +1,14 @@
 # PRD Changelog
 
+## 2026-06-13
+
+- Completed Phase 6F Hermes command allowlist and denylist proposal.
+- Added `docs/HERMES_COMMAND_POLICY.md`.
+- Defined command policy principles, command categories, initial allowlist candidates, initial denylist entries, approval classes, future enforcement requirements, and acceptance criteria before command execution.
+- Added tests confirming the command policy exists, says Hermes cannot execute commands yet, includes allowlist and denylist sections, forbids sudo and secret paths, requires approval for service start and git push, and references audit and emergency stop prerequisites.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6F result.
+- Confirmed Phase 6F did not create a command executor, enable command execution through Hermes, enable resident mode, create a Hermes launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
+
 ## 2026-06-12
 
 - Completed Phase 6E Hermes-to-Helio delegation interface proposal.

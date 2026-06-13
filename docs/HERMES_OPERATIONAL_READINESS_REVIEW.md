@@ -422,3 +422,15 @@ The proposal defines delegation types, non-goals, a future message shape, staged
 Phase 6E did not connect Helio, write Supabase, read live Agent Bus records, use credentials, dispatch agents, start services, run Hermes live, launch Desktop, modify `~/.hermes`, or broaden authority.
 
 Readiness position: resident-readiness proposals now cover authority, audit, emergency stop, resident service, and Helio delegation boundaries. The next safe phase is command allowlist and denylist proposal, or audit/emergency-stop implementation planning if explicitly approved.
+
+## Phase 6F Command Policy Result
+
+Phase 6F created `docs/HERMES_COMMAND_POLICY.md`.
+
+The proposal defines command policy principles, command categories, initial allowlist candidates, initial denylist entries, approval classes, future enforcement components, and acceptance criteria before command execution.
+
+The policy states that Hermes cannot execute commands yet and may only draft or recommend commands. Future execution requires human approval, audit logging, emergency stop, file zone policy, approval record lookup, dry-run tests, and allowlist/denylist enforcement.
+
+Phase 6F did not create a command executor, enable resident mode, start the adapter service, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
+
+Readiness position: command policy is proposed but not enforced. The next safe phase is file zone policy proposal.
