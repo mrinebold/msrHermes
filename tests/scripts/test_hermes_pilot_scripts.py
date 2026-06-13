@@ -20,6 +20,7 @@ RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
+RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -696,6 +697,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_AUTHORITY_MODEL,
             AUDIT_LOG_DESIGN,
             EMERGENCY_STOP_DESIGN,
+            RESIDENT_SERVICE_PROPOSAL,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -918,6 +920,32 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("scripts/hermes_emergency_stop.sh", content)
         self.assertIn("audit log records `emergency_stop`", content)
         self.assertIn("resident service can be disabled without deleting artifacts", content)
+
+    def test_resident_service_proposal_is_proposal_only(self):
+        content = RESIDENT_SERVICE_PROPOSAL.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("proposal only; no resident service created", content)
+        self.assertIn("Do not create this script in Phase 6D", content)
+        self.assertIn("com.msr.hermes.resident", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("manual start only at first", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
+        self.assertNotIn("resident service created", lower_content.replace("no resident service created", ""))
+
+    def test_resident_service_proposal_preserves_boundaries(self):
+        content = RESIDENT_SERVICE_PROPOSAL.read_text(encoding="utf-8")
+
+        self.assertIn("audit logging required before any execution", content)
+        self.assertIn("emergency stop compatible", content)
+        self.assertIn("no shell execution", content)
+        self.assertIn("no external integrations", content)
+        self.assertIn("no Desktop", content)
+        self.assertIn("no credentials", content)
+        self.assertIn("Allowed File Zones", content)
+        self.assertIn("Forbidden Zones", content)
+        self.assertIn("logs/hermes_audit/", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

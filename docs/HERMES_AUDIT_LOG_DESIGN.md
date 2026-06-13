@@ -206,4 +206,4 @@ Phase 6B does not approve:
 
 ## Proposal Conclusion
 
-Hermes needs local, metadata-first, append-only audit logs before resident or execution authority is enabled. Phase 6C defines the emergency stop model that must emit `emergency_stop` events after audit logging is implemented.
+Hermes needs local, metadata-first, append-only audit logs before resident or execution authority is enabled. Phase 6C defines the emergency stop model that must emit `emergency_stop` events after audit logging is implemented. Phase 6D proposes a future resident service that requires audit logging before execution.

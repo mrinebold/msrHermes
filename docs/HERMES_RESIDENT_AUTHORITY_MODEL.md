@@ -1,7 +1,7 @@
 # Hermes Resident Authority Model
 
 Phase: 6A
-Status: proposal only; resident mode not enabled yet; audit and emergency stop models proposed
+Status: proposal only; resident mode not enabled yet; audit, emergency stop, and resident service models proposed
 
 ## Purpose
 
@@ -365,3 +365,5 @@ Before enabling resident Hermes:
 ## Proposal Conclusion
 
 Hermes may become a resident personal agent only through staged, audited, tiered authority. Phase 6B proposed the audit log model, and Phase 6C proposed the emergency stop model. The next safe phase is a resident service proposal. Runtime resident mode remains disabled.
+
+Phase 6D proposes the resident service design in `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`. The service remains unimplemented and uninstalled.

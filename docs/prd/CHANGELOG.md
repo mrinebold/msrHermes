@@ -2,6 +2,12 @@
 
 ## 2026-06-12
 
+- Completed Phase 6D Hermes resident service proposal.
+- Added `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`.
+- Defined proposed future service purpose, label `com.msr.hermes.resident`, user LaunchAgent execution model, future script path `scripts/hermes_resident_loop.sh`, resident loop responsibilities, non-goals, allowed and forbidden zones, proposed processing flow, acceptance criteria, and rollback concept.
+- Added tests confirming the proposal exists, says proposal only, says no resident service created, keeps `RunAtLoad=false` and `KeepAlive=false` initially, says no external integrations, says no shell execution, includes allowed and forbidden zones, and includes emergency stop and audit prerequisites.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6D result.
+- Confirmed Phase 6D did not create `scripts/hermes_resident_loop.sh`, create a Hermes resident LaunchAgent, create launchd files, set `RunAtLoad=true`, set `KeepAlive=true`, start services, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6C Hermes emergency stop design.
 - Added `docs/HERMES_EMERGENCY_STOP_DESIGN.md`.
 - Defined emergency stop goals, triggers, stop levels, future command proposal for `scripts/hermes_emergency_stop.sh`, required no-sudo/no-deletion/no-secret/no-external-call behavior, audit interaction, and acceptance criteria before resident mode.

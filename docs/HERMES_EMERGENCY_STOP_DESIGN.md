@@ -1,7 +1,7 @@
 # Hermes Emergency Stop Design
 
 Phase: 6C
-Status: proposal only; emergency stop not implemented yet; resident mode not enabled yet
+Status: proposal only; emergency stop not implemented yet; resident mode not enabled yet; resident service proposal added in Phase 6D
 
 ## Purpose
 
@@ -200,4 +200,4 @@ Phase 6C does not approve:
 
 ## Proposal Conclusion
 
-Emergency stop must be implemented and tested before resident Hermes is enabled. The next safe phase is a proposal-only resident service design.
+Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model.

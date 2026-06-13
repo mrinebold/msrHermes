@@ -398,3 +398,15 @@ The design defines emergency stop goals, triggers, stop levels, future command p
 Phase 6C did not create `scripts/hermes_emergency_stop.sh`, create freeze flags, stop services, start services, enable resident mode, create a Hermes launchd service, change RunAtLoad/KeepAlive, launch Desktop, connect integrations, use credentials, perform Agent Bus reads/writes, modify `~/.hermes`, or broaden authority.
 
 Readiness position: emergency stop is designed but not implemented. The next safe phase is resident service design, proposal-only.
+
+## Phase 6D Resident Service Proposal Result
+
+Phase 6D created `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`.
+
+The proposal defines the future resident service purpose, label `com.msr.hermes.resident`, user LaunchAgent execution model, proposed future script `scripts/hermes_resident_loop.sh`, loop responsibilities, non-goals, allowed file zones, forbidden zones, processing flow, acceptance criteria, and rollback concept.
+
+The proposal keeps first validation manual-start only, `RunAtLoad=false`, `KeepAlive=false`, no sudo, audit logging required before any execution, emergency stop compatibility, no shell execution, no external integrations, no Desktop, no credentials, no broad filesystem scanning, and human approval before install.
+
+Phase 6D did not create `scripts/hermes_resident_loop.sh`, create a resident LaunchAgent, set RunAtLoad/KeepAlive, start services, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden authority.
+
+Readiness position: the future resident service is designed but not implemented. The next safe phase is Hermes-to-Helio delegation interface design, proposal-only.

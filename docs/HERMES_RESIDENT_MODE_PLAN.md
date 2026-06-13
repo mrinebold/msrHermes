@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
 Phase: 5AO-6A
-Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority, audit, and emergency stop models proposed
+Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority, audit, emergency stop, and service models proposed
 
 ## Purpose
 
@@ -24,6 +24,8 @@ Phase 6A adds `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md` as the proposal-only aut
 Phase 6B adds `docs/HERMES_AUDIT_LOG_DESIGN.md` as the proposal-only audit model. It defines event categories, required fields, local JSONL storage under `logs/hermes_audit/`, redaction rules, approval logging, fail-closed logging, rollback logging, audit views, and resident-mode acceptance criteria. It does not implement audit writes or create runtime state.
 
 Phase 6C adds `docs/HERMES_EMERGENCY_STOP_DESIGN.md` as the proposal-only emergency stop model. It defines stop goals, triggers, stop levels, future command proposal, required behavior, audit interaction, and acceptance criteria before resident mode. It does not implement the emergency stop script or change runtime state.
+
+Phase 6D adds `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md` as the proposal-only future resident service design. It defines the proposed label `com.msr.hermes.resident`, execution model, loop responsibilities, non-goals, allowed and forbidden zones, processing flow, acceptance criteria, and rollback concept. It does not create a resident loop script, plist, or service.
 
 ## Proposed Resident Architecture
 
@@ -292,3 +294,11 @@ Phase 6C added `docs/HERMES_EMERGENCY_STOP_DESIGN.md` as the proposal-only emerg
 The design defines status-only, adapter-stop, resident-process-stop, LaunchAgent-disable, inbox-freeze, and artifact-quarantine levels. It requires no sudo, no deletion, no credential printing, no external calls, repeated-safe behavior, preserved logs/artifacts/backups, and audit event emission after audit logging exists.
 
 No emergency stop script was created, no service was stopped or started, and resident mode remains disabled.
+
+## Phase 6D Resident Service Proposal Result
+
+Phase 6D added `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md` as the proposal-only future service design.
+
+The proposal keeps the first validation user-level, manual-start only, with `RunAtLoad=false`, `KeepAlive=false`, no sudo, audit logging required before execution, emergency stop compatibility, no shell execution, no external integrations, no Desktop, no credentials, and no broad filesystem scanning.
+
+No resident loop script was created, no Hermes LaunchAgent was created, no service was loaded or started, and resident mode remains disabled.
