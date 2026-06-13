@@ -138,6 +138,14 @@ It reports:
 - Hermes, Desktop, and resident-like process presence
 - whether `~/.hermes/config.yaml` points to the localhost adapter, without printing secrets
 - forbidden environment variable names that are currently set, without values
+- whether Hermes safety modules are importable
+- audit log directory state and latest audit timestamp/action/status if initialized
+- approval log directory state and latest approval timestamp/status if initialized
+- freeze flag path and existence at `sandbox/hermes_control/FROZEN`
+- `command_execution_enabled=no`
+- `resident_mode_enabled=no`
+
+If audit or approval logs are absent, the status command reports `not_initialized` rather than creating directories or files.
 
 ### Port 8088 Already In Use
 
@@ -227,6 +235,7 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 - service cleanup after local tasks is validated
 - final local-only readiness is certified in `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`
 - read-only local status command exists at `scripts/hermes_local_status.sh`
+- status command reports safety module, audit log, approval log, freeze flag, command execution, and resident mode state without writes
 
 ## What Is Not Ready
 
@@ -242,6 +251,6 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with Phase 6M, the first implementation phase for local audit/approval primitives, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
+Proceed with Phase 6R, emergency stop script implementation, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
 
-After Phase 6L, emergency stop and dry-run resident loop implementation is planned in `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`. The emergency stop script, dry-run resident loop, freeze flag, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.
+After Phase 6Q, `scripts/hermes_local_status.sh` reports safety primitive state read-only. The emergency stop script, dry-run resident loop, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.

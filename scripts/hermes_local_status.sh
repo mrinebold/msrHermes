@@ -8,6 +8,9 @@ DOMAIN="gui/$(id -u)"
 TARGET="$DOMAIN/$LABEL"
 CONFIG="$HOME/.hermes/config.yaml"
 HERMES_BIN="${HERMES_BIN:-$HOME/.local/bin/hermes}"
+AUDIT_DIR="$REPO_PATH/logs/hermes_audit"
+APPROVAL_DIR="$REPO_PATH/logs/hermes_approvals"
+FREEZE_FLAG="$REPO_PATH/sandbox/hermes_control/FROZEN"
 FORBIDDEN_ENV_VARS=(
   OPENAI_API_KEY
   ANTHROPIC_API_KEY
@@ -30,6 +33,72 @@ print_kv() {
 
 has_command() {
   command -v "$1" >/dev/null 2>&1
+}
+
+print_latest_jsonl_summary() {
+  local kind="$1"
+  local dir="$2"
+  if [[ ! -d "$dir" ]]; then
+    print_kv "${kind}_log_dir_exists" "no"
+    print_kv "latest_${kind}_timestamp" "not_initialized"
+    print_kv "latest_${kind}_status" "not_initialized"
+    if [[ "$kind" == "audit" ]]; then
+      print_kv "latest_audit_action" "not_initialized"
+    fi
+    return 0
+  fi
+
+  print_kv "${kind}_log_dir_exists" "yes"
+  if has_command python3; then
+    python3 - "$kind" "$dir" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+kind = sys.argv[1]
+directory = Path(sys.argv[2])
+files = sorted(directory.glob("*.jsonl"))
+if not files:
+    print(f"latest_{kind}_timestamp=no_events")
+    print(f"latest_{kind}_status=no_events")
+    if kind == "audit":
+        print("latest_audit_action=no_events")
+    raise SystemExit(0)
+
+latest = None
+for path in files:
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                stripped = line.strip()
+                if stripped:
+                    latest = json.loads(stripped)
+    except (OSError, json.JSONDecodeError):
+        continue
+
+if not isinstance(latest, dict):
+    print(f"latest_{kind}_timestamp=unreadable")
+    print(f"latest_{kind}_status=unreadable")
+    if kind == "audit":
+        print("latest_audit_action=unreadable")
+    raise SystemExit(0)
+
+if kind == "audit":
+    print(f"latest_audit_timestamp={latest.get('timestamp', 'unknown')}")
+    print(f"latest_audit_action={latest.get('action_type', 'unknown')}")
+    print(f"latest_audit_status={latest.get('status', 'unknown')}")
+else:
+    timestamp = latest.get("timestamp_granted") or latest.get("timestamp_requested") or "unknown"
+    print(f"latest_approval_timestamp={timestamp}")
+    print(f"latest_approval_status={latest.get('status', 'unknown')}")
+PY
+  else
+    print_kv "latest_${kind}_timestamp" "python3_unavailable"
+    print_kv "latest_${kind}_status" "python3_unavailable"
+    if [[ "$kind" == "audit" ]]; then
+      print_kv "latest_audit_action" "python3_unavailable"
+    fi
+  fi
 }
 
 print_kv "repo_path" "$REPO_PATH"
@@ -176,3 +245,32 @@ if [[ "${#set_forbidden_names[@]}" -gt 0 ]]; then
 else
   print_kv "forbidden_env_vars_set" "none"
 fi
+
+if has_command python3; then
+  if PYTHONPATH="$REPO_PATH${PYTHONPATH:+:$PYTHONPATH}" python3 - <<'PY' >/dev/null 2>&1
+import services.hermes_safety.audit_log
+import services.hermes_safety.approval_records
+import services.hermes_safety.file_zones
+import services.hermes_safety.command_policy
+PY
+  then
+    print_kv "safety_modules_importable" "yes"
+  else
+    print_kv "safety_modules_importable" "no"
+  fi
+else
+  print_kv "safety_modules_importable" "unknown"
+fi
+
+print_latest_jsonl_summary "audit" "$AUDIT_DIR"
+print_latest_jsonl_summary "approval" "$APPROVAL_DIR"
+
+print_kv "freeze_flag_path" "$FREEZE_FLAG"
+if [[ -f "$FREEZE_FLAG" ]]; then
+  print_kv "freeze_flag_exists" "yes"
+else
+  print_kv "freeze_flag_exists" "no"
+fi
+
+print_kv "command_execution_enabled" "no"
+print_kv "resident_mode_enabled" "no"

@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6Q Hermes safety-state local status integration.
+- Updated `scripts/hermes_local_status.sh`.
+- Added read-only reporting for safety module importability, audit log directory state, latest audit timestamp/action/status when initialized, approval log directory state, latest approval timestamp/status when initialized, freeze flag path/existence at `sandbox/hermes_control/FROZEN`, `command_execution_enabled=no`, and `resident_mode_enabled=no`.
+- Missing audit/approval logs now report `not_initialized` instead of erroring or creating directories.
+- Added tests confirming the status command mentions audit log state, approval log state, freeze flag state, command execution disabled, resident mode disabled, contains no sudo, does not start services, and does not call audit/approval write APIs.
+- Updated `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6Q result.
+- Confirmed Phase 6Q did not create logs, create approval records, create freeze flags, create a command executor, execute commands through Hermes, enable resident mode, create a Hermes launchd service, start or stop the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6P Hermes command-policy classifier primitive implementation.
 - Added `services/hermes_safety/policy_result.py` and `services/hermes_safety/command_policy.py`.
 - Added `tests/services/test_hermes_command_policy.py`.

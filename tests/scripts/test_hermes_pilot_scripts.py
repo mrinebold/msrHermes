@@ -846,6 +846,26 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("printenv", content)
         self.assertNotIn("env |", content)
 
+    def test_hermes_local_status_script_reports_safety_state_read_only(self):
+        content = HERMES_LOCAL_STATUS.read_text(encoding="utf-8")
+
+        self.assertIn('print_latest_jsonl_summary "audit"', content)
+        self.assertIn('${kind}_log_dir_exists', content)
+        self.assertIn("latest_audit_timestamp", content)
+        self.assertIn("latest_audit_action", content)
+        self.assertIn("latest_audit_status", content)
+        self.assertIn('print_latest_jsonl_summary "approval"', content)
+        self.assertIn("latest_approval_status", content)
+        self.assertIn("freeze_flag_exists", content)
+        self.assertIn("sandbox/hermes_control/FROZEN", content)
+        self.assertIn("safety_modules_importable", content)
+        self.assertIn("command_execution_enabled", content)
+        self.assertIn("resident_mode_enabled", content)
+        self.assertIn('"not_initialized"', content)
+        self.assertNotIn("mkdir", content)
+        self.assertNotIn("write_audit_event", content)
+        self.assertNotIn("write_approval_record", content)
+
     def test_resident_authority_model_defines_all_tiers(self):
         content = RESIDENT_AUTHORITY_MODEL.read_text(encoding="utf-8")
 

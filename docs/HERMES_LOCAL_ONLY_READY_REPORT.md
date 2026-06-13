@@ -21,6 +21,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - Compact task remediation is validated: Phase 5AZ-R succeeded with `sandbox/hermes_inbox/next_phase_recommendation_compact.task.md` after the larger generated task timed out in Phase 5AZ.
 - A read-only local status command exists at `scripts/hermes_local_status.sh`.
 - Phase 6M adds a local audit writer primitive that writes redacted JSONL events in tests without starting services or enabling runtime authority.
+- Phase 6Q extends the local status command to report safety module importability, audit log state, approval log state, freeze flag state, command execution disabled, and resident mode disabled without creating files or starting services.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
@@ -107,6 +108,8 @@ scripts/adapter_service_status.sh
 - No adapter process.
 - No Desktop process.
 - Repo clean.
+- Command execution reports disabled.
+- Resident mode reports disabled.
 
 Confirm with:
 
