@@ -1,7 +1,7 @@
 # Hermes Resident Authority Model
 
 Phase: 6A
-Status: proposal only; resident mode not enabled yet; audit, emergency stop, resident service, delegation, and command policy models proposed
+Status: proposal only; resident mode not enabled yet; audit, emergency stop, resident service, delegation, command policy, and file zone models proposed
 
 ## Purpose
 
@@ -213,6 +213,8 @@ Initial allowed zones:
 - metadata-only logs under approved Hermes/adapter log paths
 - repo files only when a Tier 3+ phase explicitly approves local execution or file edits
 
+Phase 6G defines the detailed file zone policy in `docs/HERMES_FILE_ZONE_POLICY.md`.
+
 ## Forbidden File Zones
 
 Forbidden without separate approval:
@@ -375,3 +377,5 @@ Phase 6D proposes the resident service design in `docs/HERMES_RESIDENT_SERVICE_P
 Phase 6E proposes the Hermes-to-Helio delegation interface. Agent Bus remains frozen until a later credential and scope approval phase.
 
 Phase 6F proposes the command policy. Hermes command execution remains disabled.
+
+Phase 6G proposes the file zone policy. File zone enforcement remains unimplemented.

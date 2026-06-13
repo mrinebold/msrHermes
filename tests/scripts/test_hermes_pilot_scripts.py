@@ -23,6 +23,7 @@ EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
 HELIO_DELEGATION_INTERFACE = REPO_ROOT / "docs" / "HERMES_HELIO_DELEGATION_INTERFACE.md"
 COMMAND_POLICY = REPO_ROOT / "docs" / "HERMES_COMMAND_POLICY.md"
+FILE_ZONE_POLICY = REPO_ROOT / "docs" / "HERMES_FILE_ZONE_POLICY.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -702,6 +703,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_SERVICE_PROPOSAL,
             HELIO_DELEGATION_INTERFACE,
             COMMAND_POLICY,
+            FILE_ZONE_POLICY,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1006,6 +1008,31 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("approval needed for `git push`", content)
         self.assertIn("audit log implemented", content)
         self.assertIn("emergency stop implemented", content)
+
+    def test_file_zone_policy_defines_zone_classes(self):
+        content = FILE_ZONE_POLICY.read_text(encoding="utf-8")
+
+        self.assertIn("Green Read/Write Zones", content)
+        self.assertIn("Yellow Read-Only Zones", content)
+        self.assertIn("Orange Approval-Required Zones", content)
+        self.assertIn("Red Forbidden Zones", content)
+        self.assertIn("sandbox/hermes_inbox/", content)
+        self.assertIn("sandbox/hermes_outbox/", content)
+        self.assertIn("logs/hermes_audit/", content)
+
+    def test_file_zone_policy_blocks_secret_and_broad_paths(self):
+        content = FILE_ZONE_POLICY.read_text(encoding="utf-8")
+
+        self.assertIn("~/.ssh", content)
+        self.assertIn("~/.gnupg", content)
+        self.assertIn("~/Library/Keychains", content)
+        self.assertIn(".env", content)
+        self.assertIn("token/key/secret files", content)
+        self.assertIn("arbitrary Desktop scanning", content)
+        self.assertIn("arbitrary Documents scanning", content)
+        self.assertIn("path traversal refusal", content)
+        self.assertIn("symlink refusal or resolution", content)
+        self.assertIn("audit event on every file read/write", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

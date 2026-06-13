@@ -1,7 +1,7 @@
 # Hermes Command Policy
 
 Phase: 6F
-Status: proposal only; Hermes command execution is not enabled
+Status: proposal only; Hermes command execution is not enabled; file zone policy proposed in Phase 6G
 
 ## Purpose
 
@@ -179,6 +179,8 @@ Future enforcement must include:
 - secret-path refusal
 - timeout and output redaction
 
+Phase 6G defines the file zone policy in `docs/HERMES_FILE_ZONE_POLICY.md`.
+
 ## Acceptance Criteria Before Command Execution
 
 - command policy exists
@@ -209,4 +211,4 @@ Phase 6F does not approve:
 
 ## Proposal Conclusion
 
-Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy, and approval records are implemented and approved.
+Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy enforcement, and approval records are implemented and approved.

@@ -1,7 +1,7 @@
 # Hermes Local Operations Runbook
 
 Phase: 5BA-6A
-Status: manual local-only operations documented; local-only readiness certified; read-only local status command added; resident authority model proposed
+Status: manual local-only operations documented; local-only readiness certified; read-only local status command added; resident safety policies proposed
 
 ## Current Approved Mode
 
@@ -242,4 +242,6 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with Phase 6B, audit log design for Hermes actions. That phase should remain proposal-only unless separately approved to change runtime state.
+Proceed with Phase 6H, human approval record model. That phase should remain proposal-only unless separately approved to change runtime state.
+
+After Phase 6G, file access for future resident Hermes is governed by `docs/HERMES_FILE_ZONE_POLICY.md`. Daily manual local-only use remains unchanged.

@@ -1,7 +1,7 @@
 # Hermes Resident Service Proposal
 
 Phase: 6D
-Status: proposal only; no resident service created; command policy proposed in Phase 6F
+Status: proposal only; no resident service created; command and file zone policies proposed
 
 ## Purpose
 
@@ -44,6 +44,7 @@ com.msr.hermes.resident
 - emergency stop compatible
 - audit logging required before any execution
 - command policy enforcement required before any execution
+- file zone policy enforcement required before any file access
 - authority tier must be selected before any resident behavior
 - adapter service remains separate from Hermes resident service
 
@@ -136,6 +137,7 @@ Before any resident service install:
 - audit log implemented
 - emergency stop implemented
 - command policy implemented
+- file zone policy implemented
 - resident loop dry-run tested
 - status command updated
 - `RunAtLoad=false`

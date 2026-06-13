@@ -434,3 +434,15 @@ The policy states that Hermes cannot execute commands yet and may only draft or 
 Phase 6F did not create a command executor, enable resident mode, start the adapter service, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
 
 Readiness position: command policy is proposed but not enforced. The next safe phase is file zone policy proposal.
+
+## Phase 6G File Zone Policy Result
+
+Phase 6G created `docs/HERMES_FILE_ZONE_POLICY.md`.
+
+The proposal defines green read/write zones, yellow read-only zones, orange approval-required zones, and red forbidden zones. It identifies approved sandbox and audit paths, read-only docs/scripts/tests context, approval-required writes, and forbidden secret/system/private paths.
+
+The policy includes secret detection rules, symlink refusal or resolution, path traversal refusal, zone classification, read/write gates, audit events for every file read/write, and fail-closed behavior on ambiguity.
+
+Phase 6G did not implement path enforcement, scan files, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
+
+Readiness position: file zone policy is proposed but not enforced. The next safe phase is human approval record model.

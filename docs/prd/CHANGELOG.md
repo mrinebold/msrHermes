@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6G Hermes file zone policy proposal.
+- Added `docs/HERMES_FILE_ZONE_POLICY.md`.
+- Defined green read/write zones, yellow read-only zones, orange approval-required zones, red forbidden zones, secret detection rules, future path normalization, symlink/path traversal handling, read/write gates, audit events for every file read/write, and acceptance criteria before resident mode.
+- Added tests confirming the file zone policy exists, includes green/yellow/orange/red zones, includes forbidden secret paths, includes symlink/path traversal concerns, says arbitrary Desktop/Documents scanning is forbidden, and says audit is required for file read/write.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6G result.
+- Confirmed Phase 6G did not implement path enforcement, scan files, enable command execution through Hermes, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6F Hermes command allowlist and denylist proposal.
 - Added `docs/HERMES_COMMAND_POLICY.md`.
 - Defined command policy principles, command categories, initial allowlist candidates, initial denylist entries, approval classes, future enforcement requirements, and acceptance criteria before command execution.
