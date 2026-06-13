@@ -1,7 +1,7 @@
 # Hermes File Zone Policy
 
 Phase: 6G
-Status: proposal only; file zone enforcement is not implemented yet
+Status: proposal only; file zone enforcement is not implemented yet; approval model proposed in Phase 6H
 
 ## Purpose
 
@@ -121,6 +121,8 @@ Future enforcement must include:
 - symlink behavior is implemented or explicitly refused
 - writes outside green zones require approval records
 
+Phase 6H defines the approval record model in `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
+
 ## Non-Goals
 
 Phase 6G does not approve:
@@ -138,4 +140,4 @@ Phase 6G does not approve:
 
 ## Proposal Conclusion
 
-Hermes needs explicit file zone classification before resident operation or command execution. The next safe phase is human approval record design.
+Hermes needs explicit file zone classification before resident operation or command execution. Phase 6H defines the human approval record model required for writes outside default green zones.

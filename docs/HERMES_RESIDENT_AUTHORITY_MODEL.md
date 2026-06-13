@@ -1,7 +1,7 @@
 # Hermes Resident Authority Model
 
 Phase: 6A
-Status: proposal only; resident mode not enabled yet; audit, emergency stop, resident service, delegation, command policy, and file zone models proposed
+Status: proposal only; resident mode not enabled yet; resident safety policy models proposed through approval records
 
 ## Purpose
 
@@ -159,6 +159,8 @@ Not allowed:
 - Approval for one tier or target does not transfer to another tier or target.
 - Any write, send, commit, service control, credential use, or external action requires a phase-specific approval until Tier 7 is separately approved.
 - Ambiguous authority defaults to denied.
+
+Phase 6H defines the approval record model in `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
 
 ## Audit Log Requirements
 
@@ -379,3 +381,5 @@ Phase 6E proposes the Hermes-to-Helio delegation interface. Agent Bus remains fr
 Phase 6F proposes the command policy. Hermes command execution remains disabled.
 
 Phase 6G proposes the file zone policy. File zone enforcement remains unimplemented.
+
+Phase 6H proposes the approval record model. Approval storage and lookup remain unimplemented.

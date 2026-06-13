@@ -24,6 +24,7 @@ RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOS
 HELIO_DELEGATION_INTERFACE = REPO_ROOT / "docs" / "HERMES_HELIO_DELEGATION_INTERFACE.md"
 COMMAND_POLICY = REPO_ROOT / "docs" / "HERMES_COMMAND_POLICY.md"
 FILE_ZONE_POLICY = REPO_ROOT / "docs" / "HERMES_FILE_ZONE_POLICY.md"
+APPROVAL_RECORD_MODEL = REPO_ROOT / "docs" / "HERMES_APPROVAL_RECORD_MODEL.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -704,6 +705,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             HELIO_DELEGATION_INTERFACE,
             COMMAND_POLICY,
             FILE_ZONE_POLICY,
+            APPROVAL_RECORD_MODEL,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1033,6 +1035,34 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("path traversal refusal", content)
         self.assertIn("symlink refusal or resolution", content)
         self.assertIn("audit event on every file read/write", content)
+
+    def test_approval_record_model_has_required_fields_and_no_blankets(self):
+        content = APPROVAL_RECORD_MODEL.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("expiration", content)
+        self.assertIn("audit_event_id", content)
+        self.assertIn("no secret values", content)
+        self.assertIn("blanket permanent approval", content)
+        self.assertIn("approval by model alone", content)
+        self.assertNotIn("blanket permanent approval is allowed", lower_content)
+        self.assertNotIn("model-only approval is allowed", lower_content)
+
+    def test_approval_record_model_covers_sensitive_action_types(self):
+        content = APPROVAL_RECORD_MODEL.read_text(encoding="utf-8")
+
+        for approval_type in (
+            "service_start",
+            "command_execute",
+            "git_push",
+            "resident_start",
+            "emergency_stop",
+        ):
+            self.assertIn(approval_type, content)
+
+        self.assertIn("local JSONL", content)
+        self.assertIn("no cloud sync by default", content)
+        self.assertIn("linked to audit events", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -1,7 +1,7 @@
 # Hermes Resident Service Proposal
 
 Phase: 6D
-Status: proposal only; no resident service created; command and file zone policies proposed
+Status: proposal only; no resident service created; command, file zone, and approval policies proposed
 
 ## Purpose
 
@@ -138,6 +138,7 @@ Before any resident service install:
 - emergency stop implemented
 - command policy implemented
 - file zone policy implemented
+- approval record model implemented
 - resident loop dry-run tested
 - status command updated
 - `RunAtLoad=false`

@@ -200,4 +200,4 @@ Phase 6C does not approve:
 
 ## Proposal Conclusion
 
-Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation.
+Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation.

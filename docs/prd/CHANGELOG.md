@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6H Hermes human approval record model proposal.
+- Added `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
+- Defined approval purpose, required approval record fields, approval types, local JSONL storage under `logs/hermes_approvals/`, approval lifecycle, non-goals, audit integration, command policy integration, emergency stop integration, and acceptance criteria before execution.
+- Added tests confirming the approval model exists, includes expiration, forbids blanket permanent approvals and model-only approvals, includes `audit_event_id`, includes no secret values, and covers `service_start`, `command_execute`, `git_push`, and `resident_start`.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_FILE_ZONE_POLICY.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6H result.
+- Confirmed Phase 6H did not implement approval storage, enable command execution through Hermes, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6G Hermes file zone policy proposal.
 - Added `docs/HERMES_FILE_ZONE_POLICY.md`.
 - Defined green read/write zones, yellow read-only zones, orange approval-required zones, red forbidden zones, secret detection rules, future path normalization, symlink/path traversal handling, read/write gates, audit events for every file read/write, and acceptance criteria before resident mode.

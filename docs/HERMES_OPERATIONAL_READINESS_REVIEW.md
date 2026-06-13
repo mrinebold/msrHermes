@@ -446,3 +446,15 @@ The policy includes secret detection rules, symlink refusal or resolution, path 
 Phase 6G did not implement path enforcement, scan files, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
 
 Readiness position: file zone policy is proposed but not enforced. The next safe phase is human approval record model.
+
+## Phase 6H Approval Record Model Result
+
+Phase 6H created `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
+
+The proposal defines approval purpose, required fields, approval types, local JSONL storage under `logs/hermes_approvals/`, lifecycle, non-goals, audit integration, command policy integration, emergency stop integration, and acceptance criteria before execution.
+
+The model requires scoped, expiring, auditable approval records before future execution, writes, sends, commits, service starts, resident starts, or external actions. It forbids blanket permanent approval, approval by model alone, hidden approvals, external approval stores, and credentials inside approval records.
+
+Phase 6H did not implement approval storage, enable command execution, enable resident mode, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
+
+Readiness position: resident safety policies now cover command policy, file zones, and approval records as proposals. The next safe phase is implementation planning for audit logs, approval records, file-zone enforcement, and emergency stop, still without enabling resident mode.
