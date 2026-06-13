@@ -204,6 +204,14 @@ Phase 6B does not approve:
 - credential use
 - `~/.hermes` modification
 
+## Phase 6J Implementation Plan
+
+Phase 6J adds `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`.
+
+The implementation plan proposes future modules `services/hermes_safety/audit_log.py`, `services/hermes_safety/approval_records.py`, and `services/hermes_safety/redaction.py`; local JSONL storage under `logs/hermes_audit/` and `logs/hermes_approvals/`; schemas; redaction rules; append-only behavior; tests; and future status-command integration.
+
+Phase 6J does not implement audit writes, create `services/hermes_safety/`, create log directories, run Hermes live, start the adapter service, enable resident mode, create a Hermes launchd service, connect integrations, use credentials, modify `~/.hermes`, or broaden authority.
+
 ## Proposal Conclusion
 
-Hermes needs local, metadata-first, append-only audit logs before resident or execution authority is enabled. Phase 6C defines the emergency stop model that must emit `emergency_stop` events after audit logging is implemented. Phase 6D proposes a future resident service that requires audit logging before execution. Phase 6F defines the command policy that must create audit events before any future approved command execution. Phase 6G defines file zone policy; future file reads and writes must emit audit events. Phase 6H defines approval records that must link to audit events.
+Hermes needs local, metadata-first, append-only audit logs before resident or execution authority is enabled. Phase 6C defines the emergency stop model that must emit `emergency_stop` events after audit logging is implemented. Phase 6D proposes a future resident service that requires audit logging before execution. Phase 6F defines the command policy that must create audit events before any future approved command execution. Phase 6G defines file zone policy; future file reads and writes must emit audit events. Phase 6H defines approval records that must link to audit events. Phase 6J plans the first audit and approval implementation, but audit writes remain unimplemented.

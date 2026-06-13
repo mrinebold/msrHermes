@@ -170,6 +170,14 @@ Future emergency stop must be able to:
 - expiration handling tested
 - no secret values stored
 
+## Phase 6J Implementation Plan
+
+Phase 6J adds `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`.
+
+The implementation plan proposes future modules `services/hermes_safety/audit_log.py`, `services/hermes_safety/approval_records.py`, and `services/hermes_safety/redaction.py`; local JSONL storage under `logs/hermes_audit/` and `logs/hermes_approvals/`; approval and audit schemas; redaction rules; append-only behavior; tests; and future status-command integration.
+
+Phase 6J does not implement approval storage, create `services/hermes_safety/`, create approval log directories, enable command execution, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, or enable resident mode.
+
 ## Proposal Conclusion
 
-Hermes must not execute, write, send, commit, start services, or take external action without scoped, expiring, auditable human approval where required. Approval records are not implemented yet.
+Hermes must not execute, write, send, commit, start services, or take external action without scoped, expiring, auditable human approval where required. Phase 6J plans the first approval record implementation, but approval records are not implemented yet.

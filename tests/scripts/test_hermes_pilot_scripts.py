@@ -26,6 +26,7 @@ COMMAND_POLICY = REPO_ROOT / "docs" / "HERMES_COMMAND_POLICY.md"
 FILE_ZONE_POLICY = REPO_ROOT / "docs" / "HERMES_FILE_ZONE_POLICY.md"
 APPROVAL_RECORD_MODEL = REPO_ROOT / "docs" / "HERMES_APPROVAL_RECORD_MODEL.md"
 SAFETY_IMPLEMENTATION_ROADMAP = REPO_ROOT / "docs" / "HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md"
+AUDIT_APPROVAL_IMPLEMENTATION_PLAN = REPO_ROOT / "docs" / "HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -708,6 +709,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             FILE_ZONE_POLICY,
             APPROVAL_RECORD_MODEL,
             SAFETY_IMPLEMENTATION_ROADMAP,
+            AUDIT_APPROVAL_IMPLEMENTATION_PLAN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1092,6 +1094,28 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("External integrations remain frozen", content)
         self.assertIn("Rollback:", content)
         self.assertIn("Acceptance criteria:", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
+
+    def test_audit_approval_implementation_plan_names_modules_and_storage(self):
+        content = AUDIT_APPROVAL_IMPLEMENTATION_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("services/hermes_safety/audit_log.py", content)
+        self.assertIn("services/hermes_safety/approval_records.py", content)
+        self.assertIn("services/hermes_safety/redaction.py", content)
+        self.assertIn("logs/hermes_audit/*.jsonl", content)
+        self.assertIn("logs/hermes_approvals/*.jsonl", content)
+        self.assertIn("Audit Event Schema", content)
+        self.assertIn("Approval Record Schema", content)
+
+    def test_audit_approval_implementation_plan_is_local_no_secret_planning(self):
+        content = AUDIT_APPROVAL_IMPLEMENTATION_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("no cloud sync", content)
+        self.assertIn("no secrets", content)
+        self.assertIn("Future tests should cover", content)
+        self.assertIn("Phase 6J is planning only", content)
+        self.assertIn("No module is implemented in Phase 6J", content)
         self.assertNotIn("resident mode is enabled", lower_content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
