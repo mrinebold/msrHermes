@@ -20,6 +20,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - The context-bearing task builder exists at `scripts/build_hermes_local_task.py`.
 - Compact task remediation is validated: Phase 5AZ-R succeeded with `sandbox/hermes_inbox/next_phase_recommendation_compact.task.md` after the larger generated task timed out in Phase 5AZ.
 - A read-only local status command exists at `scripts/hermes_local_status.sh`.
+- Phase 6M adds a local audit writer primitive that writes redacted JSONL events in tests without starting services or enabling runtime authority.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
@@ -46,6 +47,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - real credentials
 - broad filesystem authority
 - shell execution by Hermes
+- audit integration with resident behavior, command policy, emergency stop, or approval lookup
 
 ## Current Operational Procedure
 

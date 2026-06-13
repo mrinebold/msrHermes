@@ -1,7 +1,7 @@
 # Hermes Audit And Approval Implementation Plan
 
 Phase: 6J
-Status: implementation plan only; no runtime safety modules implemented
+Status: audit writer primitive implemented in Phase 6M; approval primitive pending
 
 ## Purpose
 
@@ -166,4 +166,4 @@ The status command must remain read-only and must not start services.
 
 ## Plan Conclusion
 
-The next implementation step should be a small local audit writer and approval record writer/reader, with redaction tests first. Until that implementation is separately approved and completed, audit and approval behavior remains design-only.
+Phase 6M implemented the first local audit writer primitive in `services/hermes_safety/audit_log.py` with temp-dir tests and no runtime authority. The next implementation step is the local approval record writer/reader. Approval records, audit integration, resident mode, command execution, and external integrations remain disabled.

@@ -1,7 +1,7 @@
 # Hermes Audit Log Design
 
 Phase: 6B
-Status: proposal only; audit logging not implemented yet; emergency stop design proposed in Phase 6C
+Status: local audit writer primitive implemented in Phase 6M; emergency stop design proposed in Phase 6C
 
 ## Purpose
 
@@ -212,6 +212,20 @@ The implementation plan proposes future modules `services/hermes_safety/audit_lo
 
 Phase 6J does not implement audit writes, create `services/hermes_safety/`, create log directories, run Hermes live, start the adapter service, enable resident mode, create a Hermes launchd service, connect integrations, use credentials, modify `~/.hermes`, or broaden authority.
 
+## Phase 6M Audit Writer Primitive
+
+Phase 6M adds `services/hermes_safety/__init__.py`, `services/hermes_safety/audit_log.py`, and `tests/services/test_hermes_audit_log.py`.
+
+The primitive provides:
+
+- `build_audit_event(...)`
+- `redact_event(event)`
+- `write_audit_event(event, log_dir=None)`
+
+It writes local JSONL events under `logs/hermes_audit/` by default, creates the directory when called, validates required fields, redacts secret-looking keys and values, and appends without rewriting prior events. Tests use temporary directories and do not require adapter, Hermes, Desktop, credentials, or external services.
+
+Phase 6M does not enable resident mode, command execution, external integrations, live Hermes runs, adapter service start, Desktop launch, Agent Bus reads/writes, `~/.hermes` changes, or autonomous operation.
+
 ## Proposal Conclusion
 
-Hermes needs local, metadata-first, append-only audit logs before resident or execution authority is enabled. Phase 6C defines the emergency stop model that must emit `emergency_stop` events after audit logging is implemented. Phase 6D proposes a future resident service that requires audit logging before execution. Phase 6F defines the command policy that must create audit events before any future approved command execution. Phase 6G defines file zone policy; future file reads and writes must emit audit events. Phase 6H defines approval records that must link to audit events. Phase 6J plans the first audit and approval implementation, but audit writes remain unimplemented.
+Hermes now has a local audit writer primitive, but audit integration with resident behavior, approval lookup, file-zone checks, command policy, emergency stop, status reporting, and any runtime authority remains unimplemented until later approved phases.

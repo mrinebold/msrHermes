@@ -902,15 +902,16 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("no cloud sync by default", content)
         self.assertIn("no external writes", content)
 
-    def test_audit_log_design_is_proposal_only(self):
+    def test_audit_log_design_tracks_local_primitive_without_runtime_authority(self):
         content = AUDIT_LOG_DESIGN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("proposal only; audit logging not implemented yet", content)
+        self.assertIn("local audit writer primitive implemented in Phase 6M", content)
+        self.assertIn("Phase 6M Audit Writer Primitive", content)
         self.assertIn("Phase 6B does not approve", content)
         self.assertIn("no secret values", content)
         self.assertNotIn("resident hermes is enabled", lower_content)
-        self.assertNotIn("audit writes are implemented", lower_content)
+        self.assertNotIn("runtime audit integration is enabled", lower_content)
 
     def test_emergency_stop_design_keeps_runtime_disabled(self):
         content = EMERGENCY_STOP_DESIGN.read_text(encoding="utf-8")
