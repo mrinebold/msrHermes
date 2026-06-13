@@ -208,6 +208,16 @@ scripts/hermes_emergency_stop.sh
 
 The emergency stop script is safe to run repeatedly. It creates `sandbox/hermes_control/FROZEN`, writes reason metadata, and records a metadata-only audit event when available. It does not delete artifacts, use sudo, start services, run Hermes live, launch Desktop, or connect integrations.
 
+Phase 6W validated that emergency stop freezes the dry-run loop: after running `scripts/hermes_emergency_stop.sh "Phase 6W validation"`, status reported the freeze flag and reason, and `scripts/hermes_resident_dry_run.sh` refused work without processing inbox tasks.
+
+There is no unfreeze script yet. If a later phase explicitly approves clearing a repo-local freeze, remove only the documented control files:
+
+```sh
+rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason
+```
+
+Do not remove unrelated artifacts, logs, approvals, backups, inbox tasks, outbox results, or Hermes configuration.
+
 Stop the adapter service first:
 
 ```sh

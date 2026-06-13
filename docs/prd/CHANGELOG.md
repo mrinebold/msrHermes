@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6W Hermes emergency stop freeze validation.
+- Ran `scripts/hermes_emergency_stop.sh "Phase 6W validation"` and confirmed it created `sandbox/hermes_control/FROZEN`, created `sandbox/hermes_control/FROZEN.reason`, wrote a metadata-only audit event, and reported no adapter listener, no loaded adapter LaunchAgent, no Hermes Desktop process, no Hermes task process, and no resident-like process.
+- Confirmed `scripts/hermes_local_status.sh` reported `freeze_flag_exists=yes`, `freeze_reason_exists=yes`, and latest audit action `emergency_stop`.
+- Confirmed `scripts/hermes_resident_dry_run.sh` refused work while frozen and did not process inbox tasks, start the adapter, run Hermes live, execute commands, or touch external systems.
+- Documented the manual unfreeze procedure and cleared only the two Phase 6W-created repo-local freeze files so Phase 6X can define the resident validation gate from an unfrozen baseline.
+- Updated `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 6W result.
+- Confirmed Phase 6W did not enable resident mode, create a Hermes launchd service, create a command executor, execute commands through Hermes, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6V Hermes audit and approval CLI helper implementation.
 - Added `scripts/hermes_audit_event.py` for harmless local audit visibility events. It allows only `observe`, `recommend`, `dry_run`, `fail_closed`, and `emergency_stop` action types and refuses executed-command, external-write, and resident-start events.
 - Added `scripts/hermes_approval_request.py` for requested-only local approval visibility records. It creates `requested` records only, never grants approvals, and never executes actions.

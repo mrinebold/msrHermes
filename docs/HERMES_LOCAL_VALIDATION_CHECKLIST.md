@@ -111,6 +111,7 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5BC adds a read-only local status command without starting services or changing runtime state
 - Phase 6S adds a dry-run policy check command that classifies proposed commands and paths without executing commands or reading/writing target files
 - Phase 6T adds a one-shot dry-run resident loop that scans only `sandbox/hermes_inbox`, writes redacted proposals only to `sandbox/hermes_outbox`, and does not run Hermes live or start the adapter
+- Phase 6W validates emergency stop freeze behavior and confirms the dry-run resident loop refuses work while frozen
 
 ## Credential Deferral Boundary
 
@@ -163,6 +164,7 @@ Record:
 - test results
 - confirmation that no live adapter, Hermes pilot, Desktop, integration, credential, Agent Bus read/write, background service, or authority-broadening action occurred
 - dry-run policy classifications and dry-run resident proposals when those scripts are explicitly approved
+- emergency stop freeze-state evidence when emergency stop validation is explicitly approved
 
 ## Next Gate
 

@@ -913,6 +913,29 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotRegex(output, r"ghp_[A-Za-z0-9_]{8,}")
         self.assertNotRegex(output, r"github_pat_[A-Za-z0-9_]{8,}")
 
+    def test_hermes_local_status_reports_temp_freeze_state(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            control = Path(temp_dir) / "sandbox" / "hermes_control"
+            control.mkdir(parents=True)
+            (control / "FROZEN").write_text("frozen\n", encoding="utf-8")
+            (control / "FROZEN.reason").write_text("timestamp=2026-06-13T00:00:00Z\n", encoding="utf-8")
+            env = os.environ.copy()
+            env["HERMES_REPO_ROOT"] = temp_dir
+
+            result = subprocess.run(
+                [str(HERMES_LOCAL_STATUS)],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("freeze_flag_exists=yes", result.stdout)
+            self.assertIn("freeze_reason_exists=yes", result.stdout)
+            self.assertIn("freeze_reason_first_line=timestamp=2026-06-13T00:00:00Z", result.stdout)
+
     def test_hermes_emergency_stop_script_is_no_sudo_no_delete_no_start(self):
         content = HERMES_EMERGENCY_STOP.read_text(encoding="utf-8")
 

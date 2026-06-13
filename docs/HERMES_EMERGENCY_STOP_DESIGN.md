@@ -226,3 +226,31 @@ The script does not use sudo, delete artifacts, start services, run Hermes live,
 ## Proposal Conclusion
 
 Emergency stop is now implemented as a local script, but resident Hermes remains disabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation.
+
+## Phase 6W Emergency Stop Validation
+
+Phase 6W ran:
+
+```sh
+scripts/hermes_emergency_stop.sh "Phase 6W validation"
+```
+
+Observed result:
+
+- `sandbox/hermes_control/FROZEN` was created.
+- `sandbox/hermes_control/FROZEN.reason` was created.
+- status reported `freeze_flag_exists=yes` and `freeze_reason_exists=yes`.
+- latest audit action reported `emergency_stop`.
+- adapter listener on `8088` was absent.
+- adapter LaunchAgent was not loaded.
+- Hermes Desktop, Hermes CLI task, and resident-like processes were absent.
+- `scripts/hermes_resident_dry_run.sh` refused work while frozen.
+
+Phase 6W then cleared only the two phase-created repo-local freeze files so Phase 6X could document a resident validation gate starting from an unfrozen state. This is not a general unfreeze command.
+
+Manual unfreeze remains documentation-only:
+
+```sh
+# Only after human approval, and only for the repo-local freeze files:
+rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason
+```

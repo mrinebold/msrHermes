@@ -161,3 +161,11 @@ If a later implementation is unsafe:
 ## Plan Conclusion
 
 Phase 6R implements the no-sudo emergency stop script at `scripts/hermes_emergency_stop.sh`. It creates the freeze flag, records reason metadata, stops only the already-approved adapter service if it is running, and writes an audit event when safe. The dry-run resident loop remains pending and must still propose actions only and exit cleanly.
+
+Phase 6W validates the freeze behavior end to end. Emergency stop created the repo-local freeze flag and reason file, status reported both, and `scripts/hermes_resident_dry_run.sh` refused work while frozen without starting the adapter, running Hermes, executing commands, or processing inbox tasks.
+
+Unfreeze remains manual and approval-bound. There is no unfreeze script. For Phase 6W only, the phase-created files were cleared after validation so the next resident validation gate can begin with `freeze_flag_exists=no`:
+
+```sh
+rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason
+```

@@ -511,3 +511,20 @@ The script runs once, refuses work when `sandbox/hermes_control/FROZEN` exists, 
 The script does not enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
 
 Readiness position: Hermes now has read-only/status, emergency stop/freeze, dry-run policy classification, and one-shot dry-run inbox proposal generation. Actual resident operation and command execution remain blocked pending later explicit approval.
+
+## Phase 6W Emergency Stop Freeze Validation Result
+
+Phase 6W validated emergency stop against the dry-run resident loop.
+
+Observed result:
+
+- emergency stop created `sandbox/hermes_control/FROZEN`
+- emergency stop created `sandbox/hermes_control/FROZEN.reason`
+- status reported freeze flag and freeze reason visibility
+- latest audit action was `emergency_stop`
+- dry-run resident loop refused work while frozen
+- adapter listener remained absent
+- adapter LaunchAgent remained unloaded
+- Hermes Desktop, Hermes task, and resident-like processes remained absent
+
+Final phase state: the two Phase 6W-created freeze files were cleared after validation so Phase 6X can define a resident validation gate from an unfrozen baseline. Emergency stop remains available and validated. Resident mode and command execution remain disabled.
