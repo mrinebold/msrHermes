@@ -25,6 +25,7 @@ HELIO_DELEGATION_INTERFACE = REPO_ROOT / "docs" / "HERMES_HELIO_DELEGATION_INTER
 COMMAND_POLICY = REPO_ROOT / "docs" / "HERMES_COMMAND_POLICY.md"
 FILE_ZONE_POLICY = REPO_ROOT / "docs" / "HERMES_FILE_ZONE_POLICY.md"
 APPROVAL_RECORD_MODEL = REPO_ROOT / "docs" / "HERMES_APPROVAL_RECORD_MODEL.md"
+SAFETY_IMPLEMENTATION_ROADMAP = REPO_ROOT / "docs" / "HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -706,6 +707,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             COMMAND_POLICY,
             FILE_ZONE_POLICY,
             APPROVAL_RECORD_MODEL,
+            SAFETY_IMPLEMENTATION_ROADMAP,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1063,6 +1065,34 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("local JSONL", content)
         self.assertIn("no cloud sync by default", content)
         self.assertIn("linked to audit events", content)
+
+    def test_safety_implementation_roadmap_has_ordered_prereqs(self):
+        content = SAFETY_IMPLEMENTATION_ROADMAP.read_text(encoding="utf-8")
+
+        expected_order = (
+            "Stage 1: Audit Log Writer",
+            "Stage 2: Approval Record Writer/Reader",
+            "Stage 3: File Zone Classifier",
+            "Stage 4: Command Policy Classifier",
+            "Stage 5: Emergency Stop Script",
+            "Stage 6: Dry-Run Resident Loop",
+            "Stage 7: Resident Loop Proposal Validation",
+            "Stage 8: Manual Resident Dry-Run",
+            "Stage 9: Future Resident LaunchAgent Proposal",
+            "Stage 10: Future Resident Enablement Gate",
+        )
+        positions = [content.index(item) for item in expected_order]
+        self.assertEqual(positions, sorted(positions))
+
+    def test_safety_implementation_roadmap_is_planning_only(self):
+        content = SAFETY_IMPLEMENTATION_ROADMAP.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("resident mode not enabled", content)
+        self.assertIn("External integrations remain frozen", content)
+        self.assertIn("Rollback:", content)
+        self.assertIn("Acceptance criteria:", content)
+        self.assertNotIn("resident mode is enabled", lower_content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

@@ -162,6 +162,8 @@ Not allowed:
 
 Phase 6H defines the approval record model in `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
 
+Phase 6I defines the safety implementation roadmap in `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`. The roadmap is proposal-only and does not enable resident mode, command execution, safety-module runtime enforcement, service automation, or external integrations.
+
 ## Audit Log Requirements
 
 Audit logs must exist before any Tier 3 or higher authority is enabled.
@@ -383,3 +385,5 @@ Phase 6F proposes the command policy. Hermes command execution remains disabled.
 Phase 6G proposes the file zone policy. File zone enforcement remains unimplemented.
 
 Phase 6H proposes the approval record model. Approval storage and lookup remain unimplemented.
+
+Phase 6I proposes the staged safety implementation order. Runtime enforcement remains unimplemented, and resident mode remains disabled.

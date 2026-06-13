@@ -458,3 +458,26 @@ The model requires scoped, expiring, auditable approval records before future ex
 Phase 6H did not implement approval storage, enable command execution, enable resident mode, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
 
 Readiness position: resident safety policies now cover command policy, file zones, and approval records as proposals. The next safe phase is implementation planning for audit logs, approval records, file-zone enforcement, and emergency stop, still without enabling resident mode.
+
+## Phase 6I Safety Implementation Roadmap Result
+
+Phase 6I created `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`.
+
+The roadmap defines the staged implementation order for the safety infrastructure required before resident Hermes can be enabled:
+
+- audit log writer
+- approval record writer/reader
+- file-zone classifier
+- command-policy classifier
+- emergency stop script
+- dry-run resident loop
+- resident loop proposal validation
+- manual resident dry-run
+- future resident LaunchAgent proposal
+- final resident enablement gate
+
+Each stage documents objective, likely files/scripts, risks, tests, rollback, acceptance criteria, and what remains forbidden.
+
+Phase 6I did not implement safety modules, enable command execution, enable resident mode, create a Hermes launchd service, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
+
+Readiness position: the implementation order is now defined. The next safe phase is the audit and approval implementation plan, still proposal-only and still without runtime enforcement.

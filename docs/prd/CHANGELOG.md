@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6I Hermes safety implementation roadmap.
+- Added `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`.
+- Defined the staged implementation order for audit log writer, approval record writer/reader, file-zone classifier, command-policy classifier, emergency stop script, dry-run resident loop, resident loop proposal validation, manual resident dry-run, future resident LaunchAgent proposal, and final resident enablement gate.
+- For each roadmap stage, documented objective, likely files/scripts, risks, tests, rollback, acceptance criteria, and what remains forbidden.
+- Added tests confirming the roadmap exists, starts with audit/approval/file-zone/command-policy before resident-loop work, keeps resident mode disabled, keeps external integrations frozen, and includes rollback plus acceptance criteria.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6I result.
+- Confirmed Phase 6I did not implement safety modules, create a command executor, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6H Hermes human approval record model proposal.
 - Added `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
 - Defined approval purpose, required approval record fields, approval types, local JSONL storage under `logs/hermes_approvals/`, approval lifecycle, non-goals, audit integration, command policy integration, emergency stop integration, and acceptance criteria before execution.
