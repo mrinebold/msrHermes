@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6O Hermes file-zone classifier primitive implementation.
+- Added `services/hermes_safety/file_zones.py`.
+- Added `tests/services/test_hermes_file_zones.py`.
+- Implemented path normalization, green/yellow/orange/red/unknown zone classification, path traversal denial, symlink escape denial, secret-like filename denial, forbidden home/system/private zone denial, approval-required service-support path classification, and fail-closed unknown path behavior.
+- Added tests confirming green zone read/write allowed classification, yellow read-only/write approval-required behavior, orange service path approval requirement, red forbidden path denial, traversal denial, symlink-to-forbidden denial, secret-like filename denial, arbitrary Desktop/Documents denial, unknown-path fail closed behavior, and no write/content-read dependency.
+- Updated `docs/HERMES_FILE_ZONE_POLICY.md`, `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6O result.
+- Confirmed Phase 6O did not implement runtime file-operation enforcement, command execution through Hermes, resident mode, a Hermes launchd service, adapter service start, live Hermes runs, Google/Supabase/Home Assistant/GitHub/Helio/cloud connections, real credential use, live Agent Bus reads/writes, Hermes Desktop launch, `~/.hermes` modification, sudo, or force push.
 - Completed Phase 6N Hermes approval record primitive implementation.
 - Added `services/hermes_safety/approval_records.py`.
 - Added `tests/services/test_hermes_approval_records.py`.

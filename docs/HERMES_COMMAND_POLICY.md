@@ -219,6 +219,8 @@ The plan proposes future modules `services/hermes_safety/file_zones.py`, `servic
 
 Phase 6K does not implement a command executor, execute commands through Hermes, create classifier modules, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
 
+Phase 6O implements file-zone classification only in `services/hermes_safety/file_zones.py`. Command-policy classification and command execution remain disabled until later phases.
+
 ## Proposal Conclusion
 
 Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy enforcement, and approval record lookup are implemented and approved. Phase 6K plans classifier-only policy enforcement, but command execution remains disabled.

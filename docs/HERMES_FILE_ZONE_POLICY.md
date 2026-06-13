@@ -1,7 +1,7 @@
 # Hermes File Zone Policy
 
 Phase: 6G
-Status: proposal only; file zone enforcement is not implemented yet; approval model proposed in Phase 6H
+Status: file-zone classifier primitive implemented in Phase 6O; file operation enforcement remains disabled
 
 ## Purpose
 
@@ -148,6 +148,18 @@ The plan proposes future modules `services/hermes_safety/file_zones.py`, `servic
 
 Phase 6K does not implement path enforcement, create classifier modules, scan files, start services, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
 
+## Phase 6O File-Zone Classifier Primitive
+
+Phase 6O adds `services/hermes_safety/file_zones.py` and `tests/services/test_hermes_file_zones.py`.
+
+The primitive provides:
+
+- `classify_path(path, repo_root=None, operation="read")`
+- `is_secret_like_path(path)`
+- `normalize_path(path, repo_root=None)`
+
+It classifies green, yellow, orange, red, and unknown zones; denies path traversal; denies symlink escapes; denies secret-like filenames; denies red forbidden zones; treats unknown paths as fail-closed; and requires approval for writes to docs/scripts/tests and service support paths. It does not read file contents, perform writes, execute commands, start services, or enforce runtime file operations.
+
 ## Proposal Conclusion
 
-Hermes needs explicit file zone classification before resident operation or command execution. Phase 6H defines the human approval record model required for writes outside default green zones. Phase 6K plans the first classifier-only implementation, but file-zone enforcement remains unimplemented.
+Hermes now has explicit file-zone classification before resident operation or command execution. Phase 6H defines the human approval record model required for writes outside default green zones. Phase 6O implements classifier-only behavior, but runtime file-operation enforcement remains unimplemented.

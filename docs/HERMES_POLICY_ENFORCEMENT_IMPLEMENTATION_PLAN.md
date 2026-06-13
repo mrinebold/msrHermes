@@ -1,7 +1,7 @@
 # Hermes Policy Enforcement Implementation Plan
 
 Phase: 6K
-Status: implementation plan only; classifier design only; no command execution
+Status: file-zone classifier primitive implemented in Phase 6O; command classifier pending
 
 ## Purpose
 
@@ -152,3 +152,5 @@ If classifiers are implemented incorrectly in a future phase:
 ## Plan Conclusion
 
 The next implementation step after audit and approval planning should be classifier-only file-zone and command-policy modules. Those modules must classify and fail closed; they must not execute commands, edit files, start services, or enable resident mode.
+
+Phase 6O implements the file-zone classifier primitive in `services/hermes_safety/file_zones.py`. The command-policy classifier remains pending until Phase 6P. Runtime enforcement, command execution, service control, resident mode, and external integrations remain disabled.
