@@ -38,6 +38,7 @@ ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 HERMES_LOCAL_STATUS = REPO_ROOT / "scripts" / "hermes_local_status.sh"
 HERMES_EMERGENCY_STOP = REPO_ROOT / "scripts" / "hermes_emergency_stop.sh"
+HERMES_RESIDENT_DRY_RUN = REPO_ROOT / "scripts" / "hermes_resident_dry_run.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
@@ -72,6 +73,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             ADAPTER_SERVICE_STATUS,
             HERMES_LOCAL_STATUS,
             HERMES_EMERGENCY_STOP,
+            HERMES_RESIDENT_DRY_RUN,
             LOCAL_TASK_RUNNER,
         ):
             with self.subTest(script=script.name):
@@ -1220,11 +1222,11 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("sandbox/hermes_control/FROZEN", content)
         self.assertIn("safe to run repeatedly", content)
 
-    def test_emergency_stop_and_dry_run_plan_keeps_dry_run_resident_pending(self):
+    def test_emergency_stop_and_dry_run_plan_keeps_resident_mode_disabled(self):
         content = EMERGENCY_STOP_AND_DRY_RUN_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: emergency stop script implemented in Phase 6R; dry-run resident loop pending", content)
+        self.assertIn("dry-run resident loop implemented in Phase 6T", content)
         self.assertIn("no command execution", content)
         self.assertIn("no external integrations", content)
         self.assertIn("scan only `sandbox/hermes_inbox/`", content)

@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6T Hermes dry-run resident loop implementation.
+- Added executable `scripts/hermes_resident_dry_run.sh`.
+- Implemented a one-shot dry-run loop that refuses work when `sandbox/hermes_control/FROZEN` exists, scans only `sandbox/hermes_inbox/*.task.md`, writes redacted dry-run proposal files under `sandbox/hermes_outbox/`, records metadata-only local audit events when available, archives nothing, deletes nothing, and exits.
+- Added tests confirming shell syntax, no sudo, no adapter start, no live Hermes task runner, no command execution markers, freeze flag refusal, redacted outbox proposal writing, no archive creation, and local audit event behavior in a temp root.
+- Updated `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`, `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, `docs/HERMES_LOCAL_VALIDATION_CHECKLIST.md`, and the master PRD with the Phase 6T result.
+- Confirmed Phase 6T did not enable resident mode, create a Hermes launchd service, create a command executor, execute commands through Hermes, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6S Hermes dry-run policy check implementation.
 - Added `scripts/hermes_policy_check.py`.
 - Implemented classification-only checks for proposed commands and file operations using the local command-policy and file-zone primitives, with plain-text or JSON output and explicit exit codes for allowed, approval-required, denied, and script-error outcomes.

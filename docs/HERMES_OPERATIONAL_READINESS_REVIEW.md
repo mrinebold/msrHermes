@@ -491,3 +491,23 @@ The script is a no-sudo, repeat-safe local emergency stop entrypoint. It creates
 The script does not kill arbitrary processes, delete artifacts, start services, run Hermes live, launch Desktop, modify `~/.hermes`, connect integrations, print secrets, or enable resident mode.
 
 Readiness position: emergency stop now exists for local freeze/approved-adapter-stop behavior. The next safe phase is a dry-run policy check script, still without command execution or resident mode.
+
+## Phase 6S Dry-Run Policy Check Result
+
+Phase 6S created `scripts/hermes_policy_check.py`.
+
+The script classifies proposed commands and file operations using the local safety primitives. It reports classification, reason, approval requirement, denial state, and matched policy rule in plain text or JSON. It returns `0` for allowed read-only or allowed green/yellow path checks, `2` for approval-required checks, and `3` for denied or unknown checks.
+
+The script does not execute commands, read or write target files, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
+
+Readiness position: policy classification is now script-accessible for dry runs only. The next safe phase is a one-shot dry-run resident loop that uses inbox/outbox boundaries without running Hermes live or executing commands.
+
+## Phase 6T Dry-Run Resident Loop Result
+
+Phase 6T created `scripts/hermes_resident_dry_run.sh`.
+
+The script runs once, refuses work when `sandbox/hermes_control/FROZEN` exists, scans only `sandbox/hermes_inbox/*.task.md`, writes redacted dry-run proposal files under `sandbox/hermes_outbox/`, records metadata-only audit events when available, archives nothing, deletes nothing, and exits.
+
+The script does not enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden Hermes authority.
+
+Readiness position: Hermes now has read-only/status, emergency stop/freeze, dry-run policy classification, and one-shot dry-run inbox proposal generation. Actual resident operation and command execution remain blocked pending later explicit approval.

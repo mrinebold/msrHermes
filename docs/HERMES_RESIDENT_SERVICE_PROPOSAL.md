@@ -1,13 +1,15 @@
 # Hermes Resident Service Proposal
 
 Phase: 6D
-Status: proposal only; no resident service created; command, file zone, and approval policies proposed
+Status: proposal only; no resident service created; dry-run loop script implemented in Phase 6T; command execution and resident mode remain disabled
 
 ## Purpose
 
 This document proposes the future Hermes resident service design without creating, installing, loading, or starting any Hermes resident service.
 
 Phase 6D is documentation only. It does not create `scripts/hermes_resident_loop.sh`, create a LaunchAgent, set `RunAtLoad=true`, set `KeepAlive=true`, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority in code.
+
+Phase 6T added `scripts/hermes_resident_dry_run.sh` as a one-shot dry-run script. It is not a resident service, does not run in the background, does not use launchd, does not start the adapter, does not run Hermes live, and does not execute commands.
 
 ## Proposed Resident Service Purpose
 
@@ -59,6 +61,14 @@ scripts/hermes_resident_loop.sh
 ```
 
 Do not create this script in Phase 6D. A later phase may propose or implement a dry-run-only stub after audit logging and emergency stop implementation plans are approved.
+
+Dry-run script now available:
+
+```text
+scripts/hermes_resident_dry_run.sh
+```
+
+This script scans only `sandbox/hermes_inbox/`, writes redacted dry-run proposal files only under `sandbox/hermes_outbox/`, writes metadata-only audit events when the local audit writer is available, respects `sandbox/hermes_control/FROZEN`, and exits after one pass.
 
 ## Resident Loop Responsibilities
 

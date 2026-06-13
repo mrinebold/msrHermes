@@ -1,13 +1,15 @@
 # Hermes Emergency Stop And Dry-Run Resident Loop Plan
 
 Phase: 6L
-Status: emergency stop script implemented in Phase 6R; dry-run resident loop pending
+Status: emergency stop script implemented in Phase 6R; dry-run resident loop implemented in Phase 6T; resident mode remains disabled
 
 ## Purpose
 
 This plan defines how Hermes should later implement a safe emergency stop command and a dry-run resident loop after audit logs, approval records, file-zone classification, and command-policy classification are implemented.
 
 Phase 6L is planning only. It does not create `scripts/hermes_emergency_stop.sh`, create `scripts/hermes_resident_dry_run.sh`, create freeze flags, start services, run Hermes live, enable resident mode, create a Hermes launchd service, execute commands, connect integrations, use credentials, modify `~/.hermes`, or broaden Hermes authority.
+
+Phase 6T implemented `scripts/hermes_resident_dry_run.sh` as a one-shot dry-run script. It does not enable resident mode, create launchd service files, execute commands, run Hermes live, start the adapter, connect integrations, or archive/delete task files.
 
 ## Proposed Emergency Stop Script
 
@@ -27,7 +29,7 @@ Future script:
 scripts/hermes_resident_dry_run.sh
 ```
 
-The dry-run loop should be a foreground/manual script first. It must not create a launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, run unattended, execute shell commands, connect external integrations, or launch Desktop.
+The dry-run loop is a foreground/manual script first. It must not create a launchd service, set `RunAtLoad=true`, set `KeepAlive=true`, run unattended, execute shell commands, connect external integrations, or launch Desktop.
 
 ## Emergency Stop Behavior
 
@@ -91,6 +93,16 @@ Future dry-run resident loop behavior:
 - exit cleanly after one bounded pass unless a later phase approves a loop
 
 Dry-run output should be a proposed action summary, not an executed action.
+
+Phase 6T implementation behavior:
+
+- runs once and exits
+- refuses work when `sandbox/hermes_control/FROZEN` exists
+- scans only `sandbox/hermes_inbox/*.task.md`
+- writes `<task-name>.dry_run.md` files only under `sandbox/hermes_outbox/`
+- redacts task contents from dry-run proposal files
+- records metadata-only audit events under ignored local audit logs when the audit writer is importable
+- archives nothing and deletes nothing
 
 ## Integration Prerequisites
 

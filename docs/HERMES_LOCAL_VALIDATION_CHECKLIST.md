@@ -109,6 +109,8 @@ The local pilot and adapter configuration must preserve these invariants:
 - Phase 5BA documents the safe daily manual local-only operations loop without starting the adapter or Hermes
 - Phase 5BB certifies manual local-only readiness without starting the adapter or Hermes
 - Phase 5BC adds a read-only local status command without starting services or changing runtime state
+- Phase 6S adds a dry-run policy check command that classifies proposed commands and paths without executing commands or reading/writing target files
+- Phase 6T adds a one-shot dry-run resident loop that scans only `sandbox/hermes_inbox`, writes redacted proposals only to `sandbox/hermes_outbox`, and does not run Hermes live or start the adapter
 
 ## Credential Deferral Boundary
 
@@ -141,6 +143,14 @@ git diff --check
 
 Do not run the adapter or Hermes live in Phase 5AJ.
 
+For Phase 6T dry-run validation, the only approved resident-loop check is:
+
+```sh
+scripts/hermes_resident_dry_run.sh
+```
+
+It must leave no adapter listener, no Hermes process, no Desktop process, and no resident service. It must not archive or delete task files.
+
 ## Evidence To Record
 
 Record:
@@ -152,6 +162,7 @@ Record:
 - whether local-only mode remains compatible with the Phase 5AI credential deferral freeze
 - test results
 - confirmation that no live adapter, Hermes pilot, Desktop, integration, credential, Agent Bus read/write, background service, or authority-broadening action occurred
+- dry-run policy classifications and dry-run resident proposals when those scripts are explicitly approved
 
 ## Next Gate
 
