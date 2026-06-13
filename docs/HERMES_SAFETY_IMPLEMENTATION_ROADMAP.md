@@ -420,3 +420,5 @@ Phase 6M implements Stage 1 as a local audit writer primitive in `services/herme
 Phase 6N implements Stage 2 as a local approval record writer/reader primitive in `services/hermes_safety/approval_records.py`. The implementation remains a library-only primitive and does not grant approval automatically, execute approved actions, integrate with resident mode, start services, run Hermes live, or connect external systems.
 
 Phase 6O implements Stage 3 as a local file-zone classifier primitive in `services/hermes_safety/file_zones.py`. The implementation classifies paths only and does not perform file operations, enforce writes, execute commands, start services, run Hermes live, or enable resident mode.
+
+Phase 6P implements Stage 4 as a local command-policy classifier primitive in `services/hermes_safety/command_policy.py` with shared results in `services/hermes_safety/policy_result.py`. The implementation classifies commands only and does not execute commands, start services, run Hermes live, connect integrations, or enable resident mode.

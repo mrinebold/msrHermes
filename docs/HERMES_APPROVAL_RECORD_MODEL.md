@@ -197,3 +197,5 @@ Phase 6N does not execute approved actions, grant approval automatically, enable
 ## Proposal Conclusion
 
 Hermes must not execute, write, send, commit, start services, or take external action without scoped, expiring, auditable human approval where required. Phase 6N implements local approval record storage and validity checks, but approval records do not execute actions and are not integrated with resident behavior or command execution yet.
+
+Phase 6P implements command-policy classification only. Commands that classify as approval-required can be matched to approval records in a later integration phase, but Phase 6P does not perform approval lookup automatically and does not execute commands.

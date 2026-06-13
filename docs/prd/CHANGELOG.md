@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6P Hermes command-policy classifier primitive implementation.
+- Added `services/hermes_safety/policy_result.py` and `services/hermes_safety/command_policy.py`.
+- Added `tests/services/test_hermes_command_policy.py`.
+- Implemented argv parsing, denylist-first classification, exact/bounded read-only allowlist matching, approval-required classification, file-zone integration for path-sensitive commands, external curl denial except approved localhost/DevMonster status endpoints, and fail-closed handling for unknown or ambiguous commands.
+- Added tests confirming sudo denial, destructive git/delete denial, adapter status allowed-readonly classification, adapter start approval-required classification, git status allowed-readonly classification, git push approval-required classification, external curl denial, localhost health curl allowed-readonly classification, secret path denial, unknown command fail-closed behavior, ambiguous shell syntax fail-closed behavior, and no command execution.
+- Updated `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, `docs/HERMES_APPROVAL_RECORD_MODEL.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6P result.
+- Confirmed Phase 6P did not create a command executor, execute commands through Hermes, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6O Hermes file-zone classifier primitive implementation.
 - Added `services/hermes_safety/file_zones.py`.
 - Added `tests/services/test_hermes_file_zones.py`.

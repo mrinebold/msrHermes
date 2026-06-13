@@ -221,6 +221,21 @@ Phase 6K does not implement a command executor, execute commands through Hermes,
 
 Phase 6O implements file-zone classification only in `services/hermes_safety/file_zones.py`. Command-policy classification and command execution remain disabled until later phases.
 
+## Phase 6P Command-Policy Classifier Primitive
+
+Phase 6P adds `services/hermes_safety/policy_result.py`, `services/hermes_safety/command_policy.py`, and `tests/services/test_hermes_command_policy.py`.
+
+The primitive provides:
+
+- `classify_command(command, repo_root=None)`
+- `is_denied_command(argv)`
+- `is_allowed_readonly(argv)`
+- `requires_approval(argv)`
+
+It parses commands as argv, applies denylist rules first, matches exact or bounded read-only allowlist patterns, classifies approval-required operations, integrates with the file-zone classifier for path-sensitive commands, and fails closed on unknown or ambiguous shell syntax. It never executes commands.
+
+Phase 6P does not create a command executor, enable command execution through Hermes, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
+
 ## Proposal Conclusion
 
-Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy enforcement, and approval record lookup are implemented and approved. Phase 6K plans classifier-only policy enforcement, but command execution remains disabled.
+Hermes may draft and recommend commands, but execution remains disabled until command policy classification is integrated with approval lookup, audit logging, emergency stop, file-zone enforcement, and a separately approved executor. Phase 6P implements classifier-only policy behavior, but command execution remains disabled.
