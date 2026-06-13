@@ -1,7 +1,7 @@
 # Hermes Resident Mode Plan
 
 Phase: 5AO-6A
-Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority, audit, emergency stop, and service models proposed
+Status: manual adapter service operation validated; Hermes resident mode disabled; resident authority, audit, emergency stop, service, and delegation models proposed
 
 ## Purpose
 
@@ -26,6 +26,8 @@ Phase 6B adds `docs/HERMES_AUDIT_LOG_DESIGN.md` as the proposal-only audit model
 Phase 6C adds `docs/HERMES_EMERGENCY_STOP_DESIGN.md` as the proposal-only emergency stop model. It defines stop goals, triggers, stop levels, future command proposal, required behavior, audit interaction, and acceptance criteria before resident mode. It does not implement the emergency stop script or change runtime state.
 
 Phase 6D adds `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md` as the proposal-only future resident service design. It defines the proposed label `com.msr.hermes.resident`, execution model, loop responsibilities, non-goals, allowed and forbidden zones, processing flow, acceptance criteria, and rollback concept. It does not create a resident loop script, plist, or service.
+
+Phase 6E adds `docs/HERMES_HELIO_DELEGATION_INTERFACE.md` as the proposal-only Hermes-to-Helio delegation model. It defines ownership boundaries, delegation types, non-goals, future message shape, staged rollout, and acceptance criteria before Helio or Agent Bus integration.
 
 ## Proposed Resident Architecture
 
@@ -302,3 +304,11 @@ Phase 6D added `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md` as the proposal-only f
 The proposal keeps the first validation user-level, manual-start only, with `RunAtLoad=false`, `KeepAlive=false`, no sudo, audit logging required before execution, emergency stop compatibility, no shell execution, no external integrations, no Desktop, no credentials, and no broad filesystem scanning.
 
 No resident loop script was created, no Hermes LaunchAgent was created, no service was loaded or started, and resident mode remains disabled.
+
+## Phase 6E Hermes-To-Helio Delegation Interface Result
+
+Phase 6E added `docs/HERMES_HELIO_DELEGATION_INTERFACE.md` as the proposal-only delegation interface.
+
+The proposal preserves the boundary that Hermes owns the Mac mini local operator role, Helio/ANO owns agent society/governance, DevMonster supplies inference only, and Agent Bus remains frozen until approved. It defines delegation types, a future message shape, staged rollout, and acceptance criteria before any Helio or Agent Bus integration.
+
+No Helio connector was enabled, no Supabase or Agent Bus read/write occurred, no credential was used, and resident mode remains disabled.

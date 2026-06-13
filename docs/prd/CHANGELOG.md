@@ -2,6 +2,13 @@
 
 ## 2026-06-12
 
+- Completed Phase 6E Hermes-to-Helio delegation interface proposal.
+- Added `docs/HERMES_HELIO_DELEGATION_INTERFACE.md`.
+- Defined the boundary that Hermes owns the Mac mini local operator role, Helio/ANO owns agent society/governance, DevMonster supplies inference only, and Agent Bus remains frozen until approved.
+- Defined delegation types, non-goals, future message shape, staged rollout from documentation-only to resident delegated operator, audit requirements, and acceptance criteria before any Helio or Agent Bus integration.
+- Added tests confirming the delegation interface exists, says Agent Bus frozen, says no Supabase writes, distinguishes Hermes from Helio/ANO, says DevMonster is inference worker only, includes staged rollout, and includes audit and emergency stop prerequisites.
+- Updated `docs/HERMES_RESIDENT_AUTHORITY_MODEL.md`, `docs/HERMES_RESIDENT_MODE_PLAN.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6E result.
+- Confirmed Phase 6E did not connect Helio, write Supabase, read live Agent Bus records, use credentials, dispatch agents, start services, run Hermes live, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6D Hermes resident service proposal.
 - Added `docs/HERMES_RESIDENT_SERVICE_PROPOSAL.md`.
 - Defined proposed future service purpose, label `com.msr.hermes.resident`, user LaunchAgent execution model, future script path `scripts/hermes_resident_loop.sh`, resident loop responsibilities, non-goals, allowed and forbidden zones, proposed processing flow, acceptance criteria, and rollback concept.

@@ -21,6 +21,7 @@ RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
+HELIO_DELEGATION_INTERFACE = REPO_ROOT / "docs" / "HERMES_HELIO_DELEGATION_INTERFACE.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -698,6 +699,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             AUDIT_LOG_DESIGN,
             EMERGENCY_STOP_DESIGN,
             RESIDENT_SERVICE_PROPOSAL,
+            HELIO_DELEGATION_INTERFACE,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -946,6 +948,38 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Allowed File Zones", content)
         self.assertIn("Forbidden Zones", content)
         self.assertIn("logs/hermes_audit/", content)
+
+    def test_helio_delegation_interface_preserves_boundaries(self):
+        content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Agent Bus frozen", content)
+        self.assertIn("Hermes owns the Mac mini local operator role", content)
+        self.assertIn("Helio/ANO owns agent society and governance", content)
+        self.assertIn("DevMonster supplies inference, not operational authority", content)
+        self.assertIn("direct Agent Bus writes", content)
+        self.assertIn("Supabase writes", content)
+        self.assertIn("Hermes impersonating ANO supervisor", content)
+        self.assertNotIn("agent bus writes are approved", lower_content)
+        self.assertNotIn("supabase writes are approved", lower_content)
+
+    def test_helio_delegation_interface_has_staged_rollout_and_prereqs(self):
+        content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")
+
+        for stage in (
+            "Stage 0: Documentation Only",
+            "Stage 1: Local File-Based Delegation Drafts",
+            "Stage 2: Read-Only Agent Bus Inspection",
+            "Stage 3: Draft Agent Bus Messages Only",
+            "Stage 4: Human-Approved Agent Bus Writes",
+            "Stage 5: Resident Delegated Operator",
+        ):
+            self.assertIn(stage, content)
+
+        self.assertIn("audit log implemented", content)
+        self.assertIn("emergency stop implemented", content)
+        self.assertIn("credential rotation decision complete", content)
+        self.assertIn("no secrets in messages", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

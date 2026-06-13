@@ -410,3 +410,15 @@ The proposal keeps first validation manual-start only, `RunAtLoad=false`, `KeepA
 Phase 6D did not create `scripts/hermes_resident_loop.sh`, create a resident LaunchAgent, set RunAtLoad/KeepAlive, start services, run Hermes live, connect integrations, use credentials, perform Agent Bus reads/writes, launch Desktop, modify `~/.hermes`, or broaden authority.
 
 Readiness position: the future resident service is designed but not implemented. The next safe phase is Hermes-to-Helio delegation interface design, proposal-only.
+
+## Phase 6E Hermes-To-Helio Delegation Interface Result
+
+Phase 6E created `docs/HERMES_HELIO_DELEGATION_INTERFACE.md`.
+
+The proposal defines the boundary between Hermes, Helio/ANO, DevMonster, and Agent Bus. Hermes owns the Mac mini local operator role; Helio/ANO owns agent society and governance; DevMonster supplies inference, not operational authority; and Agent Bus remains frozen until approved.
+
+The proposal defines delegation types, non-goals, a future message shape, staged rollout from documentation-only through resident delegated operator, audit requirements, and acceptance criteria before any Helio or Agent Bus integration.
+
+Phase 6E did not connect Helio, write Supabase, read live Agent Bus records, use credentials, dispatch agents, start services, run Hermes live, launch Desktop, modify `~/.hermes`, or broaden authority.
+
+Readiness position: resident-readiness proposals now cover authority, audit, emergency stop, resident service, and Helio delegation boundaries. The next safe phase is command allowlist and denylist proposal, or audit/emergency-stop implementation planning if explicitly approved.
