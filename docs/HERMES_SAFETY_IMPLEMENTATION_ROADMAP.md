@@ -410,3 +410,5 @@ What remains forbidden:
 Implementation must proceed in order: audit, approval, file-zone, command-policy, emergency stop, dry-run loop, validation, manual dry-run, LaunchAgent proposal, and final enablement gate. Resident mode remains disabled until a later explicit approval phase.
 
 Phase 6J adds `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`, which expands Stage 1 and Stage 2 into a concrete future implementation plan. Phase 6J remains planning-only and does not implement safety modules, create log directories, start services, run Hermes live, or enable resident mode.
+
+Phase 6K adds `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, which expands Stage 3 and Stage 4 into a classifier-only implementation plan. Phase 6K remains planning-only and does not implement file-zone enforcement, command-policy enforcement, command execution, service control, or resident mode.

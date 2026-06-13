@@ -27,6 +27,7 @@ FILE_ZONE_POLICY = REPO_ROOT / "docs" / "HERMES_FILE_ZONE_POLICY.md"
 APPROVAL_RECORD_MODEL = REPO_ROOT / "docs" / "HERMES_APPROVAL_RECORD_MODEL.md"
 SAFETY_IMPLEMENTATION_ROADMAP = REPO_ROOT / "docs" / "HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md"
 AUDIT_APPROVAL_IMPLEMENTATION_PLAN = REPO_ROOT / "docs" / "HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md"
+POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN = REPO_ROOT / "docs" / "HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md"
 ADAPTER_SERVICE_PLAN = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_INSTALL_PLAN.md"
 ADAPTER_SERVICE_REMEDIATION = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_PATH_REMEDIATION.md"
 ADAPTER_SERVICE_RUNBOOK = REPO_ROOT / "docs" / "HERMES_ADAPTER_SERVICE_RUNBOOK.md"
@@ -710,6 +711,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             APPROVAL_RECORD_MODEL,
             SAFETY_IMPLEMENTATION_ROADMAP,
             AUDIT_APPROVAL_IMPLEMENTATION_PLAN,
+            POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN,
             ADAPTER_SERVICE_PLAN,
             ADAPTER_SERVICE_REMEDIATION,
             ADAPTER_SERVICE_RUNBOOK,
@@ -1117,6 +1119,29 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Phase 6J is planning only", content)
         self.assertIn("No module is implemented in Phase 6J", content)
         self.assertNotIn("resident mode is enabled", lower_content)
+
+    def test_policy_enforcement_implementation_plan_is_classifier_only(self):
+        content = POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("services/hermes_safety/file_zones.py", content)
+        self.assertIn("services/hermes_safety/command_policy.py", content)
+        self.assertIn("services/hermes_safety/policy_result.py", content)
+        self.assertIn("return a policy result only", content)
+        self.assertIn("never execute commands", content)
+        self.assertIn("No module is implemented in Phase 6K", content)
+        self.assertNotIn("command execution is enabled", lower_content)
+
+    def test_policy_enforcement_implementation_plan_fails_closed_and_integrates_audit(self):
+        content = POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.read_text(encoding="utf-8")
+
+        self.assertIn("apply denylist rules first", content)
+        self.assertIn("fail closed on ambiguous syntax", content)
+        self.assertIn("resolve symlinks safely or refuse symlinks", content)
+        self.assertIn("detect path traversal attempts", content)
+        self.assertIn("refuse secret-like files and paths by default", content)
+        self.assertIn("approval lookup", content)
+        self.assertIn("audit log", content)
 
     def test_pilot_harness_writes_isolated_localhost_config_in_dry_run(self):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

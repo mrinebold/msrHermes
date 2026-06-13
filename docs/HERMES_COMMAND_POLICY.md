@@ -181,6 +181,7 @@ Future enforcement must include:
 
 Phase 6G defines the file zone policy in `docs/HERMES_FILE_ZONE_POLICY.md`.
 Phase 6H defines the approval record model in `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
+Phase 6K defines the classifier-only implementation plan in `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
 
 ## Acceptance Criteria Before Command Execution
 
@@ -210,6 +211,14 @@ Phase 6F does not approve:
 - credential use
 - `~/.hermes` modification
 
+## Phase 6K Implementation Plan
+
+Phase 6K adds `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
+
+The plan proposes future modules `services/hermes_safety/file_zones.py`, `services/hermes_safety/command_policy.py`, and `services/hermes_safety/policy_result.py`; argv-based command parsing; denylist-first classification; exact/bounded allowlist matching; approval-required outcomes; fail-closed ambiguity handling; and audit/approval integration.
+
+Phase 6K does not implement a command executor, execute commands through Hermes, create classifier modules, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
+
 ## Proposal Conclusion
 
-Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy enforcement, and approval record lookup are implemented and approved.
+Hermes may draft and recommend commands, but execution remains disabled until command policy enforcement, audit logging, emergency stop, file zone policy enforcement, and approval record lookup are implemented and approved. Phase 6K plans classifier-only policy enforcement, but command execution remains disabled.

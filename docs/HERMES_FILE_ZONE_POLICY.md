@@ -123,6 +123,8 @@ Future enforcement must include:
 
 Phase 6H defines the approval record model in `docs/HERMES_APPROVAL_RECORD_MODEL.md`.
 
+Phase 6K defines the classifier-only implementation plan in `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
+
 ## Non-Goals
 
 Phase 6G does not approve:
@@ -138,6 +140,14 @@ Phase 6G does not approve:
 - external integrations
 - Desktop launch
 
+## Phase 6K Implementation Plan
+
+Phase 6K adds `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
+
+The plan proposes future modules `services/hermes_safety/file_zones.py`, `services/hermes_safety/command_policy.py`, and `services/hermes_safety/policy_result.py`; path normalization; symlink handling; path traversal refusal; green/yellow/orange/red classification; secret-like file refusal; fail-closed ambiguity behavior; and audit/approval integration.
+
+Phase 6K does not implement path enforcement, create classifier modules, scan files, start services, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
+
 ## Proposal Conclusion
 
-Hermes needs explicit file zone classification before resident operation or command execution. Phase 6H defines the human approval record model required for writes outside default green zones.
+Hermes needs explicit file zone classification before resident operation or command execution. Phase 6H defines the human approval record model required for writes outside default green zones. Phase 6K plans the first classifier-only implementation, but file-zone enforcement remains unimplemented.

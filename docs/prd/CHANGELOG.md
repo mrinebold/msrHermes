@@ -2,6 +2,14 @@
 
 ## 2026-06-13
 
+- Completed Phase 6K Hermes file-zone and command-policy implementation plan.
+- Added `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`.
+- Defined future modules `services/hermes_safety/file_zones.py`, `services/hermes_safety/command_policy.py`, and `services/hermes_safety/policy_result.py`.
+- Planned file-zone classification with path normalization, safe symlink handling or refusal, path traversal refusal, green/yellow/orange/red classification, secret-like file refusal, fail-closed ambiguity behavior, and audit/approval metadata.
+- Planned command classification with argv parsing, denylist-first behavior, exact/bounded allowlist matching, approval-required outcomes, fail-closed ambiguity behavior, no execution, local task runner integration, future resident loop integration, approval lookup integration, and audit logging integration.
+- Added tests confirming the plan exists, says classifier only and no execution, says denylist first, says fail closed, mentions symlink/path traversal, and references audit/approval integration.
+- Updated `docs/HERMES_FILE_ZONE_POLICY.md`, `docs/HERMES_COMMAND_POLICY.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6K result.
+- Confirmed Phase 6K did not implement classifier modules, create a command executor, execute commands through Hermes, enforce file access, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6J Hermes audit and approval implementation plan.
 - Added `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`.
 - Defined future modules `services/hermes_safety/audit_log.py`, `services/hermes_safety/approval_records.py`, and `services/hermes_safety/redaction.py`.
