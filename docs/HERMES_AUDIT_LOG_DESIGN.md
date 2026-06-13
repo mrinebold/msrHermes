@@ -229,3 +229,5 @@ Phase 6M does not enable resident mode, command execution, external integrations
 ## Proposal Conclusion
 
 Hermes now has a local audit writer primitive, but audit integration with resident behavior, approval lookup, file-zone checks, command policy, emergency stop, status reporting, and any runtime authority remains unimplemented until later approved phases.
+
+Phase 6N adds a local approval record primitive in `services/hermes_safety/approval_records.py`. Approval records can link to future audit events by `audit_event_id`, but automatic audit emission from approval operations remains unimplemented until a later integration phase.

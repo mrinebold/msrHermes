@@ -1,7 +1,7 @@
 # Hermes Audit And Approval Implementation Plan
 
 Phase: 6J
-Status: audit writer primitive implemented in Phase 6M; approval primitive pending
+Status: audit writer primitive implemented in Phase 6M; approval record primitive implemented in Phase 6N
 
 ## Purpose
 
@@ -166,4 +166,4 @@ The status command must remain read-only and must not start services.
 
 ## Plan Conclusion
 
-Phase 6M implemented the first local audit writer primitive in `services/hermes_safety/audit_log.py` with temp-dir tests and no runtime authority. The next implementation step is the local approval record writer/reader. Approval records, audit integration, resident mode, command execution, and external integrations remain disabled.
+Phase 6M implemented the first local audit writer primitive in `services/hermes_safety/audit_log.py` with temp-dir tests and no runtime authority. Phase 6N implemented the local approval record writer/reader in `services/hermes_safety/approval_records.py`, including expiration checks, one-time-use handling, no model-only granted approvals, no blanket permanent approvals, and secret redaction. Audit integration, resident mode, command execution, and external integrations remain disabled.

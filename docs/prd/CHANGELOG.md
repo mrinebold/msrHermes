@@ -2,6 +2,13 @@
 
 ## 2026-06-13
 
+- Completed Phase 6N Hermes approval record primitive implementation.
+- Added `services/hermes_safety/approval_records.py`.
+- Added `tests/services/test_hermes_approval_records.py`.
+- Implemented local approval request creation, required-field validation, secret-looking key/value redaction, date-based JSONL path selection, approval directory creation when explicitly called, local approval record reading, expiration checks, one-time-use marking, model-only granted approval refusal, and blanket permanent approval refusal.
+- Added tests confirming local approval JSONL writes and reads, expiration behavior, one-time-use behavior, no model-only approvals, no blanket permanent approvals, secret redaction, sensitive action type representation, and no command execution.
+- Updated `docs/HERMES_APPROVAL_RECORD_MODEL.md`, `docs/HERMES_AUDIT_APPROVAL_IMPLEMENTATION_PLAN.md`, `docs/HERMES_AUDIT_LOG_DESIGN.md`, `docs/HERMES_SAFETY_IMPLEMENTATION_ROADMAP.md`, and the master PRD with the Phase 6N result.
+- Confirmed Phase 6N did not implement runtime approval enforcement, classifier enforcement, command execution through Hermes, resident mode, a Hermes launchd service, adapter service start, live Hermes runs, Google/Supabase/Home Assistant/GitHub/Helio/cloud connections, real credential use, live Agent Bus reads/writes, Hermes Desktop launch, `~/.hermes` modification, sudo, or force push.
 - Completed Phase 6M Hermes audit log primitive implementation.
 - Added `services/hermes_safety/__init__.py` and `services/hermes_safety/audit_log.py`.
 - Added `tests/services/test_hermes_audit_log.py`.

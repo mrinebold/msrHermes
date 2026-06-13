@@ -1,7 +1,7 @@
 # Hermes Approval Record Model
 
 Phase: 6H
-Status: proposal only; approval records are not implemented yet
+Status: local approval record primitive implemented in Phase 6N; execution remains disabled
 
 ## Purpose
 
@@ -178,6 +178,22 @@ The implementation plan proposes future modules `services/hermes_safety/audit_lo
 
 Phase 6J does not implement approval storage, create `services/hermes_safety/`, create approval log directories, enable command execution, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, or enable resident mode.
 
+## Phase 6N Approval Record Primitive
+
+Phase 6N adds `services/hermes_safety/approval_records.py` and `tests/services/test_hermes_approval_records.py`.
+
+The primitive provides:
+
+- `create_approval_request(...)`
+- `write_approval_record(record, log_dir=None)`
+- `read_approval_records(log_dir=None)`
+- `is_approval_valid(record, now=None)`
+- `mark_approval_used(record, log_dir=None)`
+
+It writes local JSONL records under `logs/hermes_approvals/` by default, creates the directory when called, validates required fields, redacts secret-looking keys and values, rejects blanket permanent approvals, rejects model-only granted approvals, checks expiration for granted approvals, and marks one-time approvals used by writing a new record when requested.
+
+Phase 6N does not execute approved actions, grant approval automatically, enable resident mode, start services, run Hermes live, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or broaden authority.
+
 ## Proposal Conclusion
 
-Hermes must not execute, write, send, commit, start services, or take external action without scoped, expiring, auditable human approval where required. Phase 6J plans the first approval record implementation, but approval records are not implemented yet.
+Hermes must not execute, write, send, commit, start services, or take external action without scoped, expiring, auditable human approval where required. Phase 6N implements local approval record storage and validity checks, but approval records do not execute actions and are not integrated with resident behavior or command execution yet.

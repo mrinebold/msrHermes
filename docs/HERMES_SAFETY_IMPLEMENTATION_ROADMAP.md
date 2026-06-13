@@ -416,3 +416,5 @@ Phase 6K adds `docs/HERMES_POLICY_ENFORCEMENT_IMPLEMENTATION_PLAN.md`, which exp
 Phase 6L adds `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`, which expands Stage 5 and Stage 6 into a future implementation plan. Phase 6L remains planning-only and does not create emergency stop scripts, dry-run resident scripts, freeze flags, services, live Hermes runs, command execution, or resident mode.
 
 Phase 6M implements Stage 1 as a local audit writer primitive in `services/hermes_safety/audit_log.py`. The implementation remains a library-only primitive and does not integrate with resident mode, command execution, emergency stop, external integrations, adapter service control, live Hermes runs, or autonomous operation.
+
+Phase 6N implements Stage 2 as a local approval record writer/reader primitive in `services/hermes_safety/approval_records.py`. The implementation remains a library-only primitive and does not grant approval automatically, execute approved actions, integrate with resident mode, start services, run Hermes live, or connect external systems.
