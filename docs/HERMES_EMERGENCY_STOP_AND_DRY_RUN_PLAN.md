@@ -1,7 +1,7 @@
 # Hermes Emergency Stop And Dry-Run Resident Loop Plan
 
 Phase: 6L
-Status: implementation plan only; no emergency stop script or resident loop created
+Status: emergency stop script implemented in Phase 6R; dry-run resident loop pending
 
 ## Purpose
 
@@ -148,4 +148,4 @@ If a later implementation is unsafe:
 
 ## Plan Conclusion
 
-Emergency stop and dry-run loop implementation should come only after the safety primitives exist. The first runtime step should be no-sudo emergency stop plus frozen-state handling, followed by a foreground dry-run loop that proposes actions only and exits cleanly.
+Phase 6R implements the no-sudo emergency stop script at `scripts/hermes_emergency_stop.sh`. It creates the freeze flag, records reason metadata, stops only the already-approved adapter service if it is running, and writes an audit event when safe. The dry-run resident loop remains pending and must still propose actions only and exit cleanly.

@@ -481,3 +481,13 @@ Each stage documents objective, likely files/scripts, risks, tests, rollback, ac
 Phase 6I did not implement safety modules, enable command execution, enable resident mode, create a Hermes launchd service, start services, run Hermes live, connect integrations, use credentials, write Agent Bus records, launch Desktop, modify `~/.hermes`, or broaden Hermes authority.
 
 Readiness position: the implementation order is now defined. The next safe phase is the audit and approval implementation plan, still proposal-only and still without runtime enforcement.
+
+## Phase 6R Emergency Stop Script Result
+
+Phase 6R created `scripts/hermes_emergency_stop.sh`.
+
+The script is a no-sudo, repeat-safe local emergency stop entrypoint. It creates or refreshes `sandbox/hermes_control/FROZEN`, writes `sandbox/hermes_control/FROZEN.reason`, detects adapter/Hermes/Desktop/resident-like state, stops the approved adapter service only if it is already running, and writes a metadata-only audit event when the local audit writer is importable.
+
+The script does not kill arbitrary processes, delete artifacts, start services, run Hermes live, launch Desktop, modify `~/.hermes`, connect integrations, print secrets, or enable resident mode.
+
+Readiness position: emergency stop now exists for local freeze/approved-adapter-stop behavior. The next safe phase is a dry-run policy check script, still without command execution or resident mode.

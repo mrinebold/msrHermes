@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 6R Hermes emergency stop script implementation.
+- Added executable `scripts/hermes_emergency_stop.sh`.
+- Implemented no-sudo, repeat-safe local emergency stop behavior that creates or refreshes `sandbox/hermes_control/FROZEN`, writes `sandbox/hermes_control/FROZEN.reason`, detects adapter/Hermes/Desktop/resident-like state, stops the approved adapter service only if already running, reports resident-like process warnings without killing arbitrary processes, and writes a metadata-only audit event when the local audit writer is importable.
+- Added tests confirming shell syntax, no sudo, no deletion command, no service start, adapter stop path reference, temp-root freeze flag creation, repeat-safe behavior, temp-root reason metadata, and temp-root audit path creation.
+- Updated `docs/HERMES_EMERGENCY_STOP_DESIGN.md`, `docs/HERMES_EMERGENCY_STOP_AND_DRY_RUN_PLAN.md`, `docs/HERMES_LOCAL_OPERATIONS_RUNBOOK.md`, `docs/HERMES_LOCAL_ONLY_READY_REPORT.md`, `docs/HERMES_OPERATIONAL_READINESS_REVIEW.md`, and the master PRD with the Phase 6R result.
+- Confirmed Phase 6R did not create a command executor, execute commands through Hermes, enable resident mode, create a Hermes launchd service, start the adapter service, run Hermes live, connect Google/Supabase/Home Assistant/GitHub/Helio/cloud providers, use real credentials, perform live Agent Bus reads/writes, launch Hermes Desktop, kill arbitrary processes, delete artifacts, broaden Hermes authority in code, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6Q Hermes safety-state local status integration.
 - Updated `scripts/hermes_local_status.sh`.
 - Added read-only reporting for safety module importability, audit log directory state, latest audit timestamp/action/status when initialized, approval log directory state, latest approval timestamp/status when initialized, freeze flag path/existence at `sandbox/hermes_control/FROZEN`, `command_execution_enabled=no`, and `resident_mode_enabled=no`.

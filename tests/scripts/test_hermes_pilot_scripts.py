@@ -37,6 +37,7 @@ ADAPTER_SERVICE_START = REPO_ROOT / "scripts" / "adapter_service_start.sh"
 ADAPTER_SERVICE_STOP = REPO_ROOT / "scripts" / "adapter_service_stop.sh"
 ADAPTER_SERVICE_STATUS = REPO_ROOT / "scripts" / "adapter_service_status.sh"
 HERMES_LOCAL_STATUS = REPO_ROOT / "scripts" / "hermes_local_status.sh"
+HERMES_EMERGENCY_STOP = REPO_ROOT / "scripts" / "hermes_emergency_stop.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
@@ -70,6 +71,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             ADAPTER_SERVICE_STOP,
             ADAPTER_SERVICE_STATUS,
             HERMES_LOCAL_STATUS,
+            HERMES_EMERGENCY_STOP,
             LOCAL_TASK_RUNNER,
         ):
             with self.subTest(script=script.name):
@@ -866,6 +868,47 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertNotIn("write_audit_event", content)
         self.assertNotIn("write_approval_record", content)
 
+    def test_hermes_emergency_stop_script_is_no_sudo_no_delete_no_start(self):
+        content = HERMES_EMERGENCY_STOP.read_text(encoding="utf-8")
+
+        self.assertNotIn("sudo", content)
+        self.assertNotIn("\nrm ", content)
+        self.assertNotIn("adapter_service_start.sh", content)
+        self.assertNotIn("launchctl bootstrap", content)
+        self.assertNotIn("launchctl kickstart", content)
+        self.assertIn("scripts/adapter_service_stop.sh", content)
+        self.assertIn("sandbox/hermes_control/FROZEN", content)
+        self.assertIn("write_audit_event", content)
+
+    def test_hermes_emergency_stop_creates_temp_freeze_flag_repeat_safe(self):
+        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
+            env = os.environ.copy()
+            env["HERMES_REPO_ROOT"] = temp_dir
+            result_one = subprocess.run(
+                ["bash", str(HERMES_EMERGENCY_STOP)],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            result_two = subprocess.run(
+                ["bash", str(HERMES_EMERGENCY_STOP)],
+                cwd=REPO_ROOT,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result_one.returncode, 0, result_one.stderr)
+            self.assertEqual(result_two.returncode, 0, result_two.stderr)
+            self.assertTrue((Path(temp_dir) / "sandbox" / "hermes_control" / "FROZEN").exists())
+            self.assertTrue((Path(temp_dir) / "sandbox" / "hermes_control" / "FROZEN.reason").exists())
+            self.assertIn("freeze_flag_exists=yes", result_two.stdout)
+            self.assertIn("adapter_stop_attempted=no_not_running", result_two.stdout)
+            self.assertTrue((Path(temp_dir) / "logs" / "hermes_audit").exists())
+
     def test_resident_authority_model_defines_all_tiers(self):
         content = RESIDENT_AUTHORITY_MODEL.read_text(encoding="utf-8")
 
@@ -1177,11 +1220,11 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("sandbox/hermes_control/FROZEN", content)
         self.assertIn("safe to run repeatedly", content)
 
-    def test_emergency_stop_and_dry_run_plan_remains_planning_only(self):
+    def test_emergency_stop_and_dry_run_plan_keeps_dry_run_resident_pending(self):
         content = EMERGENCY_STOP_AND_DRY_RUN_PLAN.read_text(encoding="utf-8")
         lower_content = content.lower()
 
-        self.assertIn("Status: implementation plan only", content)
+        self.assertIn("Status: emergency stop script implemented in Phase 6R; dry-run resident loop pending", content)
         self.assertIn("no command execution", content)
         self.assertIn("no external integrations", content)
         self.assertIn("scan only `sandbox/hermes_inbox/`", content)

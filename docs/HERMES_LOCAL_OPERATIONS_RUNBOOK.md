@@ -198,6 +198,14 @@ Credentialed integrations remain frozen. Do not use Google, Supabase, GitHub, Ho
 
 ## Rollback
 
+Emergency stop can freeze future dry-run/resident processing and stop the approved adapter service if it is already running:
+
+```sh
+scripts/hermes_emergency_stop.sh
+```
+
+The emergency stop script is safe to run repeatedly. It creates `sandbox/hermes_control/FROZEN`, writes reason metadata, and records a metadata-only audit event when available. It does not delete artifacts, use sudo, start services, run Hermes live, launch Desktop, or connect integrations.
+
 Stop the adapter service first:
 
 ```sh
@@ -251,6 +259,6 @@ Do not restore or modify `~/.hermes` without a separate approved phase.
 
 ## Next Recommended Phase
 
-Proceed with Phase 6R, emergency stop script implementation, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
+Proceed with Phase 6S, dry-run policy check script implementation, only if explicitly approved. Until then, daily operation remains manual adapter start/stop plus local task runner use only.
 
-After Phase 6Q, `scripts/hermes_local_status.sh` reports safety primitive state read-only. The emergency stop script, dry-run resident loop, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.
+After Phase 6R, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior. The dry-run resident loop, resident service, and command execution remain unimplemented. Daily manual local-only use remains unchanged.

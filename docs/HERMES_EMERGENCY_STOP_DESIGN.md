@@ -206,6 +206,23 @@ The plan proposes future scripts `scripts/hermes_emergency_stop.sh` and `scripts
 
 Phase 6L does not create the emergency stop script, create the dry-run loop script, create freeze flags, stop or start services, run Hermes live, execute commands, connect integrations, use credentials, modify `~/.hermes`, launch Desktop, or enable resident mode.
 
+## Phase 6R Emergency Stop Script
+
+Phase 6R adds `scripts/hermes_emergency_stop.sh`.
+
+The script:
+
+- creates or refreshes `sandbox/hermes_control/FROZEN`
+- writes `sandbox/hermes_control/FROZEN.reason`
+- stops the approved adapter service only if the adapter listener or LaunchAgent is already running
+- detects adapter listener, Hermes process, Hermes Desktop process, and resident-like process state
+- reports resident-like process warnings without killing arbitrary processes
+- writes a metadata-only audit event when the audit writer is importable
+- supports `HERMES_REPO_ROOT` override for tests
+- is safe to run repeatedly
+
+The script does not use sudo, delete artifacts, start services, run Hermes live, launch Desktop, modify `~/.hermes`, connect integrations, print secrets, or enable resident mode.
+
 ## Proposal Conclusion
 
-Emergency stop must be implemented and tested before resident Hermes is enabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation. Phase 6L plans the future emergency stop and dry-run loop implementation, but no script is implemented yet.
+Emergency stop is now implemented as a local script, but resident Hermes remains disabled. Phase 6D proposes the resident service design that will depend on this emergency stop model. Phase 6F defines command policy gates that emergency stop must be able to interrupt or freeze in future implementation. Phase 6H defines approval records that emergency stop must be able to freeze or revoke in future implementation.

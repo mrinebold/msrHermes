@@ -22,6 +22,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - A read-only local status command exists at `scripts/hermes_local_status.sh`.
 - Phase 6M adds a local audit writer primitive that writes redacted JSONL events in tests without starting services or enabling runtime authority.
 - Phase 6Q extends the local status command to report safety module importability, audit log state, approval log state, freeze flag state, command execution disabled, and resident mode disabled without creating files or starting services.
+- Phase 6R adds a no-sudo emergency stop script that can create a local freeze flag, write reason metadata, stop the approved adapter service only if already running, and emit a metadata-only audit event.
 - Tests pass for the local-only scripts, docs, task builder, local task runner, and guardrails.
 
 ## Current Approved Operating Mode
@@ -49,6 +50,7 @@ This certification is narrow. It does not approve resident Hermes, automatic ada
 - broad filesystem authority
 - shell execution by Hermes
 - audit integration with resident behavior, command policy, emergency stop, or approval lookup
+- dry-run resident loop
 
 ## Current Operational Procedure
 
