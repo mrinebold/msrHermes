@@ -19,6 +19,7 @@ PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PL
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
 RESIDENT_VALIDATION_GATE = REPO_ROOT / "docs" / "HERMES_RESIDENT_VALIDATION_GATE.md"
+DESKTOP_GOVERNED_INSTALL = REPO_ROOT / "docs" / "HERMES_DESKTOP_GOVERNED_INSTALL.md"
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
 RESIDENT_SERVICE_PROPOSAL = REPO_ROOT / "docs" / "HERMES_RESIDENT_SERVICE_PROPOSAL.md"
@@ -41,6 +42,8 @@ HERMES_LOCAL_STATUS = REPO_ROOT / "scripts" / "hermes_local_status.sh"
 HERMES_EMERGENCY_STOP = REPO_ROOT / "scripts" / "hermes_emergency_stop.sh"
 HERMES_POLICY_CHECK = REPO_ROOT / "scripts" / "hermes_policy_check.py"
 HERMES_RESIDENT_DRY_RUN = REPO_ROOT / "scripts" / "hermes_resident_dry_run.sh"
+HERMES_RESIDENT_ONCE = REPO_ROOT / "scripts" / "hermes_resident_once.sh"
+HERMES_RESIDENT_STATUS = REPO_ROOT / "scripts" / "hermes_resident_status.sh"
 LOCAL_TASK_RUNNER = REPO_ROOT / "scripts" / "run_hermes_local_task.sh"
 LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.task.md"
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
@@ -76,6 +79,8 @@ class HermesPilotScriptsTest(unittest.TestCase):
             HERMES_LOCAL_STATUS,
             HERMES_EMERGENCY_STOP,
             HERMES_RESIDENT_DRY_RUN,
+            HERMES_RESIDENT_ONCE,
+            HERMES_RESIDENT_STATUS,
             LOCAL_TASK_RUNNER,
         ):
             with self.subTest(script=script.name):
@@ -710,6 +715,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_MODE_PLAN,
             RESIDENT_AUTHORITY_MODEL,
             RESIDENT_VALIDATION_GATE,
+            DESKTOP_GOVERNED_INSTALL,
             AUDIT_LOG_DESIGN,
             EMERGENCY_STOP_DESIGN,
             RESIDENT_SERVICE_PROPOSAL,
@@ -736,6 +742,8 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_OPERATIONS_RUNBOOK,
             LOCAL_ONLY_READY_REPORT,
             HERMES_LOCAL_STATUS,
+            HERMES_RESIDENT_ONCE,
+            HERMES_RESIDENT_STATUS,
         ]
         disallowed_markers = (
             "sk-live-",
@@ -1110,6 +1118,61 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("human approval required", content)
         self.assertIn("Do not create this plist in Phase 6X", content)
         self.assertNotIn("resident mode is enabled.", lower_content)
+
+    def test_phase7a_resident_once_runtime_is_governed(self):
+        runbook = LOCAL_OPERATIONS_RUNBOOK.read_text(encoding="utf-8")
+        ready = LOCAL_ONLY_READY_REPORT.read_text(encoding="utf-8")
+        gate = RESIDENT_VALIDATION_GATE.read_text(encoding="utf-8")
+        combined = "\n".join([runbook, ready, gate])
+
+        self.assertIn("scripts/hermes_resident_once.sh", combined)
+        self.assertIn("scripts/hermes_resident_status.sh", combined)
+        self.assertIn("com.msr.hermes.resident-once", combined)
+        self.assertIn("Application Support/Helio/hermes-resident-once/current", combined)
+        self.assertIn("RunAtLoad=false", combined)
+        self.assertIn("KeepAlive=false", combined)
+        self.assertIn("exit code `0`", combined)
+        self.assertIn("command execution", combined)
+        self.assertIn("external integrations", combined)
+
+        plist = Path.home() / "Library" / "LaunchAgents" / "com.msr.hermes.resident-once.plist"
+        if plist.exists():
+            content = plist.read_text(encoding="utf-8")
+            self.assertIn("com.msr.hermes.resident-once", content)
+            self.assertIn("<key>RunAtLoad</key>", content)
+            self.assertIn("<false/>", content)
+            self.assertIn("<key>KeepAlive</key>", content)
+            self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-resident-once", content)
+            self.assertIn("Application Support/Helio/hermes-resident-once/current", content)
+            self.assertNotIn("com.msr.hermes.resident</string>", content)
+            self.assertNotIn("<true/>", content)
+
+        wrapper = Path.home() / ".local" / "bin" / "msr-hermes-resident-once"
+        if wrapper.exists():
+            wrapper_content = wrapper.read_text(encoding="utf-8")
+            self.assertIn("Application Support/Helio/hermes-resident-once/current", wrapper_content)
+            self.assertNotIn("sudo", wrapper_content)
+            self.assertNotIn("adapter_service_start", wrapper_content)
+            self.assertNotIn("run_hermes_local_task", wrapper_content)
+
+    def test_phase7a_desktop_governed_install_is_fail_closed(self):
+        content = DESKTOP_GOVERNED_INSTALL.read_text(encoding="utf-8")
+        lower_content = content.lower()
+
+        self.assertIn("Status: fail-closed", content)
+        self.assertIn("hdiutil verify", content)
+        self.assertIn("VALID", content)
+        self.assertIn("com.nousresearch.hermes.setup", content)
+        self.assertIn("CFBundleShortVersionString=0.0.1", content)
+        self.assertIn("strict codesign", lower_content)
+        self.assertIn("Gatekeeper assessment", content)
+        self.assertIn("do not install or replace", content)
+        self.assertIn("do not launch", content)
+        self.assertIn("Gatekeeper bypass: none", content)
+        self.assertIn("integrations connected: none", content)
+        self.assertIn("Desktop final state: installed setup/bootstrap app present, not running, fail-closed", content)
+        self.assertNotIn("Gatekeeper bypass: approved", content)
+        self.assertNotIn("Desktop launch: approved", content)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

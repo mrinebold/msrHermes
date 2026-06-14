@@ -387,3 +387,11 @@ Phase 6G proposes the file zone policy. File zone enforcement remains unimplemen
 Phase 6H proposes the approval record model. Approval storage and lookup remain unimplemented.
 
 Phase 6I proposes the staged safety implementation order. Runtime enforcement remains unimplemented, and resident mode remains disabled.
+
+## Phase 7A Authority Implementation Note
+
+Phase 7A implements a Tier 1 governed resident-once shell only. It may inspect approved inbox task metadata, classify proposed command lines without execution, write redacted recommendations/proposals to approved outbox locations, and write metadata-only audit events.
+
+It does not implement Tier 3 local execution, external read/write tiers, resident delegated operation, shell control, broad file authority, Desktop launch, or Helio/Agent Bus coordination. Command execution remains disabled. External integrations remain disabled. Hermes Desktop remains fail-closed.
+
+The `com.msr.hermes.resident-once` LaunchAgent is a manual, one-shot validation surface with `RunAtLoad=false` and `KeepAlive=false`; it is not an autonomous resident operator.

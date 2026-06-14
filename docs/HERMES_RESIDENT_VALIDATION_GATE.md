@@ -108,3 +108,25 @@ Future Phase 6Y may proceed only after explicit human approval and must:
 ## Gate Conclusion
 
 The system is ready to propose a future manual resident dry-run validation only. It is not ready for resident operation, command execution, external integrations, or Desktop launch.
+
+## Phase 7A Gate Outcome
+
+Phase 7A completed the first manual governed resident-once validation.
+
+Result:
+
+- direct `scripts/hermes_resident_once.sh` run succeeded
+- Application Support runtime wrapper `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once` succeeded
+- user LaunchAgent `com.msr.hermes.resident-once` manually kickstarted and exited with code `0`
+- LaunchAgent was booted out afterward
+- `RunAtLoad=false` remains
+- `KeepAlive=false` remains
+- no adapter start occurred
+- no Hermes live run occurred
+- no command execution occurred
+- no external integration occurred
+- no Desktop launch occurred
+
+The first launchd attempt from the `Documents` repo path failed closed with exit code `126`; the fix was a minimal no-secret runtime under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`.
+
+The next resident gate should decide whether to promote this one-shot dry-run runtime into a repeatable manual operating procedure. It must still keep command execution and external integrations disabled unless separately approved.

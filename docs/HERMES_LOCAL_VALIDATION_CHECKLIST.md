@@ -173,3 +173,34 @@ After Phase 5BC, the safest next step is:
 - draft a resident Hermes authority model proposal, without starting services, modifying runtime configs, enabling resident mode, launching Desktop, using credentials, connecting integrations, or touching Agent Bus.
 
 Do not resume live Agent Bus reads/writes or credentialed integrations from this checklist alone.
+
+## Phase 7A Validation Checklist Addendum
+
+Phase 7A adds governed resident-once validation checks:
+
+- `scripts/hermes_resident_once.sh` exists and passes `bash -n`
+- `scripts/hermes_resident_status.sh` exists and passes `bash -n`
+- resident once direct run writes redacted outbox proposals and an audit event
+- resident once checks `sandbox/hermes_control/FROZEN`
+- resident once does not start the adapter
+- resident once does not run Hermes live
+- resident once does not execute commands
+- resident once does not launch Desktop
+- resident once does not connect external integrations
+- resident once LaunchAgent uses `RunAtLoad=false`
+- resident once LaunchAgent uses `KeepAlive=false`
+- resident once LaunchAgent is installed but unloaded/stopped at phase end
+- no `8088` listener remains
+- no adapter, Hermes, Desktop, or resident process remains
+
+Phase 7A Desktop validation checks:
+
+- official DMG path recorded
+- SHA-256 recorded
+- `hdiutil verify` result recorded
+- installed app bundle metadata recorded
+- mounted app bundle metadata recorded
+- strict codesign result recorded
+- Gatekeeper assessment result recorded
+- Desktop is not installed/replaced/launched when signing or Gatekeeper validation fails
+- no Gatekeeper bypass, quarantine removal, privacy permission grant, sign-in, credential, or integration occurs

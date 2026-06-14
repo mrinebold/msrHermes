@@ -2,6 +2,17 @@
 
 ## 2026-06-13
 
+- Completed Phase 7A governed Hermes resident shell and Desktop validation.
+- Added `scripts/hermes_resident_once.sh` for one-shot observe/recommend/dry-run resident behavior. It checks the freeze flag, scans only approved local inbox task files, uses file-zone and command-policy classifiers, writes redacted proposals to outbox, writes metadata-only audit events, and exits.
+- Added `scripts/hermes_resident_status.sh` and expanded `scripts/hermes_local_status.sh` to report resident-once runtime state, resident-once LaunchAgent state, Desktop install/verification/running state, command execution disabled, and external integrations disabled.
+- Created and validated user LaunchAgent `com.msr.hermes.resident-once` with `RunAtLoad=false` and `KeepAlive=false`.
+- Fixed the launchd execution blocker by moving the minimal no-secret resident-once runtime to `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`; the earlier wrapper still reached the `Documents` repo and failed closed with exit code `126`.
+- Validated the Application Support runtime wrapper and manual launchctl kickstart. The LaunchAgent exited with code `0`, wrote a redacted dry-run proposal and audit event, and was unloaded afterward.
+- Added `docs/HERMES_DESKTOP_GOVERNED_INSTALL.md`.
+- Validated official Desktop artifact `/Users/michaelrinebold/Downloads/hermes-desktop-official/Hermes-Setup.dmg` with SHA-256 `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`; `hdiutil verify` passed.
+- Confirmed both mounted artifact app and installed `/Applications/Hermes.app` are `com.nousresearch.hermes.setup` version `0.0.1` setup/bootstrap bundles and fail strict codesign plus Gatekeeper assessment.
+- Kept Hermes Desktop fail-closed: no install, replacement, launch, Gatekeeper bypass, quarantine removal, signature override, sign-in, permission grant, credential, or external integration occurred.
+- Confirmed Phase 7A did not enable command execution, run Hermes live from the resident shell, start the adapter, connect Google/Supabase/Home Assistant/GitHub/Helio/Agent Bus/cloud providers, use real credentials, modify `~/.hermes`, use sudo, or force push.
 - Completed Phase 6X Hermes resident validation gate proposal.
 - Added `docs/HERMES_RESIDENT_VALIDATION_GATE.md`.
 - Defined preconditions for a future manual resident dry-run validation, the proposed one-shot dry-run validation sequence, a future `com.msr.hermes.resident` LaunchAgent proposal with `RunAtLoad=false` and `KeepAlive=false`, explicit non-goals, and Phase 6Y acceptance criteria.

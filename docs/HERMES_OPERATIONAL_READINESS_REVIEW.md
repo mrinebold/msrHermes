@@ -536,3 +536,29 @@ Phase 6X created `docs/HERMES_RESIDENT_VALIDATION_GATE.md`.
 The gate defines the preconditions, proposed one-shot dry-run validation, future manual-start LaunchAgent proposal, non-goals, and acceptance criteria for a later Phase 6Y. It explicitly keeps resident mode disabled, `RunAtLoad=false`, `KeepAlive=false`, no command execution, no external integrations, no Desktop launch, and human approval required before any resident plist creation.
 
 Readiness position: Hermes is ready for a future resident dry-run validation proposal only. Actual resident operation, command execution, adapter auto-start, external integrations, and Desktop launch remain blocked.
+
+## Phase 7A Operational Readiness Update
+
+The governed resident-once shell is now implemented and validated for manual dry-run use.
+
+Ready:
+
+- resident once script exists at `scripts/hermes_resident_once.sh`
+- resident status script exists at `scripts/hermes_resident_status.sh`
+- resident once writes redacted proposals and metadata-only audit events
+- resident once refuses work when the freeze flag exists
+- resident once uses file-zone and command-policy classifiers
+- user LaunchAgent `com.msr.hermes.resident-once` can run from Application Support and exit cleanly
+- resident once LaunchAgent is installed but stopped/unloaded
+
+Still not ready:
+
+- resident autonomy
+- command execution
+- live Hermes inference from resident-once
+- adapter auto-start
+- external integrations
+- Agent Bus reads/writes
+- Desktop launch
+
+Desktop readiness remains blocked because the official DMG verifies but the contained app and installed app fail strict codesign and Gatekeeper assessment.

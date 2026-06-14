@@ -367,6 +367,63 @@ Phase 6E reference:
 
 - [Hermes Helio Adapter Design](../HERMES_HELIO_ADAPTER_DESIGN.md)
 
+## Phase 7A Governed Resident Shell And Desktop Validation
+
+Phase 7A moved the next practical runtime layer from proposal into implementation.
+
+Implemented:
+
+- governed resident-once shell at `scripts/hermes_resident_once.sh`
+- read-only resident status command at `scripts/hermes_resident_status.sh`
+- user LaunchAgent `com.msr.hermes.resident-once` with `RunAtLoad=false` and `KeepAlive=false`
+- minimal no-secret launchd runtime under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`
+- wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once`
+- governed Desktop validation report at `docs/HERMES_DESKTOP_GOVERNED_INSTALL.md`
+
+Resident-once behavior:
+
+- runs once and exits
+- checks the freeze flag before work
+- scans only approved local inbox task files
+- uses file-zone and command-policy classifiers
+- writes redacted proposals only to approved outbox locations
+- writes metadata-only audit events
+- does not execute commands
+- does not start the adapter
+- does not run Hermes live
+- does not launch Desktop
+- does not connect external integrations
+
+Launchd validation result:
+
+- direct resident-once run succeeded
+- first launchd attempt from the `Documents` repo path failed closed with exit code `126`
+- Application Support runtime remediation succeeded
+- manual launchctl kickstart exited with code `0`
+- LaunchAgent was unloaded afterward
+- no resident process was left running
+
+Desktop validation result:
+
+- official DMG SHA-256: `b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5`
+- `hdiutil verify` passed
+- installed and mounted app are both `com.nousresearch.hermes.setup` version `0.0.1`
+- strict codesign verification failed
+- Gatekeeper assessment failed
+- Desktop was not installed, replaced, or launched
+- no Gatekeeper bypass, quarantine removal, signature override, privacy permission grant, sign-in, credential, or integration occurred
+
+Current state after Phase 7A:
+
+- adapter LaunchAgent installed but stopped/unloaded
+- resident-once LaunchAgent installed but stopped/unloaded
+- command execution disabled
+- resident autonomy disabled
+- external integrations frozen
+- Desktop fail-closed
+- Hermes Desktop not running
+- no `8088` listener expected
+
 ## Non-Goals
 
 - Do not run Hermes setup.

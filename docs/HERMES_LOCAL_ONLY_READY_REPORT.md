@@ -148,3 +148,33 @@ scripts/hermes_local_status.sh
 ## Final Boundary
 
 Local-only readiness is certified for manual use only. Any move beyond this report requires a new explicit phase and human approval.
+
+## Phase 7A Governed Runtime Update
+
+Phase 7A moved the first resident layer from proposal to a governed one-shot implementation while preserving the local-only boundary.
+
+Proven additions:
+
+- `scripts/hermes_resident_once.sh` runs once and exits in observe/recommend/dry-run mode.
+- `scripts/hermes_resident_status.sh` reports resident-once, Desktop, adapter, audit, approval, and freeze state without writes.
+- Resident-once direct repo execution succeeded and wrote redacted proposals for approved local inbox tasks.
+- A minimal launchd runtime under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current` avoids the macOS `Documents` privacy denial.
+- The user LaunchAgent `com.msr.hermes.resident-once` validated with manual kickstart, exited with code `0`, and was unloaded afterward.
+- The LaunchAgent remains `RunAtLoad=false` and `KeepAlive=false`.
+- Command execution remains disabled.
+- Live Hermes inference remains disabled for resident-once.
+- External integrations remain disabled.
+- Desktop remains fail-closed.
+
+Current expected final state after Phase 7A:
+
+- adapter LaunchAgent installed but stopped/unloaded
+- resident-once LaunchAgent installed but stopped/unloaded
+- no `8088` listener
+- no adapter process
+- no Hermes resident process
+- no Desktop process
+- command execution enabled: no
+- external integrations enabled: no
+
+Desktop certification remains blocked: the official DMG verifies as a disk image, but both the mounted app and `/Applications/Hermes.app` are `com.nousresearch.hermes.setup` version `0.0.1` setup/bootstrap bundles that fail strict codesign and Gatekeeper assessment.

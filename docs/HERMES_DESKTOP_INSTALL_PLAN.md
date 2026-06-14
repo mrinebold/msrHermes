@@ -1024,3 +1024,31 @@ Phase DESKTOP-2 does not approve:
 - external integrations
 - broad filesystem access
 - background service or resident operation
+
+## Phase 7A Governed Desktop Validation Result
+
+Phase 7A inspected the official artifact and installed app without bypassing macOS security controls.
+
+Artifact:
+
+```text
+/Users/michaelrinebold/Downloads/hermes-desktop-official/Hermes-Setup.dmg
+```
+
+SHA-256:
+
+```text
+b61e047efe3059faf1c55fec3252e661f2d2a993a7a3eebf5cc6a9aa5c1790f5
+```
+
+Result:
+
+- `hdiutil verify` passed for the DMG
+- installed `/Applications/Hermes.app` is `com.nousresearch.hermes.setup` version `0.0.1`
+- mounted artifact app is also `com.nousresearch.hermes.setup` version `0.0.1`
+- strict codesign failed for both installed and mounted app
+- Gatekeeper assessment failed for both installed and mounted app
+- Desktop was not installed, replaced, or launched
+- no quarantine removal, Gatekeeper bypass, signature override, sign-in, permission grant, credential, or integration occurred
+
+Desktop remains fail-closed pending an official notarized/signed artifact or release-channel clarification.

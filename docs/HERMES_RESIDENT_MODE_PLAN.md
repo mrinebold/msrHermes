@@ -322,3 +322,30 @@ The gate defines preconditions for a future manual resident dry-run validation: 
 The proposed next validation is dry-run only: run `scripts/hermes_resident_dry_run.sh` once, write proposal outputs, write audit metadata, and check status before and after. Hermes live run, adapter start, command execution, external integration, and Desktop launch remain blocked.
 
 The future LaunchAgent proposal remains `com.msr.hermes.resident` with `RunAtLoad=false`, `KeepAlive=false`, manual start only, dry-run loop only at first, emergency stop compatibility, and human approval required before any plist creation.
+
+## Phase 7A Governed Resident-Once Result
+
+Phase 7A implemented the first governed resident shell as a one-shot dry-run layer, not as unconstrained resident mode.
+
+Repo scripts:
+
+- `scripts/hermes_resident_once.sh`
+- `scripts/hermes_resident_status.sh`
+
+Local launchd runtime:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current
+```
+
+User LaunchAgent:
+
+```text
+/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.resident-once.plist
+```
+
+The LaunchAgent uses `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once`, `RunAtLoad=false`, and `KeepAlive=false`. It runs once and exits. The first launchd attempt still reached the `Documents` repo path and failed closed with exit code `126`; moving the minimal no-secret runtime to Application Support fixed the macOS privacy denial. Manual kickstart then exited with code `0` and the LaunchAgent was unloaded afterward.
+
+The governed resident shell checks emergency freeze state, scans only an approved local inbox, uses file-zone classification, uses command-policy classification for proposed command metadata only, writes redacted proposals only to outbox, writes metadata-only audit events, and exits. It does not start the adapter, run Hermes live, execute commands, launch Desktop, connect integrations, or use credentials.
+
+Resident autonomy remains disabled. The Phase 7A LaunchAgent may remain installed for manual validation only, stopped/unloaded by default.

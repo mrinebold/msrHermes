@@ -3,11 +3,17 @@ set -u
 
 REPO_PATH="${HERMES_REPO_ROOT:-/Users/michaelrinebold/Documents/Helio/helio-command-center}"
 LABEL="com.msr.hermes.model-router-adapter"
+RESIDENT_ONCE_LABEL="com.msr.hermes.resident-once"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+RESIDENT_ONCE_PLIST="$HOME/Library/LaunchAgents/$RESIDENT_ONCE_LABEL.plist"
+RESIDENT_ONCE_RUNTIME="$HOME/Library/Application Support/Helio/hermes-resident-once/current"
+RESIDENT_ONCE_WRAPPER="$HOME/.local/bin/msr-hermes-resident-once"
 DOMAIN="gui/$(id -u)"
 TARGET="$DOMAIN/$LABEL"
+RESIDENT_ONCE_TARGET="$DOMAIN/$RESIDENT_ONCE_LABEL"
 CONFIG="$HOME/.hermes/config.yaml"
 HERMES_BIN="${HERMES_BIN:-$HOME/.local/bin/hermes}"
+DESKTOP_APP="/Applications/Hermes.app"
 AUDIT_DIR="$REPO_PATH/logs/hermes_audit"
 APPROVAL_DIR="$REPO_PATH/logs/hermes_approvals"
 FREEZE_FLAG="$REPO_PATH/sandbox/hermes_control/FROZEN"
@@ -15,6 +21,8 @@ FREEZE_REASON="$REPO_PATH/sandbox/hermes_control/FROZEN.reason"
 EMERGENCY_STOP_SCRIPT="$REPO_PATH/scripts/hermes_emergency_stop.sh"
 POLICY_CHECK_SCRIPT="$REPO_PATH/scripts/hermes_policy_check.py"
 DRY_RUN_RESIDENT_SCRIPT="$REPO_PATH/scripts/hermes_resident_dry_run.sh"
+RESIDENT_ONCE_SCRIPT="$REPO_PATH/scripts/hermes_resident_once.sh"
+RESIDENT_STATUS_SCRIPT="$REPO_PATH/scripts/hermes_resident_status.sh"
 FORBIDDEN_ENV_VARS=(
   OPENAI_API_KEY
   ANTHROPIC_API_KEY
@@ -174,6 +182,34 @@ else
   print_kv "adapter_launchagent_plist_present" "false"
 fi
 
+print_kv "resident_once_launchagent_plist" "$RESIDENT_ONCE_PLIST"
+if [[ -f "$RESIDENT_ONCE_PLIST" ]]; then
+  print_kv "resident_once_launchagent_installed" "yes"
+else
+  print_kv "resident_once_launchagent_installed" "no"
+fi
+print_kv "resident_once_runtime_path" "$RESIDENT_ONCE_RUNTIME"
+if [[ -x "$RESIDENT_ONCE_RUNTIME/scripts/hermes_resident_once.sh" ]]; then
+  print_kv "resident_once_runtime_installed" "yes"
+else
+  print_kv "resident_once_runtime_installed" "no"
+fi
+if [[ -x "$RESIDENT_ONCE_WRAPPER" ]]; then
+  print_kv "resident_once_wrapper_installed" "yes"
+else
+  print_kv "resident_once_wrapper_installed" "no"
+fi
+
+if has_command launchctl; then
+  if launchctl print "$RESIDENT_ONCE_TARGET" >/dev/null 2>&1; then
+    print_kv "resident_once_launchagent_loaded" "yes"
+  else
+    print_kv "resident_once_launchagent_loaded" "no"
+  fi
+else
+  print_kv "resident_once_launchagent_loaded" "unknown"
+fi
+
 if has_command launchctl; then
   if launchctl print "$TARGET" >/dev/null 2>&1; then
     print_kv "adapter_launchagent_loaded" "true"
@@ -258,6 +294,47 @@ fi
 if [[ "$resident_present" == "true" ]]; then
   print_kv "warning_hermes_resident_like_process" "true"
 fi
+
+if has_command pgrep && pgrep -f 'hermes_resident_once|msr-hermes-resident-once|com.msr.hermes.resident-once' >/dev/null 2>&1; then
+  print_kv "resident_once_process_present" "yes"
+else
+  print_kv "resident_once_process_present" "no"
+fi
+
+if [[ -d "$DESKTOP_APP" ]]; then
+  print_kv "desktop_installed" "yes"
+  desktop_codesign="unknown"
+  desktop_spctl="unknown"
+  if has_command codesign; then
+    if codesign --verify --deep --strict "$DESKTOP_APP" >/dev/null 2>&1; then
+      desktop_codesign="passed"
+    else
+      desktop_codesign="failed"
+    fi
+  fi
+  if has_command spctl; then
+    if spctl --assess --type execute "$DESKTOP_APP" >/dev/null 2>&1; then
+      desktop_spctl="accepted"
+    else
+      desktop_spctl="failed"
+    fi
+  fi
+  print_kv "desktop_codesign_strict" "$desktop_codesign"
+  print_kv "desktop_spctl_assessment" "$desktop_spctl"
+  if [[ "$desktop_codesign" == "passed" && "$desktop_spctl" == "accepted" ]]; then
+    print_kv "desktop_verified" "yes"
+  elif [[ "$desktop_codesign" == "failed" || "$desktop_spctl" == "failed" ]]; then
+    print_kv "desktop_verified" "no"
+  else
+    print_kv "desktop_verified" "unknown"
+  fi
+else
+  print_kv "desktop_installed" "no"
+  print_kv "desktop_codesign_strict" "not_installed"
+  print_kv "desktop_spctl_assessment" "not_installed"
+  print_kv "desktop_verified" "unknown"
+fi
+print_kv "desktop_running" "$desktop_present"
 
 if [[ -f "$CONFIG" ]]; then
   print_kv "hermes_config_present" "true"
@@ -344,6 +421,17 @@ if [[ -x "$DRY_RUN_RESIDENT_SCRIPT" ]]; then
 else
   print_kv "dry_run_resident_loop_exists" "no"
 fi
+if [[ -x "$RESIDENT_ONCE_SCRIPT" ]]; then
+  print_kv "resident_once_script_exists" "yes"
+else
+  print_kv "resident_once_script_exists" "no"
+fi
+if [[ -x "$RESIDENT_STATUS_SCRIPT" ]]; then
+  print_kv "resident_status_script_exists" "yes"
+else
+  print_kv "resident_status_script_exists" "no"
+fi
 
 print_kv "command_execution_enabled" "no"
 print_kv "resident_mode_enabled" "no"
+print_kv "external_integrations_enabled" "no"

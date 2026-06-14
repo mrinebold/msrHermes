@@ -320,4 +320,40 @@ It scans only `sandbox/hermes_inbox/*.task.md`, writes redacted `<task-name>.dry
 
 Proceed with a later audit/status refinement phase only if explicitly approved. Daily operation remains manual adapter start/stop plus local task runner use only.
 
+## Phase 7A Governed Resident-Once Operation
+
+Phase 7A added a governed resident-once shell for observe/recommend/dry-run work:
+
+```sh
+scripts/hermes_resident_once.sh
+scripts/hermes_resident_status.sh
+```
+
+The script runs once and exits. It checks the emergency freeze flag, scans only `sandbox/hermes_inbox/*.task.md`, classifies task paths and proposed `command:` metadata, writes redacted proposals only to `sandbox/hermes_outbox/`, and records metadata-only audit events under `logs/hermes_audit/`.
+
+It does not execute commands, start the adapter, run Hermes live, launch Desktop, archive or delete tasks, connect external integrations, use credentials, or modify `~/.hermes`.
+
+For launchd validation, Phase 7A installed a user LaunchAgent at:
+
+```text
+/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.resident-once.plist
+```
+
+The first attempt through a wrapper that still executed from the `Documents` repo failed closed with exit code `126` due macOS privacy restrictions. The remediation was to sync a minimal no-secret runtime to:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current
+```
+
+The wrapper at `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once` now runs from that Application Support runtime. Manual launchctl validation succeeded with exit code `0`, wrote a redacted proposal and audit event in the runtime sandbox, and was booted out afterward. The LaunchAgent remains installed but unloaded/stopped. `RunAtLoad=false` and `KeepAlive=false` remain.
+
+Check status with:
+
+```sh
+scripts/hermes_resident_status.sh
+scripts/hermes_local_status.sh
+```
+
+Desktop remains governed separately and fail-closed. Phase 7A verified the official DMG and installed setup bundle but did not install, replace, or launch Desktop because strict codesign and Gatekeeper assessment still fail.
+
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.
