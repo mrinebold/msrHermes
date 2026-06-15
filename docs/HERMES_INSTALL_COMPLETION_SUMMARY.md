@@ -1,7 +1,7 @@
 # Hermes Install Completion Summary
 
 Phase: 7F
-Status: final install documentation sync in progress; governed local manual resident-shaped stack installed
+Status: final install documentation sync complete; governed local manual resident-shaped stack installed; remote repository verified current after push
 
 ## Snapshot
 
@@ -27,6 +27,12 @@ Pre-sync local commit:
 
 ```text
 7ce9612666d031916689a96c1d49c3fc1f6071b9
+```
+
+Phase 7F documentation commit verified after initial push:
+
+```text
+0a10b7dd084331f6b074cc2bbaa8df1e25bb372a
 ```
 
 Branch:
@@ -297,7 +303,7 @@ Emergency stop freezes both the repo control path and the resident-once Applicat
 
 ## Remote Repository Verification
 
-Phase 7F requires remote verification after the documentation commit is pushed.
+Phase 7F remote verification was completed after the documentation commit was pushed.
 
 Verification commands:
 
@@ -309,13 +315,13 @@ git merge-base HEAD origin/main
 git status --short
 ```
 
-Success condition:
+Verified success condition:
 
 ```text
 local HEAD equals origin/main HEAD, merge-base equals both, and git status is clean
 ```
 
-The exact post-push local and remote HEAD values are recorded in the Phase 7F final report because the commit hash changes when this summary is committed.
+The final post-push local and remote HEAD values are recorded in the Phase 7F final report. If this file is changed in a later commit, repeat the same verification commands after that later push.
 
 ## Next Optional Enhancements
 
