@@ -210,3 +210,11 @@ Phase 6X adds `docs/HERMES_RESIDENT_VALIDATION_GATE.md` as the final proposal be
 The gate requires audit helper, approval helper, file-zone classifier, command-policy classifier, emergency stop, dry-run resident loop, and status visibility to work first. The proposed future resident LaunchAgent remains manual-start only with `RunAtLoad=false`, `KeepAlive=false`, dry-run loop only, no command execution, no live Hermes run unless separately approved, no external integrations, and emergency stop compatibility.
 
 Phase 6X does not create a plist, create a Hermes launchd service, start services, run Hermes live, execute commands, or enable resident mode.
+
+## Phase 7B Resident-Once Runtime Note
+
+Phase 7B validates a separate governed one-shot runtime, not the full resident service proposed here.
+
+The validated runtime is documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md` and uses `com.msr.hermes.resident-once`, `RunAtLoad=false`, and `KeepAlive=false`. It runs once, writes redacted local proposals and audit metadata, and exits.
+
+It does not execute commands, run Hermes live, start the adapter, launch Desktop, connect integrations, use credentials, or stay alive as a daemon. The full `com.msr.hermes.resident` service remains unimplemented and unapproved.

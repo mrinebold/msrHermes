@@ -2,6 +2,12 @@
 
 ## 2026-06-13
 
+- Completed Phase 7B Hermes resident-once Application Support runtime validation.
+- Added `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`.
+- Documented runtime path `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`, wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once`, LaunchAgent plist path, working directory, stdout/stderr log paths, exact script invoked, regeneration inputs, and Desktop fail-closed boundary.
+- Validated wrapper and runtime script syntax, inspected plist paths, confirmed runtime no-secret scan only matched redaction regex marker strings, and ran the wrapper once.
+- Confirmed direct wrapper run wrote one proposal under runtime `sandbox/hermes_outbox/`, wrote an audit event under runtime `logs/hermes_audit/`, exited cleanly, and left no lingering process.
+- Confirmed Phase 7B did not execute commands, start the adapter, run Hermes live, launch Desktop, connect external integrations, use credentials, modify `~/.hermes`, set `RunAtLoad=true`, set `KeepAlive=true`, use sudo, or force push.
 - Completed Phase 7A governed Hermes resident shell and Desktop validation.
 - Added `scripts/hermes_resident_once.sh` for one-shot observe/recommend/dry-run resident behavior. It checks the freeze flag, scans only approved local inbox task files, uses file-zone and command-policy classifiers, writes redacted proposals to outbox, writes metadata-only audit events, and exits.
 - Added `scripts/hermes_resident_status.sh` and expanded `scripts/hermes_local_status.sh` to report resident-once runtime state, resident-once LaunchAgent state, Desktop install/verification/running state, command execution disabled, and external integrations disabled.

@@ -424,6 +424,36 @@ Current state after Phase 7A:
 - Hermes Desktop not running
 - no `8088` listener expected
 
+## Phase 7B Resident-Once Runtime Validation
+
+Phase 7B validated the Application Support resident-once runtime as the launchd-safe governed runtime.
+
+Documented:
+
+- runtime path: `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`
+- wrapper path: `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once`
+- plist path: `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.resident-once.plist`
+- working directory and launchd log paths
+- exact runtime script invoked
+- regeneration inputs from repo source
+- no-command-execution and no-external-integration boundaries
+
+Validation result:
+
+- wrapper and runtime script syntax passed
+- plist points to Application Support runtime paths
+- direct wrapper run succeeded once and exited
+- proposal output was written only under runtime outbox
+- metadata-only audit event was written
+- no command execution occurred
+- no external integration occurred
+- adapter was not started
+- Hermes live inference was not run
+- Desktop was not launched
+- no lingering resident process remained
+
+The runtime is ready for manual governed dry-run use. It is not a daemon, not command execution, not live Hermes inference, and not an integration gateway.
+
 ## Non-Goals
 
 - Do not run Hermes setup.

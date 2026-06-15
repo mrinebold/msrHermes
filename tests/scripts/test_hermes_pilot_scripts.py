@@ -19,6 +19,7 @@ PERSISTENT_CONFIG_PLAN = REPO_ROOT / "docs" / "HERMES_PERSISTENT_LOCAL_CONFIG_PL
 RESIDENT_MODE_PLAN = REPO_ROOT / "docs" / "HERMES_RESIDENT_MODE_PLAN.md"
 RESIDENT_AUTHORITY_MODEL = REPO_ROOT / "docs" / "HERMES_RESIDENT_AUTHORITY_MODEL.md"
 RESIDENT_VALIDATION_GATE = REPO_ROOT / "docs" / "HERMES_RESIDENT_VALIDATION_GATE.md"
+RESIDENT_ONCE_RUNTIME_DOC = REPO_ROOT / "docs" / "HERMES_RESIDENT_ONCE_RUNTIME.md"
 DESKTOP_GOVERNED_INSTALL = REPO_ROOT / "docs" / "HERMES_DESKTOP_GOVERNED_INSTALL.md"
 AUDIT_LOG_DESIGN = REPO_ROOT / "docs" / "HERMES_AUDIT_LOG_DESIGN.md"
 EMERGENCY_STOP_DESIGN = REPO_ROOT / "docs" / "HERMES_EMERGENCY_STOP_DESIGN.md"
@@ -715,6 +716,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             RESIDENT_MODE_PLAN,
             RESIDENT_AUTHORITY_MODEL,
             RESIDENT_VALIDATION_GATE,
+            RESIDENT_ONCE_RUNTIME_DOC,
             DESKTOP_GOVERNED_INSTALL,
             AUDIT_LOG_DESIGN,
             EMERGENCY_STOP_DESIGN,
@@ -1173,6 +1175,24 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Desktop final state: installed setup/bootstrap app present, not running, fail-closed", content)
         self.assertNotIn("Gatekeeper bypass: approved", content)
         self.assertNotIn("Desktop launch: approved", content)
+
+    def test_phase7b_resident_once_runtime_doc_preserves_boundaries(self):
+        content = RESIDENT_ONCE_RUNTIME_DOC.read_text(encoding="utf-8")
+
+        self.assertIn("Status: validated for governed manual dry-run operation", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current", content)
+        self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-resident-once", content)
+        self.assertIn("/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.resident-once.plist", content)
+        self.assertIn("logs/launchd/hermes-resident-once.stdout.log", content)
+        self.assertIn("logs/launchd/hermes-resident-once.stderr.log", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("command execution remained disabled", content)
+        self.assertIn("external integrations remained disabled", content)
+        self.assertIn("adapter was not started", content)
+        self.assertIn("Hermes live inference was not run", content)
+        self.assertIn("Desktop was not launched", content)
+        self.assertIn("Hermes Desktop remains fail-closed", content)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

@@ -356,4 +356,6 @@ scripts/hermes_local_status.sh
 
 Desktop remains governed separately and fail-closed. Phase 7A verified the official DMG and installed setup bundle but did not install, replace, or launch Desktop because strict codesign and Gatekeeper assessment still fail.
 
+Phase 7B validates that the Application Support runtime is self-contained enough for manual launchd execution. Use `docs/HERMES_RESIDENT_ONCE_RUNTIME.md` as the source for wrapper, plist, working directory, log paths, regeneration, and runtime validation details.
+
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.

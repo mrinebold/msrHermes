@@ -562,3 +562,24 @@ Still not ready:
 - Desktop launch
 
 Desktop readiness remains blocked because the official DMG verifies but the contained app and installed app fail strict codesign and Gatekeeper assessment.
+
+## Phase 7B Runtime Readiness Update
+
+The Application Support resident-once runtime is validated and documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`.
+
+Validated:
+
+- wrapper syntax
+- runtime script syntax
+- LaunchAgent working directory and log paths
+- direct wrapper run
+- runtime outbox proposal write
+- runtime audit event write
+- no command execution
+- no external integrations
+- no adapter start
+- no Hermes live run
+- no Desktop launch
+- no lingering process
+
+This makes the governed manual resident-shaped runtime usable for dry-run proposal generation, but not for command execution, daemon operation, or integrations.

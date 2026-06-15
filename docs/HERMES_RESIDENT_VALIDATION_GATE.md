@@ -130,3 +130,11 @@ Result:
 The first launchd attempt from the `Documents` repo path failed closed with exit code `126`; the fix was a minimal no-secret runtime under `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`.
 
 The next resident gate should decide whether to promote this one-shot dry-run runtime into a repeatable manual operating procedure. It must still keep command execution and external integrations disabled unless separately approved.
+
+## Phase 7B Runtime Validation Outcome
+
+Phase 7B validates the Application Support runtime documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`.
+
+The wrapper `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once` runs from `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`, invokes the runtime resident-once script, writes proposals only to the runtime outbox, writes audit metadata under runtime logs, and exits.
+
+Validation confirmed no command execution, no external integrations, no adapter start, no Hermes live run, no Desktop launch, and no lingering resident process.

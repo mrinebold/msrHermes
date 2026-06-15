@@ -204,3 +204,20 @@ Phase 7A Desktop validation checks:
 - Gatekeeper assessment result recorded
 - Desktop is not installed/replaced/launched when signing or Gatekeeper validation fails
 - no Gatekeeper bypass, quarantine removal, privacy permission grant, sign-in, credential, or integration occurs
+
+Phase 7B runtime validation checks:
+
+- Application Support runtime path documented
+- wrapper path documented
+- LaunchAgent plist path documented
+- working directory and logs documented
+- runtime can be regenerated from approved repo source files
+- wrapper direct run succeeds and exits
+- proposals are written only to approved runtime or repo outbox paths
+- audit event is written
+- no command execution occurs
+- no external integration occurs
+- adapter is not started
+- Hermes live inference is not run
+- Desktop is not launched
+- no lingering resident process remains

@@ -178,3 +178,5 @@ Current expected final state after Phase 7A:
 - external integrations enabled: no
 
 Desktop certification remains blocked: the official DMG verifies as a disk image, but both the mounted app and `/Applications/Hermes.app` are `com.nousresearch.hermes.setup` version `0.0.1` setup/bootstrap bundles that fail strict codesign and Gatekeeper assessment.
+
+Phase 7B adds a validated Application Support runtime for governed resident-once operation. The runtime is documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`, can be regenerated from approved repo source files, and has been validated by direct wrapper execution. It remains dry-run/manual only: command execution, external integrations, adapter auto-start, live Hermes inference, Desktop launch, `RunAtLoad=true`, and `KeepAlive=true` are still not approved.
