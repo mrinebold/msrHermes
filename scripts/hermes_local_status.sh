@@ -13,6 +13,7 @@ TARGET="$DOMAIN/$LABEL"
 RESIDENT_ONCE_TARGET="$DOMAIN/$RESIDENT_ONCE_LABEL"
 CONFIG="$HOME/.hermes/config.yaml"
 HERMES_BIN="${HERMES_BIN:-$HOME/.local/bin/hermes}"
+TAILSCALE_BIN="${TAILSCALE_BIN:-/Applications/Tailscale.app/Contents/MacOS/Tailscale}"
 DESKTOP_APP="/Applications/Hermes.app"
 AUDIT_DIR="$REPO_PATH/logs/hermes_audit"
 APPROVAL_DIR="$REPO_PATH/logs/hermes_approvals"
@@ -258,6 +259,39 @@ else
   print_kv "adapter_health" "not_checked_no_listener"
   print_kv "adapter_models" "not_checked_no_listener"
 fi
+
+if [[ -x "$TAILSCALE_BIN" ]]; then
+  print_kv "tailscale_command_available" "yes"
+  if tailscale_ip="$("$TAILSCALE_BIN" ip -4 2>/dev/null)"; then
+    if [[ "$tailscale_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      print_kv "tailscale_ipv4" "$tailscale_ip"
+    else
+      print_kv "tailscale_ipv4" "unavailable"
+    fi
+  else
+    print_kv "tailscale_ipv4" "unavailable"
+  fi
+else
+  print_kv "tailscale_command_available" "no"
+  print_kv "tailscale_ipv4" "unavailable"
+fi
+
+ssh_listener_lines=""
+if has_command lsof; then
+  ssh_listener_lines="$(lsof -nP -iTCP:22 -sTCP:LISTEN 2>/dev/null || true)"
+fi
+if [[ -n "$ssh_listener_lines" ]]; then
+  print_kv "ssh_listener_22" "yes"
+else
+  print_kv "ssh_listener_22" "no"
+fi
+if [[ -n "$listener_lines" ]] && printf '%s\n' "$listener_lines" | awk 'NR > 1 {print $0}' | grep -Eq '\*:8088|0\.0\.0\.0:8088'; then
+  print_kv "adapter_direct_public_exposure" "warning"
+else
+  print_kv "adapter_direct_public_exposure" "no"
+fi
+print_kv "ipad_access_mode" "tailscale_ssh"
+print_kv "endpoint_remote_mode" "ssh_tunnel"
 
 if [[ -x "$HERMES_BIN" ]]; then
   print_kv "hermes_cli_path" "$HERMES_BIN"

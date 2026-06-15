@@ -365,3 +365,5 @@ Phase 7D creates the final governed manual resident runbook at `docs/HERMES_GOVE
 Phase 7F adds `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the final install-state index. Use it for the complete list of installed components, runtime paths, LaunchAgent labels, disabled capabilities, and remote verification procedure.
 
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.
+
+Phase 7H adds remote and iPad access guidance. Use `docs/HERMES_REMOTE_IPAD_ACCESS.md` and `scripts/remote_ipad_access_instructions.sh` when connecting from iPad or a remote laptop. Remote access remains Tailscale-only, endpoint access remains SSH-tunnel-only, the adapter remains localhost-only, and public exposure is not approved.

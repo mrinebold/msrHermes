@@ -635,3 +635,17 @@ Operational readiness summary:
 - external integrations are frozen
 - Desktop remains fail-closed
 - no separate Hermes Agent OS artifact exists yet
+
+## Phase 7H Remote Readiness
+
+Private remote access is now documented for iPad, remote laptop, civic-main, civic-dev, and DevMonster use.
+
+Current readiness:
+
+- Tailscale is the preferred remote access layer.
+- Tailscale was installed but stopped during Phase 7G/7H discovery, so the current Mac mini Tailscale IP was unavailable.
+- SSH appeared disabled/not running during discovery; enable macOS Remote Login manually if needed.
+- `~/.ssh` and `authorized_keys` exist with secure permissions.
+- Adapter remains localhost-only.
+- Remote endpoint access is SSH-tunnel-only for now.
+- Public exposure and Tailscale Funnel are not approved.

@@ -196,3 +196,22 @@ Current installed state remains:
 - external integrations frozen
 - Desktop present but fail-closed
 - no distinct `docs/HERMES_AGENT_OS.md` artifact implemented
+
+## Phase 7H Remote/iPad Access Readiness
+
+Hermes can be operated remotely only through private access paths.
+
+Ready:
+
+- remote/iPad access model documented
+- remote instructions script available
+- endpoint tunnel model documented
+- adapter localhost-only boundary preserved
+
+Not enabled:
+
+- public internet access
+- Tailscale Funnel
+- direct `8088` exposure
+- Tailscale-bound endpoint proxy
+- external integrations

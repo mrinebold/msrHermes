@@ -334,3 +334,25 @@ Possible future phases, each requiring separate explicit approval:
 - Desktop support clarification with Nous Research
 - signed/notarized Desktop artifact validation
 - Helio/Agent Bus read-only gateway planning after credential decision
+
+## Remote And iPad Access Addendum
+
+Phase 7H adds private remote access documentation and helper scripts.
+
+Current remote model:
+
+- Tailscale is the primary remote access layer.
+- iPad access uses an SSH app over Tailscale.
+- Remote laptop access uses standard SSH over Tailscale.
+- Hermes endpoint access uses SSH tunnels to the Mac mini localhost adapter.
+- Adapter remains localhost-only.
+- Tailscale Funnel/public access is not approved.
+- Public internet exposure is not approved.
+- No external integrations are enabled by SSH access.
+
+References:
+
+- `docs/HERMES_REMOTE_IPAD_ACCESS.md`
+- `docs/HERMES_PRIVATE_NETWORK_ACCESS.md`
+- `docs/HERMES_ENDPOINT_ACCESS_MODEL.md`
+- `scripts/remote_ipad_access_instructions.sh`

@@ -244,3 +244,15 @@ Final installed/wrapped-up state:
 - Desktop present but fail-closed
 - no Gatekeeper bypass, quarantine removal, Desktop launch, sign-in, permission grant, or integration
 - no distinct `docs/HERMES_AGENT_OS.md` artifact present
+
+## Phase 7H Remote/iPad Access Checklist
+
+- [x] Remote/iPad access documented as Tailscale-only.
+- [x] iPad SSH workflow documented.
+- [x] Remote laptop SSH workflow documented.
+- [x] SSH tunnel endpoint access documented.
+- [x] Adapter remains localhost-only.
+- [x] Public exposure is not approved.
+- [x] Tailscale Funnel/public access is not approved.
+- [x] No SSH private keys belong in the repo.
+- [x] Remote access does not enable external integrations.

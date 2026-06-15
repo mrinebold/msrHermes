@@ -350,6 +350,17 @@ The governed resident shell checks emergency freeze state, scans only an approve
 
 Resident autonomy remains disabled. The Phase 7A LaunchAgent may remain installed for manual validation only, stopped/unloaded by default.
 
+## Phase 7H Remote Access Boundary
+
+Remote/iPad access does not change resident authority.
+
+- Tailscale is the primary remote access layer.
+- iPad and remote laptops use SSH over Tailscale.
+- Resident-once remains manual, one-shot, and governed.
+- Endpoint access uses SSH tunnels to localhost-only adapter endpoints.
+- Public exposure, Tailscale Funnel, direct `8088` exposure, and `0.0.0.0` binds are not approved.
+- Command execution and external integrations remain disabled.
+
 ## Phase 7D Governed Manual Resident Runbook
 
 Phase 7D adds `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` as the current operator-facing procedure for governed manual resident-shaped use.

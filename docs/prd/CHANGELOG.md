@@ -2,6 +2,11 @@
 
 ## 2026-06-15
 
+- Completed Phase 7H remote and iPad Hermes access model as docs/scripts/tests only.
+- Added `docs/HERMES_REMOTE_IPAD_ACCESS.md` describing Tailscale-only remote access, iPad SSH workflow, remote laptop workflow, SSH tunnel endpoint access, emergency remote recovery, and explicit non-approval for public exposure, Tailscale Funnel, `0.0.0.0`, direct `8088`, Desktop launch, external integrations, and command execution.
+- Added private SSH/network helper scripts for status, public-key installation, remote setup instructions, endpoint tunnel examples, outbound SSH config examples, and iPad/remote instructions.
+- Updated local status to report Tailscale command/IP availability, SSH listener state, adapter direct public exposure state, iPad access mode, and endpoint remote mode without writing files or starting services.
+- Confirmed Phase 7H did not expose public internet access, enable Tailscale Funnel, bind the adapter to `0.0.0.0`, start the adapter service, launch Desktop, use sudo, modify `~/.hermes`, store keys in the repo, or connect external integrations.
 - Completed Phase 7F final install documentation sync and remote repository verification preparation.
 - Added `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical installed-state snapshot covering date/time, repo path, remote URL, pre-sync commit, installed components, runtime paths, LaunchAgent labels, service states, Desktop state, enabled capabilities, disabled capabilities, safety controls, status verification, resident-once manual operation, emergency stop, remote verification procedure, and optional next enhancements.
 - Updated core readiness, operations, resident, adapter, model-provider, Desktop, Helio/delegation, master PRD, and changelog docs to reflect the true completed state.

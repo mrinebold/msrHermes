@@ -251,3 +251,24 @@ The next phase is a separate approval decision, not more basic setup. Future wor
 Use `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical install completion snapshot.
 
 Phase 7F confirms this runbook remains the current manual procedure. The installed stack is governed and manual: adapter and resident-once LaunchAgents are installed but stopped/unloaded by default, command execution is disabled, external integrations are frozen, and Desktop remains fail-closed.
+
+## Remote And iPad Use
+
+Remote use is approved only through private network paths.
+
+Use:
+
+```sh
+scripts/remote_ipad_access_instructions.sh
+```
+
+Current model:
+
+- Tailscale is the primary remote access layer
+- iPad access uses a trusted SSH app over Tailscale
+- remote laptop access uses standard SSH over Tailscale
+- endpoint access uses SSH local port forwarding
+- adapter remains bound to `127.0.0.1`
+- public exposure is not approved
+- Tailscale Funnel/public access is not approved
+- direct `8088` exposure is not approved

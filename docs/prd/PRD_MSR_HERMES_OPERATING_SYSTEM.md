@@ -552,6 +552,33 @@ Current manual operating commands:
 
 Desktop remains optional and blocked until a signed/notarized artifact verifies cleanly. No Gatekeeper bypass, quarantine removal, Desktop launch, sign-in, permission grant, or integration is approved.
 
+## Phase 7H Remote And iPad Access Model
+
+Phase 7H adds the private remote access model for Michael to reach the Mac mini and governed Hermes stack from iPad or a remote laptop.
+
+Current rule:
+
+- remote/iPad access is Tailscale-only
+- public exposure is not approved
+- Tailscale Funnel/public access is not approved
+- adapter remains localhost-only
+- endpoint access uses SSH tunnels for now
+- iPad access uses a trusted SSH app over Tailscale
+- future Tailscale-only gateway requires separate approval
+- SSH access does not enable Google, Supabase, Home Assistant, GitHub token, Helio, Agent Bus, Desktop, or command execution
+
+Supporting docs and scripts:
+
+- `docs/HERMES_REMOTE_IPAD_ACCESS.md`
+- `docs/HERMES_PRIVATE_NETWORK_ACCESS.md`
+- `docs/HERMES_SSH_ACCESS_MODEL.md`
+- `docs/HERMES_ENDPOINT_ACCESS_MODEL.md`
+- `docs/HERMES_OUTBOUND_NODE_ACCESS.md`
+- `scripts/ssh_access_status.sh`
+- `scripts/install_approved_ssh_key.sh`
+- `scripts/remote_ipad_access_instructions.sh`
+- `scripts/hermes_endpoint_tunnel_examples.sh`
+
 ## Non-Goals
 
 - Do not run Hermes setup.
