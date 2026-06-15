@@ -480,6 +480,29 @@ Cleanup:
 
 This confirms the emergency stop path is effective for the current governed resident-once dry-run workflow. It still does not approve command execution, daemon operation, external integrations, or Desktop launch.
 
+## Phase 7D Governed Manual Resident Runbook
+
+Phase 7D adds `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` as the final current operating procedure for Hermes as a governed local resident-shaped agent.
+
+The runbook covers:
+
+- implemented local components
+- current capabilities
+- explicit non-capabilities
+- exact status, resident-once, launchctl, emergency stop, policy check, audit helper, and approval helper commands
+- daily manual workflow
+- recovery workflow
+- wrapped-up state
+
+Current operating boundary:
+
+- Hermes can observe approved local inbox tasks, classify task/command metadata, write dry-run proposals, write audit metadata, respect freeze flags, and report status
+- Hermes cannot execute commands, edit arbitrary files, connect external integrations, launch Desktop, use real credentials, stay alive as a daemon, send messages, or write Agent Bus records
+- Desktop remains fail-closed due strict codesign and Gatekeeper failure
+- resident-once LaunchAgent remains manual and stopped/unloaded by default
+
+The local governed resident-shaped setup is wrapped up for now. The next phase should be a separate approval decision about a richer task format, manual operating cadence, or command-execution approval gate.
+
 ## Non-Goals
 
 - Do not run Hermes setup.

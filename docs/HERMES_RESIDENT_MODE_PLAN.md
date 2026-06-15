@@ -349,3 +349,11 @@ The LaunchAgent uses `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once
 The governed resident shell checks emergency freeze state, scans only an approved local inbox, uses file-zone classification, uses command-policy classification for proposed command metadata only, writes redacted proposals only to outbox, writes metadata-only audit events, and exits. It does not start the adapter, run Hermes live, execute commands, launch Desktop, connect integrations, or use credentials.
 
 Resident autonomy remains disabled. The Phase 7A LaunchAgent may remain installed for manual validation only, stopped/unloaded by default.
+
+## Phase 7D Governed Manual Resident Runbook
+
+Phase 7D adds `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` as the current operator-facing procedure for governed manual resident-shaped use.
+
+The manual path allows status checks, local inbox observation, dry-run proposal generation, audit metadata, policy checks, and emergency stop. It does not approve command execution, daemon operation, `RunAtLoad=true`, `KeepAlive=true`, external integrations, Desktop launch, real credentials, or Agent Bus writes.
+
+The resident-once LaunchAgent remains installed for manual use only and stopped/unloaded by default.

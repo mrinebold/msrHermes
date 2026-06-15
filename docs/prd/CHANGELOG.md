@@ -2,6 +2,14 @@
 
 ## 2026-06-13
 
+- Completed Phase 7D governed manual resident operations runbook.
+- Added `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md`.
+- Documented implemented components: manual adapter service, local status, emergency stop, audit helper, approval helper, policy check, resident-once script, resident-once LaunchAgent, resident status, and Desktop fail-closed validation.
+- Documented what Hermes can do today: observe approved local inbox tasks, classify local task and command metadata, write dry-run resident-once proposals, write audit metadata, respect freeze flags, and report status.
+- Documented what Hermes cannot do yet: execute commands, edit arbitrary files, connect external integrations, run Desktop, use credentials, stay alive as a daemon, set `RunAtLoad=true`, set `KeepAlive=true`, send messages/emails, or write Agent Bus records.
+- Added exact manual commands for status, resident-once, launchctl bootstrap/kickstart/bootout, emergency stop, policy checks, audit visibility, and requested-only approvals.
+- Defined the wrapped-up state for the current governed manual resident-shaped workflow.
+- Confirmed Phase 7D did not execute commands through Hermes, start the adapter, run Hermes live, launch Desktop, connect integrations, use credentials, modify `~/.hermes`, set `RunAtLoad=true`, set `KeepAlive=true`, use sudo, or force push.
 - Completed Phase 7C Hermes resident-once emergency stop validation.
 - Updated `scripts/hermes_emergency_stop.sh` to freeze both the repo sandbox control path and the Application Support resident-once runtime control path.
 - Updated `scripts/hermes_local_status.sh` and `scripts/hermes_resident_status.sh` to report resident-once runtime freeze state.

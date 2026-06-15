@@ -50,6 +50,7 @@ LOCAL_TASK_SAMPLE = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_step_review.t
 LOCAL_TASK_WITH_CONTEXT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_with_context.task.md"
 LOCAL_TASK_COMPACT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recommendation_compact.task.md"
 LOCAL_OPERATIONS_RUNBOOK = REPO_ROOT / "docs" / "HERMES_LOCAL_OPERATIONS_RUNBOOK.md"
+GOVERNED_MANUAL_RESIDENT_RUNBOOK = REPO_ROOT / "docs" / "HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md"
 LOCAL_ONLY_READY_REPORT = REPO_ROOT / "docs" / "HERMES_LOCAL_ONLY_READY_REPORT.md"
 
 SENSITIVE_ENV_VARS = {
@@ -742,6 +743,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_TASK_WITH_CONTEXT,
             LOCAL_TASK_COMPACT,
             LOCAL_OPERATIONS_RUNBOOK,
+            GOVERNED_MANUAL_RESIDENT_RUNBOOK,
             LOCAL_ONLY_READY_REPORT,
             HERMES_LOCAL_STATUS,
             HERMES_RESIDENT_ONCE,
@@ -1214,6 +1216,27 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("emergency stop deleted nothing", combined)
         self.assertIn("Only Phase 7C-created freeze files were removed", combined)
         self.assertIn("Logs and audit artifacts were preserved", combined)
+
+    def test_phase7d_governed_manual_resident_runbook_is_complete(self):
+        content = GOVERNED_MANUAL_RESIDENT_RUNBOOK.read_text(encoding="utf-8")
+
+        self.assertIn("scripts/hermes_local_status.sh", content)
+        self.assertIn("scripts/hermes_resident_status.sh", content)
+        self.assertIn("scripts/hermes_resident_once.sh", content)
+        self.assertIn("launchctl bootstrap", content)
+        self.assertIn("launchctl kickstart", content)
+        self.assertIn("launchctl bootout", content)
+        self.assertIn('scripts/hermes_emergency_stop.sh "reason"', content)
+        self.assertIn("scripts/hermes_policy_check.py", content)
+        self.assertIn("scripts/hermes_audit_event.py", content)
+        self.assertIn("scripts/hermes_approval_request.py", content)
+        self.assertIn("command execution remains disabled", content)
+        self.assertIn("external integrations remain frozen", content)
+        self.assertIn("Desktop remains fail-closed", content)
+        self.assertIn("Definition Of Wrapped-Up For Now", content)
+        self.assertIn("write to Agent Bus", content)
+        self.assertIn("RunAtLoad=true", content)
+        self.assertIn("KeepAlive=true", content)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

@@ -360,4 +360,6 @@ Phase 7B validates that the Application Support runtime is self-contained enough
 
 Phase 7C validates that `scripts/hermes_emergency_stop.sh "Phase 7C resident-once emergency stop validation"` freezes both repo and resident-once runtime control paths. Direct resident-once execution and manual LaunchAgent kickstart both refuse work while frozen. Only the Phase 7C-created freeze files were cleared afterward; logs and audit artifacts were preserved.
 
+Phase 7D creates the final governed manual resident runbook at `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md`. Use that document for day-to-day governed resident-shaped operation. This older local operations runbook remains useful for adapter and local-only background context.
+
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.

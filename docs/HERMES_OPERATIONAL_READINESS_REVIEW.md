@@ -601,3 +601,22 @@ Validated:
 - final freeze files can be cleared when explicitly safe
 
 Emergency stop is now adequate for the current manual resident-once dry-run workflow. It is not yet an authorization to enable command execution, daemon operation, external integrations, or Desktop launch.
+
+## Phase 7D Manual Operation Readiness
+
+`docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` is the current final operating procedure for manual governed resident-shaped use.
+
+Current readiness:
+
+- manual resident-once workflow is documented
+- emergency stop and freeze behavior are documented
+- launchctl manual load/kickstart/bootout commands are documented
+- status, audit helper, approval helper, policy check, resident-once, and Desktop fail-closed state are documented
+- wrapped-up state is defined
+
+Remaining blockers:
+
+- command execution approval gate
+- external integration gates
+- Desktop signed/notarized artifact
+- daemon/resident cadence decision
