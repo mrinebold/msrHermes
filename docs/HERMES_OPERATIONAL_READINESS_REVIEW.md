@@ -620,3 +620,18 @@ Remaining blockers:
 - external integration gates
 - Desktop signed/notarized artifact
 - daemon/resident cadence decision
+
+## Phase 7F Final Install State
+
+Phase 7F creates `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.
+
+Operational readiness summary:
+
+- governed manual resident-shaped local operation is available
+- adapter LaunchAgent is installed and manual-only
+- resident-once LaunchAgent is installed and manual one-shot only
+- both services are stopped/unloaded by default
+- command execution is disabled
+- external integrations are frozen
+- Desktop remains fail-closed
+- no separate Hermes Agent OS artifact exists yet

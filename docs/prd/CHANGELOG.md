@@ -1,5 +1,13 @@
 # PRD Changelog
 
+## 2026-06-15
+
+- Completed Phase 7F final install documentation sync and remote repository verification preparation.
+- Added `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical installed-state snapshot covering date/time, repo path, remote URL, pre-sync commit, installed components, runtime paths, LaunchAgent labels, service states, Desktop state, enabled capabilities, disabled capabilities, safety controls, status verification, resident-once manual operation, emergency stop, remote verification procedure, and optional next enhancements.
+- Updated core readiness, operations, resident, adapter, model-provider, Desktop, Helio/delegation, master PRD, and changelog docs to reflect the true completed state.
+- Confirmed the installed stack is governed local manual resident-shaped operation only: adapter LaunchAgent installed/stopped, resident-once LaunchAgent installed/stopped, audit/approval/file-zone/command-policy/emergency-stop/policy-check/status primitives available, command execution disabled, real resident daemon mode disabled, `RunAtLoad=false`, `KeepAlive=false`, external integrations frozen, Desktop fail-closed, and no distinct `docs/HERMES_AGENT_OS.md` artifact present.
+- Confirmed Phase 7F did not start services, launch Desktop, enable command execution, connect external integrations, use credentials, modify `~/.hermes`, set `RunAtLoad=true`, set `KeepAlive=true`, use sudo, or force push.
+
 ## 2026-06-13
 
 - Completed Phase 7D governed manual resident operations runbook.

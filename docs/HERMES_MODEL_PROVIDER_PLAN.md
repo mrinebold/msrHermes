@@ -1145,3 +1145,20 @@ The explicit-context plus `local_summary` baseline can now produce both current-
 Recommendation:
 
 Proceed next with a separately approved bounded PRD-review pilot. It should use the same builder/harness controls, produce review findings or recommendations only, and leave all shell, file-edit, integration, Desktop, and resident-mode authority disabled.
+
+## Phase 7F Final Model Provider State
+
+Phase 7F confirms the model-provider path is installed for governed local manual use.
+
+Current model state:
+
+- persistent Hermes config points to the localhost adapter
+- adapter LaunchAgent is installed but stopped/unloaded by default
+- adapter runtime is installed under Application Support
+- adapter remains manual-only
+- DevMonster Gemma remains the local inference worker behind the adapter
+- no cloud provider fallback is enabled
+- no real provider credentials are used
+- command execution and external integrations remain disabled
+
+Canonical final install snapshot: `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.

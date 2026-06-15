@@ -395,3 +395,23 @@ Phase 7A implements a Tier 1 governed resident-once shell only. It may inspect a
 It does not implement Tier 3 local execution, external read/write tiers, resident delegated operation, shell control, broad file authority, Desktop launch, or Helio/Agent Bus coordination. Command execution remains disabled. External integrations remain disabled. Hermes Desktop remains fail-closed.
 
 The `com.msr.hermes.resident-once` LaunchAgent is a manual, one-shot validation surface with `RunAtLoad=false` and `KeepAlive=false`; it is not an autonomous resident operator.
+
+## Phase 7F Authority State
+
+Phase 7F confirms the installed stack is still below command-execution authority.
+
+Active authority:
+
+- observe approved local status
+- recommend/dry-run approved local inbox tasks
+- write redacted proposal output
+- write metadata-only audit events
+- respect emergency stop/freeze
+
+Inactive authority:
+
+- command execution
+- real resident daemon operation
+- external reads or writes
+- Helio/Agent Bus activity
+- Desktop launch or Desktop authority

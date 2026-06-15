@@ -138,3 +138,9 @@ Phase 7B validates the Application Support runtime documented in `docs/HERMES_RE
 The wrapper `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once` runs from `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`, invokes the runtime resident-once script, writes proposals only to the runtime outbox, writes audit metadata under runtime logs, and exits.
 
 Validation confirmed no command execution, no external integrations, no adapter start, no Hermes live run, no Desktop launch, and no lingering resident process.
+
+## Phase 7F Gate Closure
+
+Phase 7F closes the current basic install/setup loop. The validated resident-once workflow is available manually and documented in `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` and `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.
+
+No further setup work is required for the current dry-run/manual state. Any next phase must be a separate approval decision for richer tasks, operating cadence, command-execution gating, Desktop remediation, or external integration planning.

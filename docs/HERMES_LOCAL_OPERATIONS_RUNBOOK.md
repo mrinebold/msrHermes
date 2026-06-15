@@ -362,4 +362,6 @@ Phase 7C validates that `scripts/hermes_emergency_stop.sh "Phase 7C resident-onc
 
 Phase 7D creates the final governed manual resident runbook at `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md`. Use that document for day-to-day governed resident-shaped operation. This older local operations runbook remains useful for adapter and local-only background context.
 
+Phase 7F adds `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the final install-state index. Use it for the complete list of installed components, runtime paths, LaunchAgent labels, disabled capabilities, and remote verification procedure.
+
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.

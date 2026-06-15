@@ -156,3 +156,13 @@ Phase 7C validated:
 - only Phase 7C-created freeze files were cleared afterward
 
 The runtime remains recoverable: logs and audit artifacts are preserved, and the runtime may be run again after an approved unfreeze.
+
+## Phase 7F Completion State
+
+Phase 7F confirms the resident-once runtime remains installed and ready for manual governed use. It is stopped/unloaded by default and must remain one-shot, dry-run/proposal oriented.
+
+Canonical installed-state reference:
+
+```text
+docs/HERMES_INSTALL_COMPLETION_SUMMARY.md
+```

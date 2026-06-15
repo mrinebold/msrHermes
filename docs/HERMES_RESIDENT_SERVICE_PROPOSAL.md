@@ -218,3 +218,19 @@ Phase 7B validates a separate governed one-shot runtime, not the full resident s
 The validated runtime is documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md` and uses `com.msr.hermes.resident-once`, `RunAtLoad=false`, and `KeepAlive=false`. It runs once, writes redacted local proposals and audit metadata, and exits.
 
 It does not execute commands, run Hermes live, start the adapter, launch Desktop, connect integrations, use credentials, or stay alive as a daemon. The full `com.msr.hermes.resident` service remains unimplemented and unapproved.
+
+## Phase 7F Service Boundary
+
+Phase 7F confirms no full resident service exists.
+
+Installed service surfaces:
+
+- `com.msr.hermes.model-router-adapter`: adapter service, manual-only, stopped/unloaded by default
+- `com.msr.hermes.resident-once`: governed one-shot resident-shaped service, manual-only, stopped/unloaded by default
+
+Not installed/enabled:
+
+- unconstrained `com.msr.hermes.resident`
+- daemon resident loop
+- command executor
+- external integration service

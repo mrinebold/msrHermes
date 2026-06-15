@@ -221,3 +221,26 @@ Phase 7B runtime validation checks:
 - Hermes live inference is not run
 - Desktop is not launched
 - no lingering resident process remains
+
+## Phase 7F Final Install Checklist
+
+Final installed/wrapped-up state:
+
+- `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` exists
+- adapter LaunchAgent installed
+- adapter stopped/unloaded
+- resident-once LaunchAgent installed
+- resident-once stopped/unloaded
+- governed manual resident workflow available
+- command execution disabled
+- real resident daemon mode disabled
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- external integrations frozen
+- no Google, Supabase, Home Assistant, GitHub token, Helio, or Agent Bus connection active
+- no real credentials used
+- no `8088` listener expected
+- no Hermes/Desktop/resident process expected
+- Desktop present but fail-closed
+- no Gatekeeper bypass, quarantine removal, Desktop launch, sign-in, permission grant, or integration
+- no distinct `docs/HERMES_AGENT_OS.md` artifact present

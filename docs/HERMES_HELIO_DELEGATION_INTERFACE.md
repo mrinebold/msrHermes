@@ -135,3 +135,11 @@ Every delegation must eventually produce or link to audit metadata:
 ## Proposal Conclusion
 
 Hermes may coordinate with Helio/ANO only through staged, audited delegation. Agent Bus remains frozen until a later credential and scope approval phase.
+
+## Phase 7F Integration State
+
+Phase 7F confirms no Helio, Agent Bus, Supabase, Google, GitHub, Home Assistant, or external integration is active.
+
+The governed manual resident-shaped stack may prepare local proposals only. It must not send delegation messages, write Agent Bus records, use credentials, dispatch agents, or connect external systems until a separate explicit approval gate.
+
+Canonical final install snapshot: `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.

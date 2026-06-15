@@ -357,3 +357,18 @@ Phase 7D adds `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` as the current o
 The manual path allows status checks, local inbox observation, dry-run proposal generation, audit metadata, policy checks, and emergency stop. It does not approve command execution, daemon operation, `RunAtLoad=true`, `KeepAlive=true`, external integrations, Desktop launch, real credentials, or Agent Bus writes.
 
 The resident-once LaunchAgent remains installed for manual use only and stopped/unloaded by default.
+
+## Phase 7F Final Resident Install State
+
+Phase 7F records the final install snapshot in `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.
+
+Resident state:
+
+- adapter service is installed but manual-only and stopped
+- resident-once service is installed but manual one-shot only and stopped
+- no daemon/resident loop is enabled
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- command execution disabled
+- external integrations frozen
+- Desktop fail-closed

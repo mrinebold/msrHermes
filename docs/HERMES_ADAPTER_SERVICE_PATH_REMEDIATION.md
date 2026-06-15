@@ -418,3 +418,21 @@ Validation result:
 - final status showed `loaded=false` and `listener=false`
 
 Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without a new explicit approval.
+
+## Phase 7F Path Remediation Closure
+
+The path remediation pattern is now validated for both adapter service and resident-once runtime: minimal no-secret wrappers execute from user-owned non-`Documents` paths, and launchd working directories/logs point to Application Support runtimes.
+
+Final adapter runtime:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current
+```
+
+Final resident-once runtime:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current
+```
+
+Both LaunchAgents remain manual-only with `RunAtLoad=false` and `KeepAlive=false`.

@@ -245,3 +245,9 @@ Wrapped-up state:
 - Desktop remains fail-closed due verification failure
 
 The next phase is a separate approval decision, not more basic setup. Future work should decide whether to add a strictly bounded manual resident operating cadence, a richer task format, or a command-execution approval gate. Do not enable those from this runbook alone.
+
+## Phase 7F Install Summary Reference
+
+Use `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical install completion snapshot.
+
+Phase 7F confirms this runbook remains the current manual procedure. The installed stack is governed and manual: adapter and resident-once LaunchAgents are installed but stopped/unloaded by default, command execution is disabled, external integrations are frozen, and Desktop remains fail-closed.

@@ -142,3 +142,22 @@ The official artifact verifies as a DMG, but the contained app is the same setup
 ## Next Step
 
 Request official release-channel clarification from Nous Research or obtain a notarized Desktop artifact with a valid strict signature before any Desktop install, replacement, or launch retry.
+
+## Phase 7F Desktop State
+
+Phase 7F confirms Desktop remains present but fail-closed.
+
+Current state:
+
+- `/Applications/Hermes.app` exists
+- app is not running
+- strict codesign remains failed
+- Gatekeeper assessment remains failed
+- no launch occurred
+- no Gatekeeper bypass occurred
+- no quarantine removal occurred
+- no sign-in occurred
+- no permissions were granted
+- no integrations were connected
+
+Desktop remains optional and blocked until a signed/notarized artifact verifies cleanly.

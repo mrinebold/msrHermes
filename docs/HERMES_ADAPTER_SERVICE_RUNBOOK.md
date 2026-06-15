@@ -309,3 +309,11 @@ Phase 5AT does not approve automatic service policy changes; Phase 5BA only docu
 - `~/.hermes` modification
 - sudo
 - broad filesystem or privacy permission grants
+
+## Phase 7F Final Adapter State
+
+Phase 7F confirms the adapter LaunchAgent remains installed, manual-only, and stopped/unloaded by default.
+
+Final adapter status is summarized in `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.
+
+The adapter may be started manually only when local inference is needed and must be stopped afterward. It remains bound to `127.0.0.1:8088`; no `RunAtLoad=true`, `KeepAlive=true`, cloud fallback, external integration, or Desktop dependency is enabled.

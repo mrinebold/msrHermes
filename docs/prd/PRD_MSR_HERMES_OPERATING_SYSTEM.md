@@ -2,9 +2,24 @@
 
 ## Status
 
-Phase 6R implemented `scripts/hermes_emergency_stop.sh`, a no-sudo, repeat-safe local emergency stop entrypoint. It creates or refreshes the local freeze flag, writes reason metadata, detects adapter/Hermes/Desktop/resident-like state, stops the approved adapter service only if it is already running, and writes a metadata-only audit event when the audit writer is importable.
+Phase 7F finalized the governed local install documentation for Hermes on the Mac mini.
 
-Repository status is maintained by git; this PRD records Phase 6R as local emergency-stop implementation only. The LaunchAgent plist remains installed on disk at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`, but it is unloaded and not running. Persistent config remains in `~/.hermes/config.yaml`; backup remains `/Users/michaelrinebold/.hermes/backups/phase5am-20260608T232816/config.yaml.bak`. Hermes remains manually invoked, not resident, and not approved for command execution, runtime file-operation enforcement, runtime approval enforcement, dry-run resident loop, live integrations, live Agent Bus access, Desktop relaunch, RunAtLoad, KeepAlive, or autonomous operation.
+Hermes is installed as a governed local manual resident-shaped stack:
+
+- Hermes CLI is configured for the localhost MSR Model Router adapter path.
+- The adapter LaunchAgent is installed but stopped/unloaded by default.
+- The resident-once LaunchAgent is installed but stopped/unloaded by default.
+- Resident-once operation is manual, one-shot, dry-run/proposal oriented, and audit-aware.
+- Audit, approval, file-zone, command-policy, emergency-stop, policy-check, local status, resident status, and resident-once primitives exist.
+- `RunAtLoad=false` and `KeepAlive=false` remain required for installed LaunchAgents.
+- Command execution remains disabled.
+- Real resident daemon mode is not enabled.
+- External integrations remain frozen; no Google, Supabase, Home Assistant, GitHub token, Helio, or Agent Bus connection is active.
+- No real credentials are used.
+- Hermes Desktop is present only as an untrusted setup/bootstrap bundle and remains fail-closed because strict codesign and Gatekeeper assessment failed.
+- No distinct `docs/HERMES_AGENT_OS.md` artifact exists; a separate Hermes Agent OS layer is not implemented as a distinct artifact.
+
+The canonical installed-state snapshot is `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`. Repository status is maintained by git and remote verification is performed after the Phase 7F documentation commit is pushed.
 
 ## Architecture Decision
 
@@ -502,6 +517,40 @@ Current operating boundary:
 - resident-once LaunchAgent remains manual and stopped/unloaded by default
 
 The local governed resident-shaped setup is wrapped up for now. The next phase should be a separate approval decision about a richer task format, manual operating cadence, or command-execution approval gate.
+
+## Phase 7F Final Install Documentation Sync
+
+Phase 7F creates `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical installed-state snapshot.
+
+Final true state:
+
+- Hermes CLI is installed and configured for the localhost adapter path
+- adapter LaunchAgent is installed but stopped/unloaded by default
+- adapter service is manual-only
+- resident-once LaunchAgent is installed but stopped/unloaded by default
+- resident-once is manual, one-shot, governed, and dry-run/proposal oriented
+- audit, approval, file-zone, command-policy, emergency-stop, policy-check, status, resident-once, and resident status primitives exist
+- governed manual resident workflow is available
+- command execution is disabled
+- real resident daemon mode is not enabled
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- external integrations are frozen
+- no Google, Supabase, Home Assistant, GitHub token, Helio, or Agent Bus connection is active
+- no real credentials are used
+- Hermes Desktop is present but fail-closed
+- no `docs/HERMES_AGENT_OS.md` artifact exists; a separate Hermes Agent OS layer is not implemented as a distinct artifact
+
+Current manual operating commands:
+
+- `scripts/hermes_local_status.sh`
+- `scripts/hermes_resident_status.sh`
+- `scripts/hermes_resident_once.sh`
+- `scripts/hermes_emergency_stop.sh "reason"`
+- `python3 scripts/hermes_policy_check.py --command "git status --short"`
+- `scripts/adapter_service_start.sh`, `scripts/adapter_service_stop.sh`, and `scripts/adapter_service_status.sh` for adapter-only manual inference sessions when needed
+
+Desktop remains optional and blocked until a signed/notarized artifact verifies cleanly. No Gatekeeper bypass, quarantine removal, Desktop launch, sign-in, permission grant, or integration is approved.
 
 ## Non-Goals
 

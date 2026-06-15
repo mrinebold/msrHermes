@@ -52,6 +52,7 @@ LOCAL_TASK_COMPACT = REPO_ROOT / "sandbox" / "hermes_inbox" / "next_phase_recomm
 LOCAL_OPERATIONS_RUNBOOK = REPO_ROOT / "docs" / "HERMES_LOCAL_OPERATIONS_RUNBOOK.md"
 GOVERNED_MANUAL_RESIDENT_RUNBOOK = REPO_ROOT / "docs" / "HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md"
 LOCAL_ONLY_READY_REPORT = REPO_ROOT / "docs" / "HERMES_LOCAL_ONLY_READY_REPORT.md"
+INSTALL_COMPLETION_SUMMARY = REPO_ROOT / "docs" / "HERMES_INSTALL_COMPLETION_SUMMARY.md"
 
 SENSITIVE_ENV_VARS = {
     "OPENAI_API_KEY",
@@ -745,6 +746,7 @@ class HermesPilotScriptsTest(unittest.TestCase):
             LOCAL_OPERATIONS_RUNBOOK,
             GOVERNED_MANUAL_RESIDENT_RUNBOOK,
             LOCAL_ONLY_READY_REPORT,
+            INSTALL_COMPLETION_SUMMARY,
             HERMES_LOCAL_STATUS,
             HERMES_RESIDENT_ONCE,
             HERMES_RESIDENT_STATUS,
@@ -1237,6 +1239,37 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("write to Agent Bus", content)
         self.assertIn("RunAtLoad=true", content)
         self.assertIn("KeepAlive=true", content)
+
+    def test_phase7f_install_completion_summary_is_current_and_bounded(self):
+        content = INSTALL_COMPLETION_SUMMARY.read_text(encoding="utf-8")
+
+        self.assertIn("Hermes is installed as a governed local manual resident-shaped agent stack", content)
+        self.assertIn("/Users/michaelrinebold/Documents/Helio/helio-command-center", content)
+        self.assertIn("https://github.com/mrinebold/msrHermes.git", content)
+        self.assertIn("/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist", content)
+        self.assertIn("/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.resident-once.plist", content)
+        self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter", content)
+        self.assertIn("/Users/michaelrinebold/.local/bin/msr-hermes-resident-once", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current", content)
+        self.assertIn("/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current", content)
+        self.assertIn("sandbox/hermes_inbox", content)
+        self.assertIn("sandbox/hermes_outbox", content)
+        self.assertIn("logs/hermes_audit", content)
+        self.assertIn("logs/hermes_approvals", content)
+        self.assertIn("RunAtLoad=false", content)
+        self.assertIn("KeepAlive=false", content)
+        self.assertIn("command execution", content)
+        self.assertIn("Disabled today", content)
+        self.assertIn("no external integrations", content)
+        self.assertIn("Desktop remains optional and fail-closed", content)
+        self.assertIn("No `docs/HERMES_AGENT_OS.md` file is present", content)
+        self.assertIn("scripts/hermes_local_status.sh", content)
+        self.assertIn("scripts/hermes_resident_once.sh", content)
+        self.assertIn('scripts/hermes_emergency_stop.sh "reason"', content)
+        self.assertIn("Remote Repository Verification", content)
+        self.assertIn("local and remote HEAD values", content)
+        self.assertIn("no Gatekeeper bypass", content)
+        self.assertIn("no quarantine removal", content)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

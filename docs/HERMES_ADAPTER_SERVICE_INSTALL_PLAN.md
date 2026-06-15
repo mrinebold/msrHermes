@@ -353,3 +353,22 @@ The helpers use only the existing user LaunchAgent label `com.msr.hermes.model-r
 Validation result: start passed, health passed, models passed with `gemma4:26b`, listener inspection showed only `127.0.0.1:8088`, stop passed, and final status reported `loaded=false` and `listener=false`.
 
 Recommended next action: keep manual service start/stop as the approved operating procedure. Do not enable `RunAtLoad`, `KeepAlive`, Hermes resident mode, Desktop, credentials, or integrations without separate approval.
+
+## Phase 7F Final Adapter Install State
+
+Phase 7F confirms the adapter installation work is complete for manual local use.
+
+Final state:
+
+- user LaunchAgent installed at `/Users/michaelrinebold/Library/LaunchAgents/com.msr.hermes.model-router-adapter.plist`
+- wrapper installed at `/Users/michaelrinebold/.local/bin/msr-hermes-model-router-adapter`
+- runtime installed at `/Users/michaelrinebold/Library/Application Support/Helio/hermes-adapter-service/current`
+- service manual-only
+- service stopped/unloaded by default
+- no `8088` listener expected when idle
+- `RunAtLoad=false`
+- `KeepAlive=false`
+- no Desktop dependency
+- no external integrations or credentials
+
+Canonical final install snapshot: `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md`.

@@ -182,3 +182,17 @@ Desktop certification remains blocked: the official DMG verifies as a disk image
 Phase 7B adds a validated Application Support runtime for governed resident-once operation. The runtime is documented in `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`, can be regenerated from approved repo source files, and has been validated by direct wrapper execution. It remains dry-run/manual only: command execution, external integrations, adapter auto-start, live Hermes inference, Desktop launch, `RunAtLoad=true`, and `KeepAlive=true` are still not approved.
 
 Phase 7D adds `docs/HERMES_GOVERNED_MANUAL_RESIDENT_RUNBOOK.md` as the final current operating procedure. Hermes is ready for manual governed resident-shaped local operation only: observe approved inbox tasks, write dry-run proposals, write audit metadata, respect emergency stop, and report status. Command execution, external integrations, Desktop launch, and daemon operation remain disabled.
+
+## Phase 7F Install Documentation Sync
+
+Phase 7F adds `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the canonical final installed-state snapshot.
+
+Current installed state remains:
+
+- adapter LaunchAgent installed but stopped/unloaded
+- resident-once LaunchAgent installed but stopped/unloaded
+- governed manual resident workflow available
+- command execution disabled
+- external integrations frozen
+- Desktop present but fail-closed
+- no distinct `docs/HERMES_AGENT_OS.md` artifact implemented
