@@ -7,6 +7,10 @@ REPO_ROOT="${HERMES_REPO_ROOT:-$CODE_ROOT}"
 CONTROL_DIR="${REPO_ROOT}/sandbox/hermes_control"
 FREEZE_FLAG="${CONTROL_DIR}/FROZEN"
 FREEZE_REASON="${CONTROL_DIR}/FROZEN.reason"
+RESIDENT_ONCE_RUNTIME="${HERMES_RESIDENT_ONCE_RUNTIME:-$HOME/Library/Application Support/Helio/hermes-resident-once/current}"
+RESIDENT_ONCE_CONTROL_DIR="${RESIDENT_ONCE_RUNTIME}/sandbox/hermes_control"
+RESIDENT_ONCE_FREEZE_FLAG="${RESIDENT_ONCE_CONTROL_DIR}/FROZEN"
+RESIDENT_ONCE_FREEZE_REASON="${RESIDENT_ONCE_CONTROL_DIR}/FROZEN.reason"
 ADAPTER_STOP="${REPO_ROOT}/scripts/adapter_service_stop.sh"
 LABEL="com.msr.hermes.model-router-adapter"
 DOMAIN="gui/$(id -u)"
@@ -25,15 +29,30 @@ timestamp_utc() {
 }
 
 write_freeze_flag() {
-  mkdir -p "$CONTROL_DIR"
-  if [[ ! -f "$FREEZE_FLAG" ]]; then
-    printf 'frozen\n' > "$FREEZE_FLAG"
+  local control_dir="$1"
+  local freeze_flag="$2"
+  local freeze_reason="$3"
+
+  mkdir -p "$control_dir"
+  if [[ ! -f "$freeze_flag" ]]; then
+    printf 'frozen\n' > "$freeze_flag"
   fi
   {
     printf 'timestamp=%s\n' "$(timestamp_utc)"
     printf 'reason=%s\n' "${HERMES_EMERGENCY_REASON:-manual_emergency_stop}"
     printf 'script=hermes_emergency_stop.sh\n'
-  } > "$FREEZE_REASON"
+  } > "$freeze_reason"
+}
+
+write_all_freeze_flags() {
+  write_freeze_flag "$CONTROL_DIR" "$FREEZE_FLAG" "$FREEZE_REASON"
+  if [[ -d "$RESIDENT_ONCE_RUNTIME" ]]; then
+    write_freeze_flag "$RESIDENT_ONCE_CONTROL_DIR" "$RESIDENT_ONCE_FREEZE_FLAG" "$RESIDENT_ONCE_FREEZE_REASON"
+    print_kv "resident_once_runtime_freeze_flag" "$RESIDENT_ONCE_FREEZE_FLAG"
+    print_kv "resident_once_runtime_freeze_flag_exists" "yes"
+  else
+    print_kv "resident_once_runtime_freeze_flag_exists" "no_runtime"
+  fi
 }
 
 adapter_listener_present() {
@@ -89,7 +108,7 @@ PY
 print_kv "emergency_stop" "start"
 print_kv "repo_root" "$REPO_ROOT"
 
-write_freeze_flag
+write_all_freeze_flags
 print_kv "freeze_flag" "$FREEZE_FLAG"
 print_kv "freeze_flag_exists" "yes"
 

@@ -454,6 +454,32 @@ Validation result:
 
 The runtime is ready for manual governed dry-run use. It is not a daemon, not command execution, not live Hermes inference, and not an integration gateway.
 
+## Phase 7C Resident-Once Emergency Stop Validation
+
+Phase 7C validated emergency stop behavior against both direct resident-once execution and the manual resident-once LaunchAgent workflow.
+
+Implemented/validated:
+
+- emergency stop creates repo freeze flag and reason file
+- emergency stop creates Application Support runtime freeze flag and reason file
+- status reports both freeze states
+- direct `scripts/hermes_resident_once.sh` refuses work while frozen
+- manual `com.msr.hermes.resident-once` kickstart refuses work while frozen
+- launchd exits with code `0` while frozen
+- LaunchAgent is booted out after validation
+- audit event is written
+- adapter stays stopped
+- no `8088` listener appears
+- no Hermes/Desktop/resident process remains
+
+Cleanup:
+
+- only Phase 7C-created repo and runtime freeze files were removed
+- logs and audit artifacts were preserved
+- final state is unfrozen, resident-once unloaded/stopped, adapter stopped, and Desktop not running
+
+This confirms the emergency stop path is effective for the current governed resident-once dry-run workflow. It still does not approve command execution, daemon operation, external integrations, or Desktop launch.
+
 ## Non-Goals
 
 - Do not run Hermes setup.

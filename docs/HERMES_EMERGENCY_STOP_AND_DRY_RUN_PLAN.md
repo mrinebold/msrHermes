@@ -169,3 +169,20 @@ Unfreeze remains manual and approval-bound. There is no unfreeze script. For Pha
 ```sh
 rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason
 ```
+
+## Phase 7C Resident-Once Freeze Result
+
+Phase 7C validates that emergency stop freezes both the repo control path and the Application Support resident-once runtime control path. While frozen, direct resident-once execution and manual `com.msr.hermes.resident-once` launchctl kickstart both refuse work and exit safely.
+
+Final validation state after cleanup:
+
+- repo freeze flag absent
+- resident-once runtime freeze flag absent
+- resident-once LaunchAgent unloaded/stopped
+- adapter stopped
+- no `8088` listener
+- no Hermes/Desktop/resident process
+- command execution disabled
+- external integrations frozen
+
+Only Phase 7C-created freeze files were removed after validation; logs and audit artifacts were preserved.

@@ -964,6 +964,8 @@ class HermesPilotScriptsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             env = os.environ.copy()
             env["HERMES_REPO_ROOT"] = temp_dir
+            env["HERMES_RESIDENT_ONCE_RUNTIME"] = str(Path(temp_dir) / "resident-runtime")
+            (Path(temp_dir) / "resident-runtime").mkdir()
             result_one = subprocess.run(
                 ["bash", str(HERMES_EMERGENCY_STOP)],
                 cwd=REPO_ROOT,
@@ -985,7 +987,10 @@ class HermesPilotScriptsTest(unittest.TestCase):
             self.assertEqual(result_two.returncode, 0, result_two.stderr)
             self.assertTrue((Path(temp_dir) / "sandbox" / "hermes_control" / "FROZEN").exists())
             self.assertTrue((Path(temp_dir) / "sandbox" / "hermes_control" / "FROZEN.reason").exists())
+            self.assertTrue((Path(temp_dir) / "resident-runtime" / "sandbox" / "hermes_control" / "FROZEN").exists())
+            self.assertTrue((Path(temp_dir) / "resident-runtime" / "sandbox" / "hermes_control" / "FROZEN.reason").exists())
             self.assertIn("freeze_flag_exists=yes", result_two.stdout)
+            self.assertIn("resident_once_runtime_freeze_flag_exists=yes", result_two.stdout)
             self.assertIn("adapter_stop_attempted=no_not_running", result_two.stdout)
             self.assertTrue((Path(temp_dir) / "logs" / "hermes_audit").exists())
 
@@ -1193,6 +1198,22 @@ class HermesPilotScriptsTest(unittest.TestCase):
         self.assertIn("Hermes live inference was not run", content)
         self.assertIn("Desktop was not launched", content)
         self.assertIn("Hermes Desktop remains fail-closed", content)
+
+    def test_phase7c_emergency_stop_blocks_resident_once(self):
+        runtime = RESIDENT_ONCE_RUNTIME_DOC.read_text(encoding="utf-8")
+        emergency = EMERGENCY_STOP_DESIGN.read_text(encoding="utf-8")
+        plan = EMERGENCY_STOP_AND_DRY_RUN_PLAN.read_text(encoding="utf-8")
+        combined = "\n".join([runtime, emergency, plan])
+
+        self.assertIn("Phase 7C", combined)
+        self.assertIn("resident-once runtime control path", combined)
+        self.assertIn("direct `scripts/hermes_resident_once.sh` refused work while frozen", combined)
+        self.assertIn("kickstart of `com.msr.hermes.resident-once` refused while frozen", combined)
+        self.assertIn("no command execution", combined)
+        self.assertIn("no external integration", combined)
+        self.assertIn("emergency stop deleted nothing", combined)
+        self.assertIn("Only Phase 7C-created freeze files were removed", combined)
+        self.assertIn("Logs and audit artifacts were preserved", combined)
 
     def test_helio_delegation_interface_preserves_boundaries(self):
         content = HELIO_DELEGATION_INTERFACE.read_text(encoding="utf-8")

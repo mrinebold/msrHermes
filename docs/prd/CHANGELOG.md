@@ -2,6 +2,15 @@
 
 ## 2026-06-13
 
+- Completed Phase 7C Hermes resident-once emergency stop validation.
+- Updated `scripts/hermes_emergency_stop.sh` to freeze both the repo sandbox control path and the Application Support resident-once runtime control path.
+- Updated `scripts/hermes_local_status.sh` and `scripts/hermes_resident_status.sh` to report resident-once runtime freeze state.
+- Ran `scripts/hermes_emergency_stop.sh "Phase 7C resident-once emergency stop validation"` and confirmed repo/runtime freeze flags, reason files, and audit event were written.
+- Confirmed direct `scripts/hermes_resident_once.sh` refused work while frozen.
+- Confirmed manual launchctl kickstart of `com.msr.hermes.resident-once` refused work while frozen, exited with code `0`, and was booted out afterward.
+- Cleared only the four Phase 7C-created repo/runtime freeze files after validation; logs and audit artifacts were preserved.
+- Confirmed final state: freeze absent, resident-once unloaded/stopped, adapter stopped, no `8088` listener, no Hermes/Desktop/resident process, command execution disabled, and external integrations frozen.
+- Confirmed Phase 7C did not execute commands, start the adapter, run Hermes live, launch Desktop, connect external integrations, use credentials, modify `~/.hermes`, set `RunAtLoad=true`, set `KeepAlive=true`, use sudo, or force push.
 - Completed Phase 7B Hermes resident-once Application Support runtime validation.
 - Added `docs/HERMES_RESIDENT_ONCE_RUNTIME.md`.
 - Documented runtime path `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current`, wrapper path `/Users/michaelrinebold/.local/bin/msr-hermes-resident-once`, LaunchAgent plist path, working directory, stdout/stderr log paths, exact script invoked, regeneration inputs, and Desktop fail-closed boundary.

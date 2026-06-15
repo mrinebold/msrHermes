@@ -73,7 +73,7 @@ else
 fi
 
 if [[ -x "$LOCAL_STATUS" ]]; then
-  "$LOCAL_STATUS" | grep -E '^(freeze_flag_exists|adapter_launchagent_loaded|adapter_listener_8088|latest_audit_|latest_approval_|command_execution_enabled|resident_mode_enabled|external_integrations_enabled|desktop_installed|desktop_verified|desktop_running|emergency_stop_script_exists)=' || true
+  "$LOCAL_STATUS" | grep -E '^(freeze_flag_exists|freeze_reason_exists|resident_once_runtime_freeze_|adapter_launchagent_loaded|adapter_listener_8088|latest_audit_|latest_approval_|command_execution_enabled|resident_mode_enabled|external_integrations_enabled|desktop_installed|desktop_verified|desktop_running|emergency_stop_script_exists)=' || true
 fi
 
 print_kv "command_execution_enabled" "no"

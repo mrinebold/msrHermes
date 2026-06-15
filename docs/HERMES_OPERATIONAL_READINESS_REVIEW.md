@@ -583,3 +583,21 @@ Validated:
 - no lingering process
 
 This makes the governed manual resident-shaped runtime usable for dry-run proposal generation, but not for command execution, daemon operation, or integrations.
+
+## Phase 7C Emergency Stop Readiness Update
+
+Emergency stop is validated against the governed resident-once workflow.
+
+Validated:
+
+- repo freeze flag and runtime freeze flag are created
+- status reports both freeze states
+- resident-once direct run refuses while frozen
+- resident-once LaunchAgent kickstart refuses while frozen
+- LaunchAgent exits and can be booted out
+- adapter stays stopped
+- no `8088` listener appears
+- no Hermes/Desktop/resident process remains
+- final freeze files can be cleared when explicitly safe
+
+Emergency stop is now adequate for the current manual resident-once dry-run workflow. It is not yet an authorization to enable command execution, daemon operation, external integrations, or Desktop launch.

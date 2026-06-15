@@ -18,6 +18,8 @@ AUDIT_DIR="$REPO_PATH/logs/hermes_audit"
 APPROVAL_DIR="$REPO_PATH/logs/hermes_approvals"
 FREEZE_FLAG="$REPO_PATH/sandbox/hermes_control/FROZEN"
 FREEZE_REASON="$REPO_PATH/sandbox/hermes_control/FROZEN.reason"
+RESIDENT_ONCE_RUNTIME_FREEZE="$RESIDENT_ONCE_RUNTIME/sandbox/hermes_control/FROZEN"
+RESIDENT_ONCE_RUNTIME_FREEZE_REASON="$RESIDENT_ONCE_RUNTIME/sandbox/hermes_control/FROZEN.reason"
 EMERGENCY_STOP_SCRIPT="$REPO_PATH/scripts/hermes_emergency_stop.sh"
 POLICY_CHECK_SCRIPT="$REPO_PATH/scripts/hermes_policy_check.py"
 DRY_RUN_RESIDENT_SCRIPT="$REPO_PATH/scripts/hermes_resident_dry_run.sh"
@@ -405,6 +407,20 @@ if [[ -f "$FREEZE_REASON" ]]; then
 else
   print_kv "freeze_reason_exists" "no"
   print_kv "freeze_reason_first_line" "not_initialized"
+fi
+print_kv "resident_once_runtime_freeze_flag_path" "$RESIDENT_ONCE_RUNTIME_FREEZE"
+if [[ -f "$RESIDENT_ONCE_RUNTIME_FREEZE" ]]; then
+  print_kv "resident_once_runtime_freeze_flag_exists" "yes"
+else
+  print_kv "resident_once_runtime_freeze_flag_exists" "no"
+fi
+if [[ -f "$RESIDENT_ONCE_RUNTIME_FREEZE_REASON" ]]; then
+  print_kv "resident_once_runtime_freeze_reason_exists" "yes"
+  runtime_reason_line="$(head -n 1 "$RESIDENT_ONCE_RUNTIME_FREEZE_REASON" 2>/dev/null || true)"
+  print_kv "resident_once_runtime_freeze_reason_first_line" "$(safe_line "${runtime_reason_line:-empty}")"
+else
+  print_kv "resident_once_runtime_freeze_reason_exists" "no"
+  print_kv "resident_once_runtime_freeze_reason_first_line" "not_initialized"
 fi
 if [[ -x "$EMERGENCY_STOP_SCRIPT" ]]; then
   print_kv "emergency_stop_script_exists" "yes"

@@ -254,3 +254,35 @@ Manual unfreeze remains documentation-only:
 # Only after human approval, and only for the repo-local freeze files:
 rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason
 ```
+
+## Phase 7C Resident-Once Emergency Stop Validation
+
+Phase 7C validated emergency stop against the governed resident-once workflow.
+
+Emergency stop now creates freeze flags for both:
+
+- repo control path: `sandbox/hermes_control/FROZEN`
+- resident-once runtime control path: `/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current/sandbox/hermes_control/FROZEN`
+
+Observed result:
+
+- emergency stop created repo and runtime freeze flags and reason files
+- status reported repo and runtime freeze state
+- latest audit action reported `emergency_stop`
+- adapter service stayed stopped
+- no `8088` listener appeared
+- direct `scripts/hermes_resident_once.sh` refused work while frozen
+- manual `com.msr.hermes.resident-once` kickstart refused work while runtime freeze existed
+- LaunchAgent exited with code `0` and was booted out afterward
+- no command execution, adapter start, Hermes live run, Desktop launch, or external integration occurred
+- emergency stop deleted nothing
+
+Phase 7C then cleared only the four phase-created freeze files from the repo and runtime control directories:
+
+```sh
+rm sandbox/hermes_control/FROZEN sandbox/hermes_control/FROZEN.reason \
+  "$HOME/Library/Application Support/Helio/hermes-resident-once/current/sandbox/hermes_control/FROZEN" \
+  "$HOME/Library/Application Support/Helio/hermes-resident-once/current/sandbox/hermes_control/FROZEN.reason"
+```
+
+Logs and audit artifacts were preserved. This is not a general unfreeze command.

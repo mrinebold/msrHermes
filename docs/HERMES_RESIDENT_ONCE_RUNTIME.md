@@ -134,3 +134,25 @@ After validation:
 - no Desktop process
 - command execution enabled: no
 - external integrations enabled: no
+
+## Phase 7C Emergency Stop Validation
+
+Emergency stop now freezes this runtime as well as the repo sandbox. The runtime freeze flag is:
+
+```text
+/Users/michaelrinebold/Library/Application Support/Helio/hermes-resident-once/current/sandbox/hermes_control/FROZEN
+```
+
+Phase 7C validated:
+
+- emergency stop created the runtime freeze flag and reason file
+- status reported runtime freeze visibility
+- direct repo resident-once refused while frozen
+- manual launchctl kickstart of `com.msr.hermes.resident-once` refused while frozen
+- launchd exited with code `0`
+- LaunchAgent was booted out afterward
+- no proposal work was performed while frozen
+- no command execution, adapter start, Hermes live run, Desktop launch, or integration occurred
+- only Phase 7C-created freeze files were cleared afterward
+
+The runtime remains recoverable: logs and audit artifacts are preserved, and the runtime may be run again after an approved unfreeze.
