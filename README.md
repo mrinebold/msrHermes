@@ -162,3 +162,14 @@ Requires approval after Phase 5B review.
 - Validate Hermes model use through the existing model router and DevMonster Gemma4.
 - Build the future Supabase task bus for governed 40-agent dispatch.
 - Keep Google Workspace and Home Assistant behind their existing staged safety plans.
+
+
+## Phase 7I Browser Gateway
+
+The private browser gateway is implemented under services/hermes_gateway/ and is started manually with:
+
+```sh
+scripts/run_hermes_gateway.sh
+```
+
+It defaults to 127.0.0.1:8787, requires token authentication, supports explicit Tailscale binding to the Mac mini's approved address, refuses wildcard/public binds, and does not expose the adapter, command execution, Desktop, or external integrations.

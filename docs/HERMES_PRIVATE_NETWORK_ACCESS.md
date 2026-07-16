@@ -111,3 +111,10 @@ Required remote posture:
 Detailed procedure:
 
 - [Hermes Remote And iPad Access](HERMES_REMOTE_IPAD_ACCESS.md)
+
+
+## Phase 7I Browser Gateway
+
+The Mac mini was confirmed online in Tailscale on 2026-07-15 as michaels-mac-mini at 100.80.79.75. The private browser gateway may bind to that address only when explicitly approved through HERMES_GATEWAY_ALLOW_TAILSCALE_BIND=1 and token authentication.
+
+The supported browser URL is http://100.80.79.75:8787. The default remains localhost-only at 127.0.0.1:8787. Tailscale Funnel, public exposure, wildcard binds, and direct adapter exposure remain forbidden.

@@ -367,3 +367,16 @@ Phase 7F adds `docs/HERMES_INSTALL_COMPLETION_SUMMARY.md` as the final install-s
 After Phase 6T, `scripts/hermes_emergency_stop.sh` exists for no-sudo local freeze/stop behavior, `scripts/hermes_policy_check.py` exists for dry-run command/path classification, and `scripts/hermes_resident_dry_run.sh` exists for one-shot dry-run inbox proposal generation. The resident service and command execution remain unimplemented. Daily manual local-only use remains unchanged.
 
 Phase 7H adds remote and iPad access guidance. Use `docs/HERMES_REMOTE_IPAD_ACCESS.md` and `scripts/remote_ipad_access_instructions.sh` when connecting from iPad or a remote laptop. Remote access remains Tailscale-only, endpoint access remains SSH-tunnel-only, the adapter remains localhost-only, and public exposure is not approved.
+
+
+## Phase 7I Browser Gateway
+
+Start manually from the repository:
+
+```sh
+scripts/run_hermes_gateway.sh
+```
+
+Default URL: http://127.0.0.1:8787. Confirmed direct Tailscale URL for the Mac mini: http://100.80.79.75:8787, only when started with explicit Tailscale binding and a gateway token.
+
+The gateway must be stopped with Ctrl-C after use. It has no LaunchAgent, no RunAtLoad, and no KeepAlive. Use scripts/hermes_gateway_status.sh for bounded status. Public exposure and Funnel remain prohibited.

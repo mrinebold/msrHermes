@@ -908,3 +908,10 @@
 - Recorded that no single canonical Supabase Agent Bus PRD was found during Phase 6A.
 - Linked the Phase 6A source map and Hermes-to-Helio bus plan.
 - Set next required work to Phase 6B: Canonical Agent Bus Contract.
+
+
+## 2026-07-15 — Phase 7I
+
+- Added the private browser Hermes gateway for iPad and approved Tailscale/private-network browsers.
+- Added token authentication, safe inbox/outbox access, bounded audit/approval summaries, and governed resident/emergency actions.
+- Preserved localhost-only adapter access; public exposure, Funnel, wildcard binds, Desktop launch, command execution, and external integrations remain disabled.

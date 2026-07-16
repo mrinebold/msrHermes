@@ -147,3 +147,28 @@ Remote/iPad access does not approve:
 - external integrations
 - command execution
 - real credentials
+
+
+## Phase 7I Browser Gateway
+
+Status: implemented; manual foreground service only.
+
+The private browser gateway is available at 127.0.0.1:8787 by default. It requires a gateway token and exposes only status, inbox, outbox, audit/approval summaries, resident-once, and emergency-stop surfaces.
+
+For direct iPad browser access, connect the iPad to Tailscale and start the gateway on the Mac mini with:
+
+```sh
+HERMES_GATEWAY_BIND_HOST=100.80.79.75 \\
+HERMES_GATEWAY_ALLOW_TAILSCALE_BIND=1 \\
+scripts/run_hermes_gateway.sh
+```
+
+Then browse to http://100.80.79.75:8787. Public exposure, Tailscale Funnel, wildcard binds, direct adapter exposure, Desktop launch, command execution, and external integrations remain disabled.
+
+If direct binding is not desired, use an SSH local tunnel to the gateway:
+
+```sh
+ssh -N -L 18787:127.0.0.1:8787 macmini-hermes
+```
+
+Then browse to http://127.0.0.1:18787 on the device running the tunnel.

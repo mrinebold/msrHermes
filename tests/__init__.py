@@ -1,1 +1,1 @@
-"""Helio test package."""
+"""Hermes gateway tests."""

@@ -71,3 +71,12 @@ secrets/
 .tmp/
 tmp/
 data/local/
+
+# Phase 7I Hermes browser gateway runtime state
+sandbox/hermes_audit.jsonl
+sandbox/hermes_approvals.jsonl
+sandbox/hermes_inbox/*
+sandbox/hermes_outbox/*
+!sandbox/hermes_inbox/.gitkeep
+!sandbox/hermes_outbox/.gitkeep
+*.token

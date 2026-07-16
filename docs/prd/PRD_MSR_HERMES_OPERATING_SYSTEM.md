@@ -590,3 +590,12 @@ Supporting docs and scripts:
 - Do not connect the scaffold to live services until a later approval is explicit.
 - Do not use `SUPABASE_SERVICE_ROLE_KEY` in the Hermes adapter.
 - Do not run further live reads until exposed high-risk credentials are rotated.
+
+
+## Phase 7I — Private Browser Gateway
+
+Phase 7I adds a manual, token-authenticated browser gateway for iPad and approved private-network browsers. It exposes only governed status, inbox, outbox, audit/approval summaries, resident-once, and emergency-stop routes.
+
+The default listener is 127.0.0.1:8787. A direct Tailscale bind requires an explicit literal Mac mini Tailscale IP and HERMES_GATEWAY_ALLOW_TAILSCALE_BIND=1. The gateway refuses wildcard/public binds, never proxies 127.0.0.1:8088, does not execute commands, does not launch Desktop, does not connect integrations, and has no always-on LaunchAgent.
+
+Acceptance requires token auth, safe file-zone enforcement, path traversal rejection, fixed approved-script invocation, audit events, localhost smoke coverage, and clean listener/process shutdown.

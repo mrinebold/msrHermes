@@ -1,1 +1,1 @@
-"""Helio service packages."""
+"""Helio services."""

@@ -215,3 +215,13 @@ Not enabled:
 - direct `8088` exposure
 - Tailscale-bound endpoint proxy
 - external integrations
+
+
+## Phase 7I Browser Gateway Readiness
+
+- Gateway implementation is present in services/hermes_gateway/.
+- Manual lifecycle scripts are present in scripts/run_hermes_gateway.sh, scripts/hermes_gateway_status.sh, and scripts/hermes_gateway_stop.sh.
+- Token authentication is required.
+- Default listener is 127.0.0.1:8787; direct Tailscale bind is explicit only.
+- Raw adapter 127.0.0.1:8088 remains unproxied.
+- Command execution remains disabled; Desktop remains fail-closed; integrations remain frozen.

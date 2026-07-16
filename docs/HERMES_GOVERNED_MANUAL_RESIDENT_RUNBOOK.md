@@ -272,3 +272,16 @@ Current model:
 - public exposure is not approved
 - Tailscale Funnel/public access is not approved
 - direct `8088` exposure is not approved
+
+
+## Phase 7I Browser Gateway Run
+
+The browser gateway is a manual front door for the existing governed resident-once workflow. It does not start the adapter or LaunchAgents.
+
+```sh
+scripts/run_hermes_gateway.sh
+```
+
+Authenticate at /login, add tasks through /inbox, run resident once, inspect /outbox, and stop the gateway with Ctrl-C. Emergency stop remains available through the browser action and invokes only scripts/hermes_emergency_stop.sh with the supplied bounded reason.
+
+No RunAtLoad, KeepAlive, Desktop launch, public exposure, Tailscale Funnel, command execution, or external integration is enabled by this gateway.
