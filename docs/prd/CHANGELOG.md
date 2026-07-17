@@ -1,5 +1,13 @@
 # PRD Changelog
 
+## 2026-07-17 — Hermes Phase 1
+
+- Added the fail-closed Phase 1 private Gemma4 readiness surface and in-process Hermes-to-Helio contract bridge.
+- The browser gateway now reports private Gemma configuration and Helio bridge state without probing a network endpoint or enabling browser chat.
+- Replaced the bridge's Supabase-shaped configuration dependency with an explicit `inprocess://helio-test` transport; all other URLs are refused in this phase.
+- Added scoped in-memory reads plus a dry-run `/agent-bus/tasks/propose` contract result. No task is stored, dispatched, or executed.
+- Confirmed no Supabase credentials or database access, direct agent-bus writes, cloud fallback, external integrations, background service, or public exposure were added.
+
 ## 2026-06-15
 
 - Completed Phase 7H remote and iPad Hermes access model as docs/scripts/tests only.
