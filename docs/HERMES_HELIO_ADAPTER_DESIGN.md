@@ -2,6 +2,8 @@
 
 ## Status
 
+> **Phase 1 amendment (2026-07-17):** the implemented bridge now accepts only the in-process test transport `inprocess://helio-test`, with an explicit `HERMES_HELIO_TEST_GATEWAY=1` opt-in. It has no Supabase configuration dependency, no network transport, and no listener. This amendment supersedes older references in this document to Supabase-shaped configuration or direct live preflight as the next step. A future live bridge must use a Helio-owned governed private endpoint; Hermes must never acquire direct Supabase or raw message-bus write access.
+
 Phase 6E planning complete for a live Supabase read-only preflight. No live Supabase, `ano-messaging`, network, polling, or write path is enabled.
 
 This design uses [Agent Bus Contract](AGENT_BUS_CONTRACT.md) as the canonical message-bus contract and keeps Hermes behind Helio. It does not authorize direct Supabase access, direct agent dispatch, autonomous execution, or task execution.
