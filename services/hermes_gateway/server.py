@@ -30,6 +30,8 @@ from .app import (
     _read_summaries,
     session_cookie,
     status,
+    private_gemma_status,
+    helio_bridge_status,
     status_page,
     summaries_page,
     valid_session,
@@ -110,6 +112,15 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 self._send(HTTPStatus.OK, home_page(self.config) if path == "/" else status_page(data))
             elif path == "/api/status":
                 self._json(HTTPStatus.OK, status(self.config))
+            elif path == "/api/pilot-readiness":
+                self._json(
+                    HTTPStatus.OK,
+                    {
+                        "private_gemma": private_gemma_status(),
+                        "helio_bridge": helio_bridge_status(),
+                        "browser_chat": {"enabled": False, "next_phase": "workbench_chat"},
+                    },
+                )
             elif path == "/inbox":
                 self._send(HTTPStatus.OK, files_page("inbox", list_files(self.config.inbox_dir), self.config))
             elif path == "/api/inbox":
