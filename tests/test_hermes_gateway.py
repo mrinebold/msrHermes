@@ -102,6 +102,14 @@ class GatewayHTTPTests(unittest.TestCase):
         self.assertFalse(body["command_execution"]["enabled"])
         self.assertEqual(body["desktop"]["state"], "fail_closed")
 
+    def test_pilot_readiness_is_private_and_non_executing(self):
+        status, body = self.request("GET", "/api/pilot-readiness")
+        self.assertEqual(status, 200)
+        self.assertEqual(body["private_gemma"]["cloud_fallback"], "disabled_for_phase_1")
+        self.assertEqual(body["helio_bridge"]["direct_supabase"], False)
+        self.assertEqual(body["helio_bridge"]["direct_agent_bus_writes"], False)
+        self.assertFalse(body["browser_chat"]["enabled"])
+
     def test_inbox_post_and_outbox_path_traversal_denial(self):
         status, body = self.request("POST", "/api/inbox", {"name": "test task.md", "content": "hello"})
         self.assertEqual(status, 201)
