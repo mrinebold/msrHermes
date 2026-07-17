@@ -309,6 +309,54 @@ def adapter_state() -> str:
         sock.close()
 
 
+
+def private_gemma_status() -> dict[str, Any]:
+    """Describe the Phase 1 private model route without probing the network."""
+    from services.model_router.config import ModelRouterConfig
+
+    router = ModelRouterConfig.from_env()
+    adapter_host = os.environ.get("MODEL_ROUTER_ADAPTER_HOST", "127.0.0.1").strip()
+    adapter_port = os.environ.get("MODEL_ROUTER_ADAPTER_PORT", "8088").strip()
+    endpoint = urlsplit(router.devmonster_ollama_url)
+    private_worker = False
+    try:
+        private_worker = bool(endpoint.hostname) and ipaddress.ip_address(endpoint.hostname) in ipaddress.ip_network("100.64.0.0/10")
+    except ValueError:
+        private_worker = False
+    configured = (
+        endpoint.scheme == "http"
+        and private_worker
+        and router.devmonster_default_model == "gemma4:26b"
+        and adapter_host == "127.0.0.1"
+    )
+    return {
+        "state": "configured_not_probed" if configured else "configuration_refused",
+        "route": "hermes_local_adapter_to_private_gemma",
+        "provider": "devmonster_ollama",
+        "model": router.devmonster_default_model,
+        "private_tailscale_worker": private_worker,
+        "local_adapter_only": adapter_host == "127.0.0.1",
+        "adapter_port": adapter_port,
+        "live_probe": "not_run",
+        "cloud_fallback": "disabled_for_phase_1",
+    }
+
+
+def helio_bridge_status() -> dict[str, Any]:
+    """Report only the fail-closed Phase 1 test-bridge state."""
+    from services.agent_bus.config import load_config as load_agent_bus_config
+
+    bridge = load_agent_bus_config()
+    return {
+        "state": "ready_for_inprocess_test" if bridge.configured else "disabled_or_unconfigured",
+        "mode": bridge.mode,
+        "transport": bridge.transport,
+        "direct_supabase": False,
+        "direct_agent_bus_writes": False,
+        "task_execution": False,
+        "helio_is_sole_router": True,
+    }
+
 def status(config: GatewayConfig) -> dict[str, Any]:
     local: dict[str, Any]
     resident: dict[str, Any]
@@ -325,6 +373,8 @@ def status(config: GatewayConfig) -> dict[str, Any]:
         "hermes_local": local,
         "resident": resident,
         "adapter": {"state": adapter_state(), "endpoint_exposed": False},
+        "private_gemma": private_gemma_status(),
+        "helio_bridge": helio_bridge_status(),
         "resident_once": {"state": "manual_only", "launch_agent": "stopped_or_unloaded"},
         "desktop": {"state": "fail_closed", "launch_allowed": False},
         "command_execution": {"enabled": False},
@@ -373,7 +423,7 @@ def login_page() -> bytes:
 def home_page(config: GatewayConfig) -> bytes:
     return _page(
         "Hermes Gateway",
-        f"<p>Private, governed browser surface for the local Hermes stack.</p><div class='grid'><div class='card'><h2>Status</h2><a href='/status'>View status</a></div><div class='card'><h2>Work surfaces</h2><a href='/inbox'>Inbox</a> · <a href='/outbox'>Outbox</a></div><div class='card'><h2>Governance</h2><a href='/audit'>Audit</a> · <a href='/approvals'>Approvals</a></div><div class='card'><h2>Controlled actions</h2><button id='resident'>Run resident once</button> <button id='stop'>Emergency stop</button><pre id='result'></pre></div></div><p><strong>Command execution:</strong> disabled · <strong>External integrations:</strong> frozen · <strong>Desktop:</strong> fail-closed</p><p>Bound to <code>{html.escape(config.host)}:{config.port}</code>. Public exposure and Tailscale Funnel are not approved.</p>",
+        f"<p>Private, governed browser surface for the local Hermes stack.</p><div class='grid'><div class='card'><h2>Status</h2><a href='/status'>View status</a></div><div class='card'><h2>Work surfaces</h2><a href='/inbox'>Inbox</a> · <a href='/outbox'>Outbox</a></div><div class='card'><h2>Governance</h2><a href='/audit'>Audit</a> · <a href='/approvals'>Approvals</a></div><div class='card'><h2>Phase 1 readiness</h2><a href='/api/pilot-readiness'>Private Gemma4 + Helio bridge</a><p>Configured only; browser chat is not enabled yet.</p></div><div class='card'><h2>Controlled actions</h2><button id='resident'>Run resident once</button> <button id='stop'>Emergency stop</button><pre id='result'></pre></div></div><p><strong>Command execution:</strong> disabled · <strong>External integrations:</strong> frozen · <strong>Desktop:</strong> fail-closed</p><p>Bound to <code>{html.escape(config.host)}:{config.port}</code>. Public exposure and Tailscale Funnel are not approved.</p>",
         "async function post(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});const d=await r.json();document.getElementById('result').textContent=JSON.stringify(d,null,2);};document.getElementById('resident').onclick=()=>post('/api/resident/run-once',{});document.getElementById('stop').onclick=()=>{const reason=prompt('Emergency-stop reason');if(reason)post('/api/emergency-stop',{reason});};",
     )
 
