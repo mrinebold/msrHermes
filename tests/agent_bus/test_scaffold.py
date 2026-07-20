@@ -1,7 +1,7 @@
 import unittest
 
 from services.agent_bus.client import AgentBusClient
-from services.agent_bus.config import AgentBusConfig, is_configured, load_config
+from services.agent_bus.config import AgentBusConfig, TEST_GATEWAY_URL, is_configured, load_config
 from services.agent_bus.permissions import can_write
 from services.agent_bus.schemas import AgentBusError
 
@@ -54,12 +54,12 @@ MESSAGES = [
 
 def configured(mode="read_only"):
     return AgentBusConfig(
-        supabase_url="https://example.supabase.co",
-        supabase_anon_key="anon-placeholder",
+        helio_gateway_url=TEST_GATEWAY_URL,
         mode=mode,
         default_org="msr",
         default_workspace="default",
         agent_id="hermes",
+        test_gateway_enabled=True,
     )
 
 
@@ -74,7 +74,21 @@ class AgentBusScaffoldTest(unittest.TestCase):
         with self.assertRaises(AgentBusError):
             client.list_org_messaging_configs()
 
-    def test_read_only_mode_permits_reads(self):
+    def test_non_test_gateway_is_refused_in_phase_one(self):
+        config = load_config(
+            {
+                "HELIO_AGENT_BUS_MODE": "read_only",
+                "HELIO_GATEWAY_URL": "http://100.93.120.124:9999",
+                "HERMES_HELIO_TEST_GATEWAY": "1",
+                "HELIO_DEFAULT_ORG": "msr",
+                "HELIO_DEFAULT_WORKSPACE": "default",
+                "HELIO_AGENT_ID": "hermes",
+            }
+        )
+        self.assertFalse(config.configured)
+        self.assertIn(f"HELIO_GATEWAY_URL={TEST_GATEWAY_URL}", config.validation_errors)
+
+    def test_read_only_mode_permits_scoped_test_gateway_reads(self):
         client = AgentBusClient(config=configured("read_only"), org_configs=ORG_CONFIGS, messages=MESSAGES)
 
         configs = client.list_org_messaging_configs()
@@ -84,6 +98,8 @@ class AgentBusScaffoldTest(unittest.TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].to_agent, "hermes")
         self.assertEqual(messages[0].payload["directive"], "Status check")
+        self.assertEqual(client._test_gateway.requests[0]["method"], "GET")
+        self.assertEqual(client._test_gateway.requests[1]["path"], "/agent-bus/messages/inbound/hermes")
 
     def test_write_mode_is_denied(self):
         config = configured("outbound_with_approval")
@@ -109,7 +125,16 @@ class AgentBusScaffoldTest(unittest.TestCase):
         self.assertEqual(result.payload["chat_id_ref"], "approved-chat-ref")
         self.assertIn("not sent", result.warnings[0])
 
+    def test_task_proposal_is_dry_run_only(self):
+        client = AgentBusClient(config=configured("dry_run"), org_configs=ORG_CONFIGS)
+
+        result = client.propose_task_dry_run("req-123", "Check governed Hermes readiness")
+
+        self.assertEqual(result["status"], "dry_run")
+        self.assertFalse(result["would_dispatch"])
+        self.assertEqual(result["route"], "helio_only")
+        self.assertEqual(client._test_gateway.requests[-1]["path"], "/agent-bus/tasks/propose")
+
 
 if __name__ == "__main__":
     unittest.main()
-
